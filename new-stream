@@ -1,0 +1,57 @@
+#!/usr/bin/gjs
+/*
+ * NewStream - Youtube player
+ *
+ * Copyright (C) 2018 konkor <kapa76@gmail.com>
+ *
+ * This file is part of NewStream.
+ *
+ * NewStream is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * NewStream is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+
+const APPDIR = get_appdir ();
+imports.searchPath.unshift(APPDIR);
+const Application = imports.common.Application;
+
+let app = new Application.NewStreamApplication (ARGV);
+app.run (ARGV);
+
+function getCurrentFile () {
+    let stack = (new Error()).stack;
+    let stackLine = stack.split('\n')[1];
+    if (!stackLine)
+        throw new Error ('Could not find current file');
+    let match = new RegExp ('@(.+):\\d+').exec(stackLine);
+    if (!match)
+        throw new Error ('Could not find current file');
+    let path = match[1];
+    let file = Gio.File.new_for_path (path);
+    return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
+}
+
+function get_appdir () {
+    let s = getCurrentFile ()[1];
+    if (GLib.file_test (s + "/common/Application.js", GLib.FileTest.EXISTS)) return s;
+    s = GLib.get_home_dir () + "/.local/share/new-stream";
+    if (GLib.file_test (s + "/common/Application.js", GLib.FileTest.EXISTS)) return s;
+    s = "/usr/local/share/new-stream";
+    if (GLib.file_test (s + "/common/Application.js", GLib.FileTest.EXISTS)) return s;
+    s = "/usr/share/new-stream";
+    if (GLib.file_test (s + "/common/Application.js", GLib.FileTest.EXISTS)) return s;
+    throw "NewStream installation not found...";
+    return s;
+}
