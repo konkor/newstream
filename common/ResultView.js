@@ -40,7 +40,7 @@ var ResultView = new Lang.Class({
         this.results = new Gtk.FlowBox ({
             homogeneous: true,
             activate_on_single_click: false,
-            max_children_per_line: 1,
+            max_children_per_line: 3,
             valign: Gtk.Align.START
         });
         box.pack_start (this.results, true, false, 0);
@@ -78,6 +78,7 @@ var ResultViewItem = new Lang.Class({
     _init: function (item) {
         this.parent ({orientation:Gtk.Orientation.HORIZONTAL, margin:8, spacing:8});
         //this.get_style_context ().add_class ("sb");
+        this.hexpand = false;
         this.item = item;
 
         this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/newstream.item.svg");
@@ -86,15 +87,22 @@ var ResultViewItem = new Lang.Class({
         //box.get_style_context ().add_class ("sb");
         this.pack_start (box, true, true, 8);
 
-        this.title = new Gtk.Label ({xalign:0});
-        if (item.snippet.title) this.title.set_text (item.snippet.title);
-        box.pack_start (this.title, true, true, 0);
+        this.title = new Gtk.Label ({xalign:0, wrap: true, lines: 2, ellipsize: 3});
+        this.title.max_width_chars = 27;
+        if (item.snippet.title) {
+            this.tooltip_text = item.snippet.title;
+            this.title.set_text (item.snippet.title);
+        }
+        box.pack_start (this.title, false, false, 0);
         
-        this.channel = new Gtk.Label ({xalign:0});
+        this.channel = new Gtk.Label ({xalign:0, opacity: 0.7});
+        //this.channel.opacity = 0.7;
+        this.channel.get_style_context ().add_class ("small");
         if (item.snippet.channelTitle) this.channel.set_text (item.snippet.channelTitle);
         box.pack_start (this.channel, true, true, 0);
         
-        this.published = new Gtk.Label ({xalign:0});
+        this.published = new Gtk.Label ({xalign:0, opacity: 0.7});
+        this.published.get_style_context ().add_class ("small");
         if (item.snippet.publishedAt) this.published.set_text (item.snippet.publishedAt);
         box.pack_start (this.published, true, true, 0);
         
@@ -113,6 +121,7 @@ var ResultViewItem = new Lang.Class({
             });*/
         }));
         //this.connect ("notify", (o,a,b,c) => {print (o,a);});
+
         this.show_all ();
    }
 });

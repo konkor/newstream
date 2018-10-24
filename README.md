@@ -53,6 +53,14 @@ sudo wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin/youtub
 sudo chmod a+rx /usr/local/bin/youtube-dl
 ```
 
+## Testing
+
+```sh
+git clone https://github.com/konkor/newstream
+cd newstream
+./new-stream
+```
+
 ## License
 
 [GPLv3](https://www.gnu.org/licenses/gpl.html)

@@ -1,5 +1,5 @@
 * Search Entry keys (done)
-* ydl info fetch
+* ydl info fetch (done)
 * Player widget
 * Player view
 * Player engine
@@ -7,3 +7,5 @@
 * ResultItem events
 * ResultItem time
 * ResultItem styles
+* Layouts: tops, search, video
+* Channels support (view, video...)
