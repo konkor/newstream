@@ -17,8 +17,10 @@ const Lang = imports.lang;
 
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
+
 const Provider = imports.common.SearchProvider;
-const Stacks = imports.common.ResultView;
+const ResultView = imports.common.ResultView;
+const ItemView = imports.common.ItemView;
 
 let theme_gui = APPDIR + "/data/themes/default/gtk.css";
 let cssp = null;
@@ -86,68 +88,42 @@ var MainWindow = new Lang.Class ({
         this.stack.transition_type = Gtk.StackTransitionType.SLIDE_UP_DOWN;
         box.pack_start (this.stack, true, true, 0);
         
-        this.hotview = new Stacks.ResultView ();
+        this.hotview = new ResultView.ResultView (this);
         this.stack.add_named (this.hotview, "0");
 
-        this.newview = new Stacks.ResultView ();
+        this.newview = new ResultView.ResultView (this);
         this.stack.add_named (this.newview, "1");
 
-        this.hitview = new Stacks.ResultView ();
+        this.hitview = new ResultView.ResultView (this);
         this.stack.add_named (this.hitview, "2");
 
-        this.searchview = new Stacks.ResultView ();
+        this.searchview = new ResultView.ResultView (this);
         this.stack.add_named (this.searchview, "search");
+
+        this.itemview = new ItemView.ItemView (this);
+        this.stack.add_named (this.itemview, "item");
 
         this.searchbar.search_button.connect ('clicked', Lang.bind (this, ()=>{
             if (!this.searchbar.entry.text) return;
-            this.provider.get (this.searchbar.entry.text, Lang.bind (this, this.on_search_results));
+            this.searchview.query (this.searchbar.entry.text);
         }));
         this.searchbar.entry.connect ('activate', Lang.bind (this, ()=>{
             if (!this.searchbar.entry.text) return;
-            this.provider.get (this.searchbar.entry.text, Lang.bind (this, this.on_search_results));
+            this.searchview.query (this.searchbar.entry.text);
         }));
-        this.provider.get_hot (Lang.bind (this, this.on_hot_results));
+        this.hotview.get_hot ();
         this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
-        
+        this.searchview.connect ('ready', Lang.bind (this, ()=>{this.stack.visible_child_name = "search";}));
     },
 
     on_stack_update: function (o, index) {
         this.stack.visible_child_name = index.toString ();
         if (index == 0)
-            this.provider.get_hot (Lang.bind (this, this.on_hot_results));
+            this.hotview.get_hot ();
         else if (index == 1)
-            this.provider.get_day (Lang.bind (this, this.on_day_results));
+            this.newview.get_day ();
         else
-            this.provider.get_hit (Lang.bind (this, this.on_hit_results));
-    },
-
-    on_search_results: function (data, res) {
-        //print (res, data.toString());
-        if (res != 200) return;
-        this.stack.visible_child_name = "search";
-        this.searchview.clear_all ();
-        this.searchview.add_items (JSON.parse (data.toString()).items);
-    },
-
-    on_hot_results: function (data, res) {
-        //print (res, data.toString());
-        if (res != 200) return;
-        this.hotview.clear_all ();
-        this.hotview.add_items (JSON.parse (data.toString()).items);
-    },
-
-    on_day_results: function (data, res) {
-        //print (res, data.toString());
-        if (res != 200) return;
-        this.newview.clear_all ();
-        this.newview.add_items (JSON.parse (data.toString()).items);
-    },
-
-    on_hit_results: function (data, res) {
-        //print (res, data.toString());
-        if (res != 200) return;
-        this.hitview.clear_all ();
-        this.hitview.add_items (JSON.parse (data.toString()).items);
+            this.hitview.get_hit ();
     }
     
 });

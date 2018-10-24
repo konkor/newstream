@@ -20,7 +20,7 @@ const fetch = imports.common.Utils.fetch;
 
 //https://gdata.youtube.com/feeds/api/videos?q=%s&orderby=%s&start-index=%s&max-results=%s&alt=json&v=2
 //www.googleapis.com/youtube/v3/search?part=snippet&order=viewCount&q=atareao&type=video&videoDefinition=high&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o
-const BASE_URL = 'https://www.googleapis.com/youtube/v3/search';
+const BASE_URL = 'https://www.googleapis.com/youtube/v3/';
 
 const ORDER = { //order
     0: "date", // Entries are ordered by their relevance to a search query. This is the default setting for video search results feeds.
@@ -87,7 +87,7 @@ var SearchProvider = new Lang.Class({
         this._videoduration = VIDEODURATION[0];
         this._videolicense = VIDEOLICENSE[0];
         this._videotype = VIDEOTYPE[0];
-        this._max_results = 10;
+        this._max_results = 24;
     },
 
     calculate_time: function (thetime) {
@@ -128,7 +128,7 @@ var SearchProvider = new Lang.Class({
     },
 
     _build_query_url: function (query) {
-        let url = '%s?part=snippet&q=%s&order=%s&maxResults=%s&type=video&safeSearch=%s&videoCaption=%s&videoDefinition=%s&videoDimension=%s&videoDuration=%s&videoLicense=%s&videoType=%s%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+        let url = '%ssearch?part=snippet&q=%s&order=%s&maxResults=%s&type=video&safeSearch=%s&videoCaption=%s&videoDefinition=%s&videoDimension=%s&videoDuration=%s&videoLicense=%s&videoType=%s%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
             this._base_url,
             encodeURIComponent (query),
             this._order,
@@ -148,32 +148,53 @@ var SearchProvider = new Lang.Class({
     get: function (query, callback) {
         let url = this._build_query_url (query);
         fetch (url, null, null, callback);
+        return url;
+    },
+
+    get_page: function (query, token, etag, callback) {
+        let url = query;
+        if (token) url += "&pageToken=" + token;
+        //if (etag) url += "&etag=" + etag;
+        fetch (url, null, null, callback);
+    },
+
+    get_info: function (id, callback) {
+        if (!id) return;
+        let url = '%svideos?part=snippet,contentDetails,statistics&id=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+            this._base_url,
+            id
+        );
+        //print (url);
+        fetch (url, null, null, callback);
     },
 
     get_hot: function (callback) {
-        let url = '%s?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+        let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
             this._base_url,
             this._max_results,
             this.calculate_time ("last_7_days")
         );
         fetch (url, null, null, callback);
+        return url;
     },
 
     get_day: function (callback) {
-        let url = '%s?part=snippet&order=date&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+        let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
             this._base_url,
             this._max_results,
             this.calculate_time ("last_24_hours")
         );
         fetch (url, null, null, callback);
+        return url;
     },
 
     get_hit: function (callback) {
-        let url = '%s?part=snippet&order=viewCount&maxResults=%s&type=video&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+        let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
             this._base_url,
             this._max_results
         );
         fetch (url, null, null, callback);
+        return url;
     }
 });
 
