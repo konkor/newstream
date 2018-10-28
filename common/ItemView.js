@@ -50,10 +50,7 @@ var ItemView = new Lang.Class({
     },
 
     load: function (item) {
-        if (!this.player) {
-
-        }
-        this.player.load (item);
+      this.player.load (item);
     },
 
     clear_all: function () {

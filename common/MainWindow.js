@@ -127,6 +127,9 @@ var MainWindow = new Lang.Class ({
         this.back.connect ('clicked', Lang.bind (this, ()=>{
             this.on_back ();
         }));
+        this.connect ('key-press-event', Lang.bind (this, (o,e)=>{
+          this.on_key_press (e);
+        }));
     },
 
     on_stack_update: function (o, index) {
@@ -148,6 +151,15 @@ var MainWindow = new Lang.Class ({
     on_back: function () {
         if (!this.back.last) return;
         this.stack.visible_child_name = this.back.last;
+    },
+
+    on_key_press: function (e) {
+      var [,key] = e.get_keyval ();
+      switch (key) {
+        case Gdk.KEY_Escape:
+          if (this.back.visible) this.on_back ();
+          break;
+      }
     }
 });
 

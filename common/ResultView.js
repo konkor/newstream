@@ -64,6 +64,7 @@ var ResultView = new Lang.Class({
             var details = a.get_children()[0].details;
             if (details) {
                 this.owner.itemview.load (details);
+                this.owner.back.last = this.owner.stack.visible_child_name;
                 this.owner.stack.visible_child_name = "item";
             }
         }));

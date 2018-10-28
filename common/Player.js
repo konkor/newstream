@@ -43,8 +43,9 @@ var Player = new Lang.Class({
 
     load: function (item) {
         //print (item, "\n\n\n");
-        this.item = JSON.parse (item).items[0];
-        if (!this.item) return;
+        let data = JSON.parse (item).items[0];
+        if (!data || !data.id) return;
+        if (!this.item || (this.item.id != data.id)) this.item = data;
         //return;
         if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
             this.formats = d;
@@ -60,7 +61,7 @@ var Player = new Lang.Class({
                 //url = "https://download.blender.org/durian/trailer/sintel_trailer-480p.ogv";
                 //if (window_handler) this.engine.set_window (window_handler);
                 this.engine.open (url);
-                GLib.animate_event = GLib.timeout_add (100, 2000, Lang.bind (this, ()=>{this.engine.play ();}));
+                //GLib.animate_event = GLib.timeout_add (100, 2000, Lang.bind (this, ()=>{this.engine.play ();}));
                 this.show_all ();
             }
             //print (d.format_id, d.id, d.ext);
