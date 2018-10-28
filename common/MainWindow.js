@@ -59,19 +59,28 @@ var MainWindow = new Lang.Class ({
         this.home.get_style_context ().add_class ("hb-button");
         this.home.margin = 6;
         this.hb.add (this.home);
+
+        this.back = new Gtk.Button ({always_show_image: true, tooltip_text:"Back"});
+        this.back.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/back-symbolic.svg");
+        this.back.get_style_context ().add_class ("hb-button");
+        this.back.last = "";
+        this.back.margin = 6;
+        this.back.set_size_request (64,24);
+        this.hb.add (this.back);
+
         this.section = new Gtk.Label ({label:"New Stream"});
         this.hb.add (this.section);
 
         let mmenu = new Gtk.Menu ();
-		let mii = new Gtk.MenuItem ({label:"About"});
-		mmenu.add (mii);
-		mmenu.show_all ();
+        let mii = new Gtk.MenuItem ({label:"About"});
+        mmenu.add (mii);
+        mmenu.show_all ();
 
         this.menu_button = new Gtk.MenuButton ({tooltip_text:"Application Menu"});
         this.menu_button.image = Gtk.Image.new_from_icon_name ("open-menu-symbolic",Gtk.IconSize.LARGE_TOOLBAR);
         this.menu_button.get_style_context ().add_class ("hb-button");
         //this.menu_button.menu_model = mmenu;
-		this.menu_button.set_popup (mmenu);
+        this.menu_button.set_popup (mmenu);
         this.menu_button.margin = 6;
         this.hb.pack_end (this.menu_button);
 
@@ -103,22 +112,25 @@ var MainWindow = new Lang.Class ({
         this.itemview = new ItemView.ItemView (this);
         this.stack.add_named (this.itemview, "item");
 
-        this.searchbar.search_button.connect ('clicked', Lang.bind (this, ()=>{
-            if (!this.searchbar.entry.text) return;
-            this.searchview.query (this.searchbar.entry.text);
-        }));
-        this.searchbar.entry.connect ('activate', Lang.bind (this, ()=>{
-            if (!this.searchbar.entry.text) return;
-            this.searchview.query (this.searchbar.entry.text);
-        }));
         this.hotview.get_hot ();
+
         this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
         this.searchview.connect ('ready', Lang.bind (this, ()=>{
-            this.stack.visible_child_name = "search";
+            this.back.last = this.stack.visible_child_name = "search";
+        }));
+        this.searchbar.search_button.connect ('clicked', Lang.bind (this, ()=>{
+            this.on_search ();
+        }));
+        this.searchbar.entry.connect ('activate', Lang.bind (this, ()=>{
+            this.on_search ();
+        }));
+        this.back.connect ('clicked', Lang.bind (this, ()=>{
+            this.on_back ();
         }));
     },
 
     on_stack_update: function (o, index) {
+        this.back.last = this.stack.visible_child_name;
         this.stack.visible_child_name = index.toString ();
         if (index == 0)
             this.hotview.get_hot ();
@@ -126,6 +138,16 @@ var MainWindow = new Lang.Class ({
             this.newview.get_day ();
         else
             this.hitview.get_hit ();
+    },
+
+    on_search: function () {
+      if (!this.searchbar.entry.text) return;
+      this.searchview.query (this.searchbar.entry.text);
+    },
+
+    on_back: function () {
+        if (!this.back.last) return;
+        this.stack.visible_child_name = this.back.last;
     }
 });
 
