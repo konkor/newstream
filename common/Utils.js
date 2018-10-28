@@ -28,7 +28,7 @@ function fetch (url, agent, headers, callback) {
         if (callback) {
             //callback (message.response_body.data.toString()?message.response_body.data:"", message.status_code);
             callback (message.response_body_data.get_data (), message.status_code);
-        } 
+        }
     });
 }
 
@@ -117,4 +117,3 @@ var SpawnPipe = new Lang.Class({
         return true;
     }
 });
-

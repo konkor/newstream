@@ -31,7 +31,7 @@ var Player = new Lang.Class({
         this.engine = new PlayerEngine.PlayerEngine ();
         this.video = new VideoFrame (sender);
         this.pack_start (this.video, true, true, 0);
-        
+
         this.video.contents.video_display.connect ('realize', Lang.bind (this, (o)=>{
         //this.connect ('realize', Lang.bind (this, ()=>{
             //let xid = this.video.contents.video_display.window.get_xid ();
@@ -105,7 +105,7 @@ var VideoFrame = new Lang.Class({
             this.video_window.unfullscreen ();
             this.video_window.hide ();
             this.move_internal ();
-            
+
         } else {
             this.move_fullscreen ();
             this.video_window.show ();
@@ -141,7 +141,7 @@ var FullscreenWindow = new Lang.Class({
         this.decorated = false;
         this.deletable = false;
         this.transient_for = null;
-        
+
         this.control = null;
 
         this.connect ('window_state_event', Lang.bind (this, (o, e)=>{

@@ -47,18 +47,17 @@ var ItemView = new Lang.Class({
 
         this.results = new ResultView.ResultView (owner);
         this.box.pack_end (this.results, true, true, 0);
-        //this.show_all ();
     },
 
     load: function (item) {
         if (!this.player) {
-            
+
         }
         this.player.load (item);
     },
 
     clear_all: function () {
-        
+
     }
 });
 

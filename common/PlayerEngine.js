@@ -24,7 +24,7 @@ var PlayerEngine = new Lang.Class({
         this.playbin.set_property("audio-sink", this.audiosink);
         this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
         this.playbin.set_property("video-sink", this.videosink);
-        
+
         this.bus = this.playbin.get_bus();
         this.bus.add_signal_watch();
         this.bus.connect ("message", Lang.bind (this, (bus, msg) => {

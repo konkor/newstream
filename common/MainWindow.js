@@ -42,7 +42,7 @@ var MainWindow = new Lang.Class ({
     },
 
     build: function() {
-        this.set_default_size (512, 600);
+        this.set_default_size (480, 640);
         Gtk.Settings.get_default().gtk_application_prefer_dark_theme = true;
         //cssp = get_css_provider ();
         if (cssp) {
@@ -83,11 +83,11 @@ var MainWindow = new Lang.Class ({
 
         this.topbar = new Topbar ();
         box.add (this.topbar);
-        
+
         this.stack = new Gtk.Stack ();
         this.stack.transition_type = Gtk.StackTransitionType.SLIDE_UP_DOWN;
         box.pack_start (this.stack, true, true, 0);
-        
+
         this.hotview = new ResultView.ResultView (this);
         this.stack.add_named (this.hotview, "0");
 
@@ -113,11 +113,8 @@ var MainWindow = new Lang.Class ({
         }));
         this.hotview.get_hot ();
         this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
-        this.searchview.connect ('ready', Lang.bind (this, ()=>{this.stack.visible_child_name = "search";}));
-        this.connect ('realize', Lang.bind (this, (o)=>{
-            print ('realize', o);
-            //this.stack.visible_child_name = "search";
-            //if (this.itemview.player.engine) this.itemview.player.engine.set_window (this.window.get_xid ());
+        this.searchview.connect ('ready', Lang.bind (this, ()=>{
+            this.stack.visible_child_name = "search";
         }));
     },
 
@@ -130,7 +127,6 @@ var MainWindow = new Lang.Class ({
         else
             this.hitview.get_hit ();
     }
-    
 });
 
 var Searchbar = new Lang.Class({
@@ -152,7 +148,7 @@ var Searchbar = new Lang.Class({
         this.search_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/folder-saved-search-symbolic.svg");
         this.search_button.get_style_context ().add_class ("hb-button");
         box.pack_start (this.search_button, false, false, 0);
-        
+
         this.entry = new Gtk.Entry ();
         this.entry.get_style_context ().add_class ("search-entry");
         this.entry.input_hints = Gtk.InputHints.SPELLCHECK | Gtk.InputHints.WORD_COMPLETION;
@@ -166,7 +162,7 @@ var Searchbar = new Lang.Class({
 
         space = new Gtk.Box ();
         box.pack_start (space, true, false, 0);
-        
+
         this.clear_button.connect ('clicked', Lang.bind (this, ()=>{
             this.entry.text = "";
         }));

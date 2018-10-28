@@ -42,7 +42,7 @@ var ResultView = new Lang.Class({
 
         let space = new Gtk.Box ();
         box.pack_start (space, true, false, 0);
-        
+
         let results_box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
         box.pack_start (results_box, true, false, 0);
 
@@ -66,12 +66,6 @@ var ResultView = new Lang.Class({
                 this.owner.itemview.load (details);
                 this.owner.stack.visible_child_name = "item";
             }
-            /*var data = a.get_children()[0].item.data, url = "";
-            //print (o,item);
-            if (data && data.formats) data.formats.forEach (p => {
-                if (data.format_id == p.format_id) url = p.url;
-            });
-            if (url) Utils.spawn_async ([GLib.find_program_in_path ("gst-launch-1.0"),"playbin","uri="+url],null);*/
         }));
         this.pager.connect ("page-selected", (o, token) => {
             this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
@@ -152,18 +146,18 @@ var ResultViewItem = new Lang.Class({
             this.title.set_text (item.snippet.title);
         }
         box.pack_start (this.title, false, false, 0);
-        
+
         this.channel = new Gtk.Label ({xalign:0, opacity: 0.7});
         //this.channel.opacity = 0.7;
         this.channel.get_style_context ().add_class ("small");
         if (item.snippet.channelTitle) this.channel.set_text (item.snippet.channelTitle);
         box.pack_start (this.channel, true, true, 0);
-        
+
         this.published = new Gtk.Label ({xalign:0, opacity: 0.7});
         this.published.get_style_context ().add_class ("small");
         if (item.snippet.publishedAt) this.published.set_text (item.snippet.publishedAt);
         box.pack_start (this.published, true, true, 0);
-        
+
         if (item.snippet.thumbnails.default.url) Utils.fetch (item.snippet.thumbnails.default.url,null,null, Lang.bind (this, (d,r)=>{
             if (r != 200) return;
             //print (d.get_size(),d.get_data().length);
