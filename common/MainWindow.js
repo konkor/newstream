@@ -42,9 +42,9 @@ var MainWindow = new Lang.Class ({
     },
 
     build: function() {
-        this.set_default_size (512, 480);
+        this.set_default_size (512, 600);
         Gtk.Settings.get_default().gtk_application_prefer_dark_theme = true;
-        cssp = get_css_provider ();
+        //cssp = get_css_provider ();
         if (cssp) {
             Gtk.StyleContext.add_provider_for_screen (
                 this.get_screen(), cssp, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -114,6 +114,11 @@ var MainWindow = new Lang.Class ({
         this.hotview.get_hot ();
         this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
         this.searchview.connect ('ready', Lang.bind (this, ()=>{this.stack.visible_child_name = "search";}));
+        this.connect ('realize', Lang.bind (this, (o)=>{
+            print ('realize', o);
+            //this.stack.visible_child_name = "search";
+            //if (this.itemview.player.engine) this.itemview.player.engine.set_window (this.window.get_xid ());
+        }));
     },
 
     on_stack_update: function (o, index) {

@@ -29,6 +29,7 @@ var ResultView = new Lang.Class({
 
     _init: function (parent, id) {
         this.parent ({orientation:Gtk.Orientation.VERTICAL});
+        this.owner = parent;
         this.provider = parent.provider;
 
         this.scroll = new Gtk.ScrolledWindow ();
@@ -59,14 +60,19 @@ var ResultView = new Lang.Class({
         space = new Gtk.Box ();
         box.pack_start (space, true, false, 0);
 
-        this.results.connect ("child-activated", (o,a,b,c) => {
-            var data = a.get_children()[0].item.data, url = "";
+        this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
+            var details = a.get_children()[0].details;
+            if (details) {
+                this.owner.itemview.load (details);
+                this.owner.stack.visible_child_name = "item";
+            }
+            /*var data = a.get_children()[0].item.data, url = "";
             //print (o,item);
             if (data && data.formats) data.formats.forEach (p => {
                 if (data.format_id == p.format_id) url = p.url;
             });
-            if (url) Utils.spawn_async ([GLib.find_program_in_path ("gst-launch-1.0"),"playbin","uri="+url],null);
-        });
+            if (url) Utils.spawn_async ([GLib.find_program_in_path ("gst-launch-1.0"),"playbin","uri="+url],null);*/
+        }));
         this.pager.connect ("page-selected", (o, token) => {
             this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
         });
@@ -109,7 +115,7 @@ var ResultView = new Lang.Class({
             let item = new ResultViewItem (p);
             this.results.add (item);
             if (item.id) this.provider.get_info (item.id.videoId, Lang.bind (this, (d)=>{
-                //item.data = d;
+                item.details = d;
                 //print (d);
             }));
         });
