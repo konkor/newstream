@@ -53,6 +53,10 @@ var ItemView = new Lang.Class({
       this.player.load (item);
     },
 
+    get playing () {
+      return this.player.engine.state == 4;
+    },
+
     clear_all: function () {
 
     }

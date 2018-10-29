@@ -28,6 +28,7 @@ var Player = new Lang.Class({
 
     _init: function (sender) {
         this.parent ({orientation:Gtk.Orientation.VERTICAL});
+        this.w = sender;
         this.engine = new PlayerEngine.PlayerEngine ();
         this.video = new VideoFrame (sender);
         this.pack_start (this.video, true, true, 0);
@@ -41,6 +42,12 @@ var Player = new Lang.Class({
         }));
         this.connect ('unrealize', Lang.bind (this, (o)=>{
             this.engine.stop ();
+        }));
+        this.engine.connect ('state-changed', Lang.bind (this, (s,o,n,p)=>{
+            //print ("state-changed:", o,n,p);
+            if (this.w.stack.visible_child_name != "item") {
+              this.w.phones.visible = n == 4;
+            }
         }));
     },
 
@@ -101,10 +108,7 @@ var VideoFrame = new Lang.Class({
             if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
         }));
         this.connect ('realize', Lang.bind (this, ()=>{
-            //print ("frame realize");
             this.move_internal ();
-            //this.video_window.show ();
-            //this.video_window.fullscreen ();
         }));
     },
 
@@ -160,7 +164,6 @@ var FullscreenWindow = new Lang.Class({
 
     set_bounds: function () {
         var monitor = 0;
-        print ("Setting bounds...");
         if (this.mainwindow.window) monitor = this.screen.get_monitor_at_window (this.mainwindow.window);
         var bounds = this.screen.get_monitor_geometry (0);
         this.move (bounds.x, bounds.y);
@@ -198,7 +201,7 @@ var VideoArea = new Lang.Class({
 
     _init: function (parent) {
         this.parent ();
-        this.double_buffered = false;
+        //this.double_buffered = false;
         var [,color] = Gdk.Color.parse ("#000");
         this.modify_bg (Gtk.StateType.NORMAL, color);
         //this.realize ();

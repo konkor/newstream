@@ -58,6 +58,10 @@ var MainWindow = new Lang.Class ({
         this.home.get_style_context ().add_class ("hb-button");
         this.home.margin = 6;
         this.hb.add (this.home);
+        this.home.connect ('clicked', () => {
+          let app = Gio.AppInfo.get_default_for_uri_scheme ("https");
+          app.launch_uris (["https://github.com/konkor/newstream"], null);
+        });
 
         this.back = new BackButton ();
         this.hb.add (this.back);
@@ -77,6 +81,17 @@ var MainWindow = new Lang.Class ({
         this.menu_button.set_popup (mmenu);
         this.menu_button.margin = 6;
         this.hb.pack_end (this.menu_button);
+
+        this.phones = new Gtk.Button ({always_show_image: true, tooltip_text:"Background Player"});
+        this.phones.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/headphones-symbolic.svg");
+        this.phones.get_style_context ().add_class ("hb-button");
+        this.phones.margin = 6;
+        this.phones.no_show_all = true;
+        this.hb.pack_end (this.phones);
+        this.phones.connect ('clicked', Lang.bind (this, () => {
+          this.back.last = this.stack.visible_child_name;
+          this.stack.visible_child_name = "item";
+        }));
 
         let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
         this.add (box);
@@ -124,6 +139,11 @@ var MainWindow = new Lang.Class ({
         this.connect ('key-press-event', Lang.bind (this, (o,e)=>{
           this.on_key_press (e);
         }));
+        this.stack.connect ('notify::visible-child-name', Lang.bind (this, (o,e)=>{
+          if (this.stack.visible_child_name != "item" && this.itemview.playing)
+            this.phones.visible = true;
+          else this.phones.visible = false;
+        }));
     },
 
     on_stack_update: function (o, index) {
@@ -142,7 +162,7 @@ var MainWindow = new Lang.Class ({
 
     on_back: function () {
         var view = this.back.last;
-        print ("on_back: ", view);
+        //print ("on_back: ", view);
         if (!view) return;
         this.stack.visible_child_name = view;
     },
@@ -251,16 +271,16 @@ var BackButton = new Lang.Class({
     Extends: Gtk.Button,
 
     _init: function () {
-        this.parent ({always_show_image: true, tooltip_text:"Back"});
+        this.parent ({always_show_image: true, tooltip_text:"Back (Escape)"});
         this.get_style_context ().add_class ("hb-button");
+        this.margin = 6;
         this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/back-symbolic.svg");
         this.history = [];
-        this.set_size_request (64,24);
+        this.set_size_request (64,-1);
     },
 
     get last () {
       var view = this.history.pop () || "";
-      //if (!view) view = "";
       return view;
     },
 
