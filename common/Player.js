@@ -39,7 +39,7 @@ var Player = new Lang.Class({
             print ("video_window xid:", xid);
             if (this.engine) this.engine.set_window (xid);
         }));
-        this.connect ('destroy', Lang.bind (this, (o)=>{
+        this.connect ('unrealize', Lang.bind (this, (o)=>{
             this.engine.stop ();
         }));
     },
