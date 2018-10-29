@@ -66,7 +66,7 @@ var MainWindow = new Lang.Class ({
         this.back = new BackButton ();
         this.hb.add (this.back);
 
-        this.section = new Gtk.Label ({label:"New Stream"});
+        this.section = new Gtk.Label ({label:"New Stream", wrap: true, lines: 1, ellipsize: 3});
         this.hb.add (this.section);
 
         let mmenu = new Gtk.Menu ();
