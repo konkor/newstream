@@ -117,3 +117,24 @@ var SpawnPipe = new Lang.Class({
         return true;
     }
 });
+
+function age (date) {
+    let s = "just now";
+    if (!date) return "";
+    var d = new Date (Date.now () - date);
+    //print (d);
+    var y = d.getUTCFullYear() - 1970, m = d.getUTCMonth(),days = d.getUTCDate()-1;
+    var h = d.getUTCHours(), min = d.getUTCMinutes(), sec = d.getUTCSeconds();
+    if (y > 1) s = y + " years ago";
+    else if (y > 0) s = "1 year ago";
+    else if (m > 1) s = m + " months ago";
+    else if (m > 0) s = "1 month ago";
+    else if (days > 1) s = days + " days ago";
+    else if (days > 0) s = "1 day ago";
+    else if (h > 1) s = h + " hours ago";
+    else if (h > 0) s = "1 hour ago";
+    else if (min > 1) s = min + " minutes ago";
+    else if (min > 0) s = "1 minute ago";
+
+    return s;
+}

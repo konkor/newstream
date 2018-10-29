@@ -156,7 +156,7 @@ var ResultViewItem = new Lang.Class({
 
         this.published = new Gtk.Label ({xalign:0, opacity: 0.7});
         this.published.get_style_context ().add_class ("small");
-        if (item.snippet.publishedAt) this.published.set_text (item.snippet.publishedAt);
+        if (item.snippet.publishedAt) this.published.set_text (Utils.age (new Date (item.snippet.publishedAt)));
         box.pack_start (this.published, true, true, 0);
 
         if (item.snippet.thumbnails.default.url) Utils.fetch (item.snippet.thumbnails.default.url,null,null, Lang.bind (this, (d,r)=>{
