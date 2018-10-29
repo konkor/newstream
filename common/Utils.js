@@ -138,3 +138,23 @@ function age (date) {
 
   return s;
 }
+
+function format_size (number) {
+  let s = "0";
+  if (!number) return s;
+
+  if (number >= 1000000000) s = get_round (number, 1000000000) + "B";
+  else if (number >= 1000000) s = get_round (number, 1000000) + "M";
+  else if (number >= 1000) s = get_round (number, 1000) + "K";
+  else s = number.toString();
+
+  return s;
+}
+
+function get_round (number, base) {
+  if (!base) return "0";
+  var s = Math.round (number/base, 1).toString();
+  if (s.length > 3)
+    s = Math.round (number/base, 0).toString();
+  return s;
+}

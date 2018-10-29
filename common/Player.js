@@ -53,7 +53,7 @@ var Player = new Lang.Class({
 
   load: function (item) {
     //print (item, "\n\n\n");
-    let data = JSON.parse (item).items[0];
+    let data = item;
     if (!data || !data.id) return;
     if (!this.item || (this.item.id != data.id)) {
       this.item = data;

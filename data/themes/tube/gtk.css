@@ -1,0 +1,93 @@
+@define-color newstream_base_color shade (@theme_base_color, 0.9);
+@define-color newstream_fg_color shade (@theme_fg_color, 0.9);
+@define-color newstream_bg_color shade (@theme_bg_color, 0.9);
+
+* {
+  font-family: Roboto, Cantarell, Sans-Serif;
+}
+
+.small {
+    font-size: 85%;
+}
+  
+.hb {
+  border:0;
+  border-style:none;
+  border-image:none;
+  box-shadow:none;
+  outline-width:0px;
+  padding:0;
+  text-shadow:none;
+  color: #cfcfcf;
+  background-color: #a10705;
+  background-image: none;
+  font-weight: bold;
+}
+.titlebar {
+  padding:0 1em 0 0.2em;
+}
+.sb {
+  color: #bfbfbf;
+  background-color: @newstream_bg_color;
+  font-size: 1.2em;
+}
+.sb-button {
+  border-radius: 0;
+  border-style:none;
+  box-shadow:none;
+  outline-width:0;
+  border-image:none;
+  font-size: 1em;
+  padding:1em;
+  margin:0;
+  border:0;
+  color: @newstream_fg_color;
+  text-shadow:none;
+  background-image: none;
+  border-right: 1px solid alpha(#fff, 0.47);
+}
+.sb-button:last-child {
+  border:0;
+}
+.sb-button:checked, .sb-button:hover, .sb-preferences:checked, .sb-preferences:hover {
+  color: @newstream_fg_color;
+  background-color: @newstream_base_color;
+}
+.sb-button:checked {
+  font-weight: bold;
+}
+
+.hb-button, .hb GtkButton, .hb button, .hb GtkMenuButton {
+  margin:0;
+  padding:6px 8px;
+  outline-width:0;
+  border: 0;
+  border-style:none;
+  box-shadow:none;
+  border-image:none;
+  background-image: none;
+  color: #cfcfcf;
+}
+.hb GtkButton:hover, .hb button:hover {
+  color: #fff;
+  /*background-color: #7a0000;*/
+}
+
+.search-bar {
+  color: #cfcfcf;
+  background-color: #a10705;
+  border:0;
+  box-shadow:none;
+  padding:6px 8px;
+}
+.search-entry {
+  color: #cfcfcf;
+  background-image: none;
+  box-shadow:none;
+  border-image:none;
+  border:0;
+  padding:6px 8px;
+}
+.search-entry:focus, .search-entry:hover{
+  border:1px solid;
+}

@@ -43,7 +43,7 @@ var MainWindow = new Lang.Class ({
   build: function() {
     this.set_default_size (574, 640);
     Gtk.Settings.get_default().gtk_application_prefer_dark_theme = true;
-    //cssp = get_css_provider ();
+    cssp = get_css_provider ();
     if (cssp) {
       Gtk.StyleContext.add_provider_for_screen (
         this.get_screen(), cssp, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -66,7 +66,8 @@ var MainWindow = new Lang.Class ({
     this.back = new BackButton ();
     this.hb.add (this.back);
 
-    this.section = new Gtk.Label ({label:"New Stream", wrap: true, lines: 1, ellipsize: 3});
+    this.section = new Gtk.Label ({label:"New Stream", wrap: true, lines: 1, ellipsize: 3, xalign:0});
+    this.section.width_chars = 12;
     this.hb.add (this.section);
 
     let mmenu = new Gtk.Menu ();

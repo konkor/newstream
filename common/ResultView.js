@@ -74,18 +74,6 @@ var ResultView = new Lang.Class({
 
   },
 
-  get_hot: function () {
-    this.url = this.provider.get_hot (Lang.bind (this, this.on_results));
-  },
-
-  get_day: function () {
-    this.url = this.provider.get_day (Lang.bind (this, this.on_results));
-  },
-
-  get_hit: function () {
-    this.url = this.provider.get_hit (Lang.bind (this, this.on_results));
-  },
-
   query: function (words) {
     this.url = this.provider.get (words, Lang.bind (this, this.on_results));
   },
@@ -110,8 +98,11 @@ var ResultView = new Lang.Class({
       let item = new ResultViewItem (p);
       this.results.add (item);
       if (item.id) this.provider.get_info (item.id.videoId, Lang.bind (this, (d)=>{
-        item.details = d;
-        //print (d);
+        let data = JSON.parse (d);
+        if (data.pageInfo.totalResults == 1) {
+          item.details = data.items[0];
+          item.show_details ();
+        }
       }));
     });
   },
@@ -141,7 +132,7 @@ var ResultViewItem = new Lang.Class({
     this.pack_start (box, true, true, 8);
 
     this.title = new Gtk.Label ({xalign:0, wrap: true, lines: 2, ellipsize: 3});
-    this.title.max_width_chars = 27;
+    this.title.max_width_chars = 24;
     if (item.snippet.title) {
       this.tooltip_text = item.snippet.title;
       this.title.set_text (item.snippet.title);
@@ -154,10 +145,17 @@ var ResultViewItem = new Lang.Class({
     if (item.snippet.channelTitle) this.channel.set_text (item.snippet.channelTitle);
     box.pack_start (this.channel, true, true, 0);
 
+    let dbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    box.pack_start (dbox, true, true, 0);
+
     this.published = new Gtk.Label ({xalign:0, opacity: 0.7});
     this.published.get_style_context ().add_class ("small");
     if (item.snippet.publishedAt) this.published.set_text (Utils.age (new Date (item.snippet.publishedAt)));
-    box.pack_start (this.published, true, true, 0);
+    dbox.pack_start (this.published, true, true, 0);
+
+    this.views = new Gtk.Label ({xalign:1, opacity: 0.7});
+    this.views.get_style_context ().add_class ("small");
+    dbox.pack_end (this.views, false, false, 0);
 
     if (item.snippet.thumbnails.default.url) Utils.fetch (item.snippet.thumbnails.default.url,null,null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
@@ -177,6 +175,11 @@ var ResultViewItem = new Lang.Class({
     //this.connect ("notify", (o,a,b,c) => {print (o,a);});
 
     this.show_all ();
+  },
+
+  show_details: function () {
+    if (this.details.statistics.viewCount)
+      this.views.set_text (Utils.format_size (this.details.statistics.viewCount) + " views");
   }
 });
 
