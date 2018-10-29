@@ -19,8 +19,7 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 
 const Provider = imports.common.SearchProvider;
-const ResultView = imports.common.ResultView;
-const ItemView = imports.common.ItemView;
+const Layouts = imports.common.Layouts;
 
 let theme_gui = APPDIR + "/data/themes/default/gtk.css";
 let cssp = null;
@@ -97,26 +96,26 @@ var MainWindow = new Lang.Class ({
         this.stack.transition_type = Gtk.StackTransitionType.SLIDE_UP_DOWN;
         box.pack_start (this.stack, true, true, 0);
 
-        this.hotview = new ResultView.ResultView (this);
+        this.hotview = new Layouts.HotView (this);
         this.stack.add_named (this.hotview, "0");
 
-        this.newview = new ResultView.ResultView (this);
+        this.newview = new Layouts.NewView (this);
         this.stack.add_named (this.newview, "1");
 
-        this.hitview = new ResultView.ResultView (this);
+        this.hitview = new Layouts.HitView (this);
         this.stack.add_named (this.hitview, "2");
 
-        this.searchview = new ResultView.ResultView (this);
+        this.searchview = new Layouts.SearchView (this);
         this.stack.add_named (this.searchview, "search");
 
-        this.itemview = new ItemView.ItemView (this);
+        this.itemview = new Layouts.ItemLayout (this);
         this.stack.add_named (this.itemview, "item");
 
-        this.hotview.get_hot ();
+        this.hotview.query ();
 
         this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
         this.searchview.connect ('ready', Lang.bind (this, ()=>{
-            this.back.last = this.stack.visible_child_name = "search";
+            this.stack.visible_child_name = "search";
         }));
         this.searchbar.search_button.connect ('clicked', Lang.bind (this, ()=>{
             this.on_search ();
@@ -135,20 +134,19 @@ var MainWindow = new Lang.Class ({
     on_stack_update: function (o, index) {
         this.back.last = this.stack.visible_child_name;
         this.stack.visible_child_name = index.toString ();
-        if (index == 0)
-            this.hotview.get_hot ();
-        else if (index == 1)
-            this.newview.get_day ();
-        else
-            this.hitview.get_hit ();
+        if (index == 0) this.hotview.query ();
+        else if (index == 1) this.newview.query ();
+        else if (index == 2) this.hitview.query ();
     },
 
     on_search: function () {
       if (!this.searchbar.entry.text) return;
+      this.back.last = this.stack.visible_child_name;
       this.searchview.query (this.searchbar.entry.text);
     },
 
     on_back: function () {
+        print ("on_back: ", this.back.last);
         if (!this.back.last) return;
         this.stack.visible_child_name = this.back.last;
     },

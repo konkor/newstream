@@ -39,15 +39,19 @@ var Player = new Lang.Class({
             print ("video_window xid:", xid);
             if (this.engine) this.engine.set_window (xid);
         }));
+        this.connect ('destroy', Lang.bind (this, (o)=>{
+            this.engine.stop ();
+        }));
     },
 
     load: function (item) {
         //print (item, "\n\n\n");
         let data = JSON.parse (item).items[0];
         if (!data || !data.id) return;
-        if (!this.item || (this.item.id != data.id)) this.item = data;
-        //return;
-        if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
+        if (!this.item || (this.item.id != data.id)) {
+          this.item = data;
+          //return;
+          if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
             this.formats = d;
             print (d);
             var url = "";
@@ -69,6 +73,9 @@ var Player = new Lang.Class({
                 //print (p.format);
                 //print (p.url);
         }));
+      } else {
+        this.engine.play ();
+      }
     }
 });
 

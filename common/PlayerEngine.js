@@ -54,18 +54,20 @@ var PlayerEngine = new Lang.Class({
         if (!xid) return;
         this.handler = xid;
         this.videosink.expose();
-        print ("XID: ", xid);
+        //print ("XID: ", xid);
     },
 
     on_bus_message: function (msg) {
         //TODO Process messages
         //print (msg.type);
-        if(GstVideo.is_video_overlay_prepare_window_handle_message (msg)) {
-            print ("Seet overlay...", msg.type, this.handler);
-			var overlay = msg.src;
-			if (!overlay || !this.handler) return false;
-			overlay.set_window_handle (this.handler);
-		}
-		return true;
+        if (GstVideo.is_video_overlay_prepare_window_handle_message (msg)) {
+            //print ("Seet overlay...", msg.type, this.handler);
+            var overlay = msg.src;
+            if (!overlay || !this.handler) return false;
+            overlay.set_window_handle (this.handler);
+        } else if (msg.type == Gst.MessageType.EOS) {
+          this.playbin.set_state(Gst.State.READY);
+        }
+    return true;
     }
 });
