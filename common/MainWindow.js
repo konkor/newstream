@@ -59,12 +59,7 @@ var MainWindow = new Lang.Class ({
         this.home.margin = 6;
         this.hb.add (this.home);
 
-        this.back = new Gtk.Button ({always_show_image: true, tooltip_text:"Back"});
-        this.back.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/back-symbolic.svg");
-        this.back.get_style_context ().add_class ("hb-button");
-        this.back.last = "";
-        this.back.margin = 6;
-        this.back.set_size_request (64,24);
+        this.back = new BackButton ();
         this.hb.add (this.back);
 
         this.section = new Gtk.Label ({label:"New Stream"});
@@ -146,9 +141,10 @@ var MainWindow = new Lang.Class ({
     },
 
     on_back: function () {
-        print ("on_back: ", this.back.last);
-        if (!this.back.last) return;
-        this.stack.visible_child_name = this.back.last;
+        var view = this.back.last;
+        print ("on_back: ", view);
+        if (!view) return;
+        this.stack.visible_child_name = view;
     },
 
     on_key_press: function (e) {
@@ -247,6 +243,30 @@ var Topbar = new Lang.Class({
         this.current = o.index;
         this.emit ('stack_update', o.index);
         this.toggle_lock = false;
+    }
+});
+
+var BackButton = new Lang.Class({
+    Name: "BackButton",
+    Extends: Gtk.Button,
+
+    _init: function () {
+        this.parent ({always_show_image: true, tooltip_text:"Back"});
+        this.get_style_context ().add_class ("hb-button");
+        this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/back-symbolic.svg");
+        this.history = [];
+        this.set_size_request (64,24);
+    },
+
+    get last () {
+      var view = this.history.pop () || "";
+      //if (!view) view = "";
+      return view;
+    },
+
+    set last (value) {
+      if (!this.history.length || this.history[this.history.length-1] != value)
+        this.history.push (value);
     }
 });
 

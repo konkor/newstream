@@ -33,7 +33,6 @@ var ItemLayout = new Lang.Class({
   },
 
   setup: function (o, e) {
-    print ("Setup: ", o, e);
     if (this.player.item) this.w.section.label = this.player.item.snippet.title;
     this.w.home.visible = false;
     this.w.back.visible = true;
@@ -58,7 +57,6 @@ var HotView = new Lang.Class({
   },
 
   setup: function (o, e) {
-    print ("Setup: ", o, e);
     this.w.section.label = "New Stream";
     this.w.home.visible = true;
     this.w.back.visible = false;
@@ -112,7 +110,6 @@ var SearchView = new Lang.Class({
   },
 
   setup: function (o, e) {
-    print ("Setup: ", o, e);
     this.w.section.label = this.words;
     this.w.home.visible = false;
     this.w.back.visible = true;
