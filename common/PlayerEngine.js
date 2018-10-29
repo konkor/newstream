@@ -18,7 +18,7 @@ var PlayerEngine = new Lang.Class({
     Name: "PlayerEngine",
 
     _init: function () {
-        Gst.init(null, 0);
+        Gst.init(null);
         this.playbin = Gst.ElementFactory.make("playbin", null);
         this.audiosink = Gst.ElementFactory.make("pulsesink", "audiosink");
         this.playbin.set_property("audio-sink", this.audiosink);
