@@ -170,7 +170,7 @@ var Searchbar = new Lang.Class({
         this.get_style_context ().add_class ("search-bar");
 
         let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
-        box.margin_bottom = 8;
+        box.margin = 8;
         this.pack_start (box, true, true, 0);
 
         let space = new Gtk.Box ();
@@ -179,7 +179,7 @@ var Searchbar = new Lang.Class({
         this.search_button = new Gtk.Button ({always_show_image: true, tooltip_text:"Search"});
         this.search_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/folder-saved-search-symbolic.svg");
         this.search_button.get_style_context ().add_class ("hb-button");
-        box.pack_start (this.search_button, false, false, 0);
+        box.pack_start (this.search_button, false, false, 8);
 
         this.entry = new Gtk.Entry ();
         this.entry.get_style_context ().add_class ("search-entry");
@@ -190,7 +190,7 @@ var Searchbar = new Lang.Class({
         this.clear_button = new Gtk.Button ({always_show_image: true, tooltip_text:"Clear"});
         this.clear_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/window-close-symbolic.svg");
         this.clear_button.get_style_context ().add_class ("hb-button");
-        box.pack_start (this.clear_button, false, false, 0);
+        box.pack_start (this.clear_button, false, false, 8);
 
         space = new Gtk.Box ();
         box.pack_start (space, true, false, 0);
