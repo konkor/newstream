@@ -11,7 +11,7 @@
 
 `It's very first initial versions and all could be changed any time.`
 
-![screencast](https://i.imgur.com/IOfuKIo.png)
+![screencast](https://i.imgur.com/FS7gWU6.png)
 
 ## Planned Features
 * Modern styled GTK UI with user-friendly mobile-like behavior
