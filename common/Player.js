@@ -100,7 +100,7 @@ var VideoFrame = new Lang.Class({
 
     this.frame = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.frame.override_background_color (Gtk.StateFlags.NORMAL, new Gdk.RGBA({alpha:1}));
-    this.frame.set_size_request (100,240);
+    this.frame.set_size_request (100,480);
     this.frame.show ();
     this.pack_start (this.frame, true, true, 0);
     this.contents.connect ('button-press-event', Lang.bind (this, (o, e)=>{

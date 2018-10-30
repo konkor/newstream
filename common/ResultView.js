@@ -27,18 +27,22 @@ var ResultView = new Lang.Class({
     flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED},
   },
 
-  _init: function (parent, id) {
+  _init: function (parent, scroll) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
+    scroll = (typeof scroll !== 'undefined') ?  scroll : true;
+    let box = null;
     this.owner = parent;
     this.provider = parent.provider;
 
-    this.scroll = new Gtk.ScrolledWindow ();
-    this.scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
-    this.scroll.shadow_type = Gtk.ShadowType.NONE;
-    this.pack_start (this.scroll, true, true, 0);
+    if (scroll) {
+      this.scroll = new Gtk.ScrolledWindow ();
+      this.scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
+      this.scroll.shadow_type = Gtk.ShadowType.NONE;
+      this.pack_start (this.scroll, true, true, 0);
 
-    let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
-    this.scroll.add (box);
+      box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+      this.scroll.add (box);
+    } else box = this;
 
     let space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);

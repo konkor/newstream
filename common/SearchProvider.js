@@ -193,6 +193,14 @@ var SearchProvider = new Lang.Class({
     );
     fetch (url, null, null, callback);
     return url;
+  },
+
+  get_relaited: function (id, callback) {
+    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&relatedToVideoId=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+      this._base_url, 12, id
+    );
+    fetch (url, null, null, callback);
+    return url;
   }
 });
 

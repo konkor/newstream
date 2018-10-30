@@ -31,7 +31,7 @@ var ItemView = new Lang.Class({
 
   _init: function (owner) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
-    this.owner = owner;
+    this.w = owner;
 
     this.scroll = new Gtk.ScrolledWindow ();
     this.scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
@@ -42,15 +42,16 @@ var ItemView = new Lang.Class({
     this.box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.scroll.add (this.box);
 
-    this.player = new Player.Player (this.owner);
+    this.player = new Player.Player (owner);
     this.box.pack_start (this.player, true, true, 0);
 
-    this.results = new ResultView.ResultView (owner);
+    this.results = new ResultView.ResultView (owner, false);
     this.box.pack_end (this.results, true, true, 0);
   },
 
   load: function (item) {
     this.player.load (item);
+    this.results.url = this.w.provider.get_relaited (this.player.item.id,Lang.bind (this.results, this.results.on_results));
   },
 
   get playing () {
