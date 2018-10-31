@@ -51,6 +51,7 @@ var Settings = new Lang.Class({
   load: function () {
     save = this.get_boolean (SAVE_SETTINGS_KEY);
     history_size = this.get_int (HISTORY_SIZE_KEY);
+    this.load_history ();
   },
 
   get save () { return save; },
@@ -92,6 +93,14 @@ var Settings = new Lang.Class({
       JSON.stringify (history), null, false,
       Gio.FileCreateFlags.REPLACE_DESTINATION, null, null
     );
+  },
+
+  load_history: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/history.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) history = JSON.parse (ar);
+    }
   }
 
 });
