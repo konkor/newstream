@@ -62,13 +62,36 @@ var Settings = new Lang.Class({
   get history () { return history; },
   set history (val) {
     history = val;
-    //TODO HISTORY_ROTATION
+    this.save_history ();
   },
 
   get history_size () { return history_size; },
   set history_size (val) {
     history_size = val;
     this.set_int (HISTORY_SIZE_KEY, history_size);
+  },
+
+  history_add: function (text) {
+    if (!text) return;
+    let s = text.trim ();
+    if (!s) return;
+
+    var i = history.indexOf (s);
+    if (i > -1) history.splice (i, 1);
+    history.unshift (s);
+
+    //saving history
+    if (history_size < 1) return;
+    if (history.length > history_size) history.pop ();
+    this.save_history ();
+  },
+
+  save_history: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/history.json");
+    f.replace_contents_async (
+      JSON.stringify (history), null, false,
+      Gio.FileCreateFlags.REPLACE_DESTINATION, null, null
+    );
   }
 
 });
