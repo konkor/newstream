@@ -26,13 +26,14 @@ var PlayerEngine = new Lang.Class({
   },
 
   _init: function () {
-    Gst.init(null);
+    Gst.init(null); //["GST_GL_PLATFORM=\"egl\""]
     this.current_state = 0;
 
     this.playbin = Gst.ElementFactory.make("playbin", null);
     this.audiosink = Gst.ElementFactory.make("pulsesink", "audiosink");
     this.playbin.set_property("audio-sink", this.audiosink);
     this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
+    //this.videosink = Gst.ElementFactory.make("appsink", "videosink");
     this.playbin.set_property("video-sink", this.videosink);
 
     this.bus = this.playbin.get_bus();
@@ -65,7 +66,7 @@ var PlayerEngine = new Lang.Class({
   set_window: function (xid) {
     if (!xid) return;
     this.handler = xid;
-    this.videosink.expose ();
+    //this.videosink.expose ();
     //print ("XID: ", xid);
   },
 

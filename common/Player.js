@@ -201,7 +201,7 @@ var VideoArea = new Lang.Class({
 
   _init: function (parent) {
     this.parent ();
-    //this.double_buffered = false;
+    this.double_buffered = false;
     var [,color] = Gdk.Color.parse ("#000");
     this.modify_bg (Gtk.StateType.NORMAL, color);
     //this.realize ();
