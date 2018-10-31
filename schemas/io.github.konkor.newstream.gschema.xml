@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="io-github-konkor-newstream">
+
+  <schema id="io.github.konkor.newstream" path="/io/github/konkor/newstream/">
+
+    <key type="b" name="save-settings">
+      <default>true</default>
+      <summary>Save last settings</summary>
+      <description>Remember settings for restoring</description>
+    </key>
+
+    <key type="i" name="history-size">
+      <default>5</default>
+      <summary>History Size</summary>
+      <description>History Size To Remember</description>
+    </key>
+
+  </schema>
+</schemalist>
