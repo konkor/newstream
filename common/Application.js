@@ -17,9 +17,6 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const Window = imports.common.MainWindow;
 
-let theme_gui = APPDIR + "/data/themes/default/gtk.css";
-let cssp = null;
-
 var NewStreamApplication = new Lang.Class ({
   Name: "NewStreamApplication",
   Extends: Gtk.Application,
@@ -57,4 +54,3 @@ function getCurrentFile () {
   let file = Gio.File.new_for_path (path).get_parent();
   return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
 }
-
