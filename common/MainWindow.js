@@ -20,6 +20,7 @@ imports.searchPath.unshift(APPDIR);
 
 const Prefs = imports.common.Settings;
 const Provider = imports.common.SearchProvider;
+const Search = imports.common.Search;
 const Layouts = imports.common.Layouts;
 
 let theme_gui = APPDIR + "/data/themes/default/gtk.css";
@@ -99,7 +100,7 @@ var MainWindow = new Lang.Class ({
     let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.add (box);
 
-    this.searchbar = new Searchbar ();
+    this.searchbar = new Search.Searchbar ();
     box.add (this.searchbar);
 
     this.topbar = new Topbar ();
@@ -177,50 +178,6 @@ var MainWindow = new Lang.Class ({
      if (this.back.visible) this.on_back ();
      break;
    }
-  }
-});
-
-var Searchbar = new Lang.Class({
-  Name: "Searchbar",
-  Extends: Gtk.Box,
-
-  _init: function () {
-    this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
-    this.get_style_context ().add_class ("search-bar");
-
-    let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
-    box.margin = 8;
-    this.pack_start (box, true, true, 0);
-
-    let space = new Gtk.Box ();
-    box.pack_start (space, true, false, 0);
-
-    this.search_button = new Gtk.Button ({always_show_image: true, tooltip_text:"Search"});
-    this.search_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/folder-saved-search-symbolic.svg");
-    this.search_button.get_style_context ().add_class ("hb-button");
-    box.pack_start (this.search_button, false, false, 8);
-
-    this.entry = new Gtk.Entry ();
-    this.entry.get_style_context ().add_class ("search-entry");
-    this.entry.input_hints = Gtk.InputHints.SPELLCHECK | Gtk.InputHints.WORD_COMPLETION;
-    this.entry.placeholder_text = "Search";
-    box.pack_start (this.entry, true, true, 0);
-
-    this.clear_button = new Gtk.Button ({always_show_image: true, tooltip_text:"Clear"});
-    this.clear_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/window-close-symbolic.svg");
-    this.clear_button.get_style_context ().add_class ("hb-button");
-    box.pack_start (this.clear_button, false, false, 8);
-
-    space = new Gtk.Box ();
-    box.pack_start (space, true, false, 0);
-
-    this.clear_button.connect ('clicked', Lang.bind (this, ()=>{
-      this.entry.text = "";
-    }));
-    this.entry.connect ('key_press_event', Lang.bind (this, (o, e)=>{
-      var [,key] = e.get_keyval ();
-      if (key == Gdk.KEY_Escape) this.entry.text = "";
-    }));
   }
 });
 
