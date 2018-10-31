@@ -9,6 +9,7 @@
  */
 
 const Lang = imports.lang;
+const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 let app_data_dir = get_app_data_dir ();
@@ -48,33 +49,33 @@ var Settings = new Lang.Class({
   },
 
   load: function () {
-    _save = this.get_boolean (SAVE_SETTINGS_KEY);
-    _history_size = this.get_int (HISTORY_SIZE_KEY);
+    save = this.get_boolean (SAVE_SETTINGS_KEY);
+    history_size = this.get_int (HISTORY_SIZE_KEY);
   },
 
-  get save () { return _save; },
+  get save () { return save; },
   set save (val) {
-    _save = val;
-    this.set_boolean (SAVE_SETTINGS_KEY, _save);
+    save = val;
+    this.set_boolean (SAVE_SETTINGS_KEY, save);
   },
 
-  get history () { return _history; },
+  get history () { return history; },
   set history (val) {
-    _history = val;
+    history = val;
     //TODO HISTORY_ROTATION
   },
 
-  get history_size () { return _history_size; },
+  get history_size () { return history_size; },
   set history_size (val) {
-    _history_size = val;
-    this.set_int (HISTORY_SIZE_KEY, _history_size);
+    history_size = val;
+    this.set_int (HISTORY_SIZE_KEY, history_size);
   }
 
 });
 
 function get_app_data_dir () {
   let path = GLib.build_filenamev ([GLib.get_user_data_dir(),"newstream"]);
-  if (!GLib.file_test (GLib.FileTest.EXISTS))
+  if (!GLib.file_test (path, GLib.FileTest.EXISTS))
     GLib.mkdir_with_parents (path, 484);
   return path;
 }

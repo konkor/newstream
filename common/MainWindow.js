@@ -18,6 +18,7 @@ const Lang = imports.lang;
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 
+const Prefs = imports.common.Settings;
 const Provider = imports.common.SearchProvider;
 const Layouts = imports.common.Layouts;
 
@@ -36,6 +37,7 @@ var MainWindow = new Lang.Class ({
     } catch (e) {
       error (e.message);
     }
+    this.settings = new Prefs.Settings ();
     this.provider = new Provider.SearchProvider ();
     this.build ();
   },
