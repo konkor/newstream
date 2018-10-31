@@ -10,7 +10,7 @@
     </key>
 
     <key type="i" name="history-size">
-      <default>5</default>
+      <default>5000</default>
       <summary>History Size</summary>
       <description>History Size To Remember</description>
     </key>

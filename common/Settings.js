@@ -19,7 +19,7 @@ const HISTORY_SIZE_KEY = 'history-size';
 
 let save = true;
 let history = [];
-let history_size = 5;
+let history_size = 5000;
 
 var Settings = new Lang.Class({
   Name: "Settings",
@@ -88,18 +88,18 @@ var Settings = new Lang.Class({
   },
 
   save_history: function () {
-    let f = Gio.file_new_for_path (app_data_dir + "/history.json");
-    f.replace_contents_async (
-      JSON.stringify (history), null, false,
-      Gio.FileCreateFlags.REPLACE_DESTINATION, null, null
-    );
+    GLib.file_set_contents (app_data_dir + "/history.json", JSON.stringify (history));
   },
 
   load_history: function () {
     let f = Gio.file_new_for_path (app_data_dir + "/history.json");
     if (f.query_exists(null)) {
       var [res, ar, tags] = f.load_contents (null);
-      if (res) history = JSON.parse (ar);
+      if (res) try {
+        history = JSON.parse (ar);
+      } catch (e) {
+        history = [];
+      }
     }
   }
 

@@ -8,8 +8,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const GObject = imports.gi.GObject;
+const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const Gdk = imports.gi.Gdk;
 const Lang = imports.lang;
 
 const APPDIR = getCurrentFile ()[1];
@@ -19,8 +22,9 @@ var Searchbar = new Lang.Class({
   Name: "Searchbar",
   Extends: Gtk.Box,
 
-  _init: function () {
-    this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
+  _init: function (sender) {
+    this.parent ({orientation:Gtk.Orientation.VERTICAL});
+    this.settings = sender.settings;
     this.get_style_context ().add_class ("search-bar");
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
@@ -49,6 +53,9 @@ var Searchbar = new Lang.Class({
     space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);
 
+    this.history = new SearchHistory (this);
+    this.add (this.history);
+
     this.clear_button.connect ('clicked', Lang.bind (this, ()=>{
       this.entry.text = "";
     }));
@@ -56,6 +63,108 @@ var Searchbar = new Lang.Class({
       var [,key] = e.get_keyval ();
       if (key == Gdk.KEY_Escape) this.entry.text = "";
     }));
+    this.entry.connect ('activate', Lang.bind (this, ()=>{
+      this.search_button.clicked ();
+    }));
+    this.entry.connect ('notify::text', Lang.bind (this, (o,a)=>{
+      this.history.setup ();
+    }));
+    this.entry.connect ('focus-in-event', Lang.bind (this, (o, e)=>{
+      this.history.visible = true;
+    }));
+    this.entry.connect ('focus-out-event', Lang.bind (this, (o, e)=>{
+      //this.history.visible = false;
+      GLib.timeout_add (0, 200, Lang.bind (this, ()=>{
+        this.history.visible = false;
+        return false;
+      }));
+    }));
+    this.history.connect ('selected', Lang.bind (this, (o, t)=>{
+      //print ("selected", t);
+      this.entry.text = t;
+      this.search_button.clicked ();
+    }));
+  }
+});
+
+var SearchHistory = new Lang.Class({
+  Name: "SearchHistory",
+  Extends: Gtk.Box,
+  Signals: {
+    'selected': {
+    flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
+    param_types: [GObject.TYPE_STRING]},
+  },
+
+  _init: function (bar) {
+    this.parent ({orientation:Gtk.Orientation.VERTICAL, spacing:8});
+    this.get_style_context ().add_class ("search-bar");
+    this.no_show_all = true;
+    this.bar = bar;
+
+    this.items = [];
+
+    this.items.push (new SearchHistoryItem ());
+    this.items.push (new SearchHistoryItem ());
+    this.items.push (new SearchHistoryItem ());
+    this.items.forEach (p => {
+      this.add (p);
+      p.connect ("clicked", Lang.bind (this, (o)=>{
+        this.emit ("selected", o.get_label ());
+      }));
+    });
+
+    this.connect ("map", Lang.bind (this, this.setup));
+  },
+
+  setup: function (o, e) {
+    let history = this.get_history ();
+    for (let i = 0; i < 3; i++) {
+      if (history[i]) this.items[i].set_text (history[i]);
+      else this.items[i].set_text ("");
+    }
+  },
+
+  get_history: function () {
+    var filter = this.bar.entry.text.trim().toLowerCase();
+    var sh = this.bar.settings.history;
+    let history = [];
+    for (let i = 0; i < sh.length; i++) {
+      if (filter) {
+        if (sh[i].toLowerCase().indexOf (filter) > -1)
+          history.push (sh[i]);
+      } else history.push (sh[i]);
+      if (history.length > 2) break;
+    }
+    return history;
+  }
+
+});
+
+var SearchHistoryItem = new Lang.Class({
+  Name: "SearchHistoryItem",
+  Extends: Gtk.Button,
+
+  _init: function (text) {
+    this.parent ({always_show_image: true, tooltip_text:"Search History", xalign:0});
+    //this.get_style_context ().add_class ("search-bar");
+    this.set_relief (Gtk.ReliefStyle.NONE);
+
+    this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/history-symbolic.svg");
+    var l = this.get_image ();
+    l.margin_right = 12;
+    l.margin_left = 64;
+
+    //wrap: true, lines: 1, ellipsize: 3, xalign:0});
+    //this.width_chars = 12;
+    this.show_all ();
+    this.set_text (text);
+  },
+
+  set_text: function (text) {
+    text = text || "";
+    this.set_label (text.trim());
+    this.visible = this.get_label().length != 0;
   }
 });
 

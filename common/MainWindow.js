@@ -100,7 +100,7 @@ var MainWindow = new Lang.Class ({
     let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.add (box);
 
-    this.searchbar = new Search.Searchbar ();
+    this.searchbar = new Search.Searchbar (this);
     box.add (this.searchbar);
 
     this.topbar = new Topbar ();
@@ -131,15 +131,8 @@ var MainWindow = new Lang.Class ({
     this.searchview.connect ('ready', Lang.bind (this, ()=>{
       this.stack.visible_child_name = "search";
     }));
-    this.searchbar.search_button.connect ('clicked', Lang.bind (this, ()=>{
-      this.on_search ();
-    }));
-    this.searchbar.entry.connect ('activate', Lang.bind (this, ()=>{
-      this.on_search ();
-    }));
-    this.back.connect ('clicked', Lang.bind (this, ()=>{
-      this.on_back ();
-    }));
+    this.searchbar.search_button.connect ('clicked', Lang.bind (this, this.on_search));
+    this.back.connect ('clicked', Lang.bind (this, this.on_back));
     this.connect ('key-press-event', Lang.bind (this, (o,e)=>{
      this.on_key_press (e);
     }));
@@ -162,11 +155,11 @@ var MainWindow = new Lang.Class ({
    if (!this.searchbar.entry.text) return;
    this.back.last = this.stack.visible_child_name;
    this.searchview.query (this.searchbar.entry.text);
+   this.settings.history_add (this.searchbar.entry.text);
   },
 
   on_back: function () {
     var view = this.back.last;
-    //print ("on_back: ", view);
     if (!view) return;
     this.stack.visible_child_name = view;
   },
