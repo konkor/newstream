@@ -47,6 +47,9 @@ var Player = new Lang.Class({
       //print ("state-changed:", o,n,p);
       if (this.w.stack.visible_child_name != "item") {
         this.w.phones.visible = n == 4;
+      } else {
+        if (this.item.snippet.title != this.w.section.label)
+          this.w.section.label = this.item.snippet.title;
       }
     }));
   },
