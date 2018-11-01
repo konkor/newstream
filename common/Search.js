@@ -67,7 +67,7 @@ var Searchbar = new Lang.Class({
       this.search_button.clicked ();
     }));
     this.entry.connect ('notify::text', Lang.bind (this, (o,a)=>{
-      this.history.setup ();
+      this.history.update ();
     }));
     this.entry.connect ('focus-in-event', Lang.bind (this, (o, e)=>{
       this.history.visible = true;
@@ -114,10 +114,10 @@ var SearchHistory = new Lang.Class({
       }));
     });
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", Lang.bind (this, this.update));
   },
 
-  setup: function (o, e) {
+  update: function (o, e) {
     let history = this.get_history ();
     for (let i = 0; i < 3; i++) {
       if (history[i]) this.items[i].set_text (history[i]);

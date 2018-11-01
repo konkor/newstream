@@ -184,6 +184,38 @@ var ResultViewItem = new Lang.Class({
   show_details: function () {
     if (this.details.statistics.viewCount)
       this.views.set_text (Utils.format_size (this.details.statistics.viewCount) + " views");
+    if (this.details.snippet.liveBroadcastContent != "none")
+      this.published.set_text ("LIVE • " + this.published.get_text());
+    else if (this.details.contentDetails.duration && this.details.contentDetails.duration.length > 2) {
+      let s = this.details.contentDetails.duration.substring (2);
+      let h = 0, m = 0, sec = 0, i;
+      i = s.indexOf ("H");
+      if (i > -1) {
+        h = parseInt(s.substring (0,i));
+        if (!Number.isInteger (h)) h = 0;
+        s = s.substring (i + 1);
+      }
+      i = s.indexOf ("M");
+      if (i > -1) {
+        m = parseInt(s.substring (0,i));
+        if (!Number.isInteger (m)) m = 0;
+        s = s.substring (i + 1);
+      }
+      i = s.indexOf ("S");
+      if (i > -1) {
+        sec = parseInt(s.substring (0,i));
+        if (!Number.isInteger (sec)) sec = 0;
+      }
+      if (h) s = "%d:%02d:%02d".format (h, m, sec);
+      else if (m) s = "%d:%02d".format (m, sec);
+      else s = "%ds".format (sec);
+      //s = s.replace (/([A-Z])/g, ":");
+      //if (s.length < 3) s += "s";
+      print (this.details.contentDetails.duration, s);
+      this.published.set_text (s + " • " + this.published.get_text());
+
+    }
+
   }
 });
 
