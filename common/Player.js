@@ -30,7 +30,7 @@ var Player = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.w = sender;
     this.engine = new PlayerEngine.PlayerEngine ();
-    this.video = new VideoFrame (sender);
+    this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
 
     this.video.contents.video_display.connect ('realize', Lang.bind (this, (o)=>{
@@ -96,7 +96,7 @@ var VideoFrame = new Lang.Class({
   _init: function (sender) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
 
-    this.contents = new VideoContents ();
+    this.contents = new VideoContents (sender);
     this.video_window = new FullscreenWindow (sender);
     this.video_window.realize ();
     this.video_window.add (this.contents);
@@ -151,7 +151,7 @@ var FullscreenWindow = new Lang.Class({
 
   _init: function (sender) {
     this.parent ({type: Gtk.WindowType.TOPLEVEL});
-    this.mainwindow = sender;
+    this.mainwindow = sender.w;
     this.can_focus = true;
     this.decorated = false;
     this.deletable = false;
@@ -178,7 +178,7 @@ var VideoContents = new Lang.Class({
   Name: "VideoContents",
   Extends: Gtk.Box,
 
-  _init: function (parent) {
+  _init: function (sender) {
     this.parent ();
     this.video_display = new VideoArea ();
 
@@ -189,6 +189,7 @@ var VideoContents = new Lang.Class({
     this.ebox.can_focus = true;
     this.ebox.above_child = true;
     this.ebox.add (this.video_display);
+    //this.ebox.add (sender.videosink.props.widget);
     this.ebox.events |= Gdk.EventMask.POINTER_MOTION_MASK |
 				Gdk.EventMask.BUTTON_PRESS_MASK |
 				Gdk.EventMask.BUTTON_MOTION_MASK |
@@ -200,8 +201,8 @@ var VideoContents = new Lang.Class({
 
 var VideoArea = new Lang.Class({
   Name: "VideoArea",
-  Extends: Gtk.DrawingArea,
-
+  Extends: Gtk.Box,
+//DrawingArea
   _init: function (parent) {
     this.parent ();
     this.double_buffered = false;

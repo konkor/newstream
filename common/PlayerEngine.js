@@ -33,7 +33,7 @@ var PlayerEngine = new Lang.Class({
     this.audiosink = Gst.ElementFactory.make("pulsesink", "audiosink");
     this.playbin.set_property("audio-sink", this.audiosink);
     this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
-    //this.videosink = Gst.ElementFactory.make("appsink", "videosink");
+    //this.videosink = Gst.ElementFactory.make("gtksink", "videosink");
     this.playbin.set_property("video-sink", this.videosink);
 
     this.bus = this.playbin.get_bus();
