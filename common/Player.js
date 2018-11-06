@@ -26,9 +26,6 @@ const Utils = imports.common.Utils;
 var CG_VERSION = 3;
 if (!ClutterGst.Content) CG_VERSION = 2;
 
-GtkClutter.init (null);
-ClutterGst.init(null);
-
 const OVERLAY_OPACITY = 220;
 
 let window_handler = 0;
@@ -40,6 +37,10 @@ var Player = new Lang.Class({
   _init: function (sender) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.w = sender;
+
+    GtkClutter.init (null);
+    ClutterGst.init(null);
+
     this.engine = new PlayerEngine.PlayerEngine ();
     this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
