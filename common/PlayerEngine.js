@@ -32,9 +32,8 @@ var PlayerEngine = new Lang.Class({
     this.playbin = Gst.ElementFactory.make("playbin", null);
     this.audiosink = Gst.ElementFactory.make("pulsesink", "audiosink");
     this.playbin.set_property("audio-sink", this.audiosink);
-    this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
-    //this.videosink = Gst.ElementFactory.make("gtksink", "videosink");
-    this.playbin.set_property("video-sink", this.videosink);
+    //this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
+    //this.playbin.set_property("video-sink", this.videosink);
 
     this.bus = this.playbin.get_bus();
     this.bus.add_signal_watch();
@@ -68,6 +67,20 @@ var PlayerEngine = new Lang.Class({
     this.handler = xid;
     //this.videosink.expose ();
     //print ("XID: ", xid);
+  },
+
+  set_videosink: function (sink) {
+    this.videosink = sink;
+    this.playbin.set_property("video-sink", this.videosink);
+  },
+
+  get_videosink: function (name) {
+    name = name || "cluttersink";
+    if (!this.videosink) {
+      this.videosink = Gst.ElementFactory.make (name, "videosink");
+      this.playbin.set_property ("video-sink", this.videosink);
+    }
+    return this.videosink;
   },
 
   on_bus_message: function (bus,msg,a,b,c) {

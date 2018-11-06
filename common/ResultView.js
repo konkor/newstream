@@ -211,7 +211,7 @@ var ResultViewItem = new Lang.Class({
       else s = "%ds".format (sec);
       //s = s.replace (/([A-Z])/g, ":");
       //if (s.length < 3) s += "s";
-      print (this.details.contentDetails.duration, s);
+      //print (this.details.contentDetails.duration, s);
       this.published.set_text (s + " • " + this.published.get_text());
 
     }

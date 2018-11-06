@@ -44,7 +44,7 @@ var MainWindow = new Lang.Class ({
   },
 
   build: function() {
-    this.set_default_size (574, 640);
+    this.set_default_size (800, 480);
     Gtk.Settings.get_default().gtk_application_prefer_dark_theme = true;
     cssp = get_css_provider ();
     if (cssp) {

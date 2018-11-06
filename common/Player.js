@@ -10,15 +10,24 @@
 
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
+const GdkX11 = imports.gi.GdkX11;
+const GtkClutter = imports.gi.GtkClutter;
+const Clutter = imports.gi.Clutter;
+const ClutterGst = imports.gi.ClutterGst;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Lang = imports.lang;
-const GdkX11 = imports.gi.GdkX11;
 
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const PlayerEngine = imports.common.PlayerEngine;
 const Utils = imports.common.Utils;
+
+var CG_VERSION = 3;
+if (!ClutterGst.Content) CG_VERSION = 2;
+
+GtkClutter.init (null);
+ClutterGst.init(null);
 
 let window_handler = 0;
 
@@ -33,13 +42,6 @@ var Player = new Lang.Class({
     this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
 
-    this.video.contents.video_display.connect ('realize', Lang.bind (this, (o)=>{
-    //this.connect ('realize', Lang.bind (this, ()=>{
-      //let xid = this.video.contents.video_display.window.get_xid ();
-      let xid = o.window.get_xid ();
-      print ("video_window xid:", xid);
-      if (this.engine) this.engine.set_window (xid);
-    }));
     this.connect ('unrealize', Lang.bind (this, (o)=>{
       this.engine.stop ();
     }));
@@ -96,7 +98,7 @@ var VideoFrame = new Lang.Class({
   _init: function (sender) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
 
-    this.contents = new VideoContents (sender);
+    this.contents = new VideoWidget (sender);
     this.video_window = new FullscreenWindow (sender);
     this.video_window.realize ();
     this.video_window.add (this.contents);
@@ -174,42 +176,130 @@ var FullscreenWindow = new Lang.Class({
   }
 });
 
-var VideoContents = new Lang.Class({
-  Name: "VideoContents",
-  Extends: Gtk.Box,
+var VideoWidget = new Lang.Class ({
+  Name: "VideoWidget",
+  Extends: GtkClutter.Embed,
 
   _init: function (sender) {
+    if (!sender || !sender.engine) throw "No player engine!";
+    this.player = sender;
+    this.control_visible = false;
+    this.control_timeout_id = 0;
     this.parent ();
-    this.video_display = new VideoArea ();
+    this.build ();
+    if (CG_VERSION < 3) {
+      //this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
+      this.texture = new Clutter.Texture ({"disable-slicing":true, "reactive":true});
+      this.player.engine.get_videosink().set_property ("texture", this.texture);
+      this.frame = new AspectFrame ();
+      this.frame.add_child (this.texture);
+    } else {
+      let videosink = new ClutterGst.VideoSink ();
+      this.frame = new Clutter.Actor ({
+        "content": new ClutterGst.Aspectratio ({"sink": videosink}),
+        "name": "texture",
+        "reactive": true
+      });
+      this.player.engine.set_videosink (videosink);
+    }
+    this.stage.add_child (this.frame);
+    this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
 
-    this.ebox = new Gtk.EventBox ();
-    this.ebox.hexpand = true;
-    this.ebox.vexpand = true;
-    //this.ebox.visible_window = false;
-    this.ebox.can_focus = true;
-    this.ebox.above_child = true;
-    this.ebox.add (this.video_display);
-    //this.ebox.add (sender.videosink.props.widget);
-    this.ebox.events |= Gdk.EventMask.POINTER_MOTION_MASK |
-				Gdk.EventMask.BUTTON_PRESS_MASK |
-				Gdk.EventMask.BUTTON_MOTION_MASK |
-				Gdk.EventMask.KEY_PRESS_MASK |
-				Gdk.EventMask.KEY_RELEASE_MASK;
-    this.pack_start (this.ebox, true, true, 0);
+    this.set_controls_visibility (true);
+  },
+
+  build: function () {
+    this.stage = this.get_stage ();
+    this.stage.layout_manager = new Clutter.BinLayout ({
+      x_align: Clutter.BinAlignment.FILL,
+      y_align: Clutter.BinAlignment.FILL,
+    });
+    this.stage.set_background_color (new Clutter.Color ());
+  },
+
+  on_motion_notify: function (o, event) {
+    //print (event);
+    if (!this.control_visible)
+      this.set_controls_visibility (true);
+  },
+
+  set_controls_visibility: function (visible) {
+    this.set_show_cursor (visible);
+    if (visible) this.schedule_hiding_popup ();
+    this.control_visible = visible;
+  },
+
+  schedule_hiding_popup: function () {
+    this.unschedule_hiding_popup ();
+    this.control_timeout_id = GLib.timeout_add (0, 2000, () => {
+      this.unschedule_hiding_popup ();
+      this.set_controls_visibility (false);
+      return false;
+    });
+  },
+
+  unschedule_hiding_popup: function () {
+    if (this.control_timeout_id > 0)
+      GLib.source_remove (this.control_timeout_id);
+    this.control_timeout_id = 0;
+  },
+
+  set_show_cursor: function (show) {
+    let window = this.get_window ();
+    if (!window) return;
+
+    if (show) window.cursor = null;
+    else {
+      let cursor = Gdk.Cursor.new (Gdk.CursorType.BLANK_CURSOR);
+      window.cursor = cursor;
+    }
   }
+
 });
 
-var VideoArea = new Lang.Class({
-  Name: "VideoArea",
-  Extends: Gtk.Box,
-//DrawingArea
-  _init: function (parent) {
-    this.parent ();
-    this.double_buffered = false;
-    var [,color] = Gdk.Color.parse ("#000");
-    this.modify_bg (Gtk.StateType.NORMAL, color);
-    //this.realize ();
-    //this.set_size_request (100,240);
+var AspectFrame = new Lang.Class ({
+  Name: "AspectFrame",
+  Extends: Clutter.Actor,
+
+  _init: function () {
+    this.parent ({name: "frame"});
+    this.set_pivot_point ( 0.5, 0.5);
+  },
+
+  vfunc_allocate: function (box, flags) {
+    this.parent (box, flags);
+    let child = this.get_child_at_index (0);
+    if (!child) return;
+    var box_width = box.x2 - box.x1;
+    var box_height = box.y2 - box.y1;
+    let [,,width, height] = child.get_preferred_size ();
+    if (width <= 0 || height <= 0) return;
+
+    var aspect = box_width / box_height;
+    var child_aspect = width / height;
+
+    if (aspect < child_aspect) {
+      width = box_width;
+      height = box_width / child_aspect;
+    } else {
+      height = box_height;
+      width = box_height * child_aspect;
+    }
+    let child_box = new Clutter.ActorBox({
+      x1: (box_width - width) / 2,
+      y1: (box_height - height) / 2,
+      x2: (box_width - width) / 2 + width,
+      y2: (box_height - height) / 2 + height
+    });
+    child.allocate (child_box, flags);
+    child.queue_redraw ();
+  },
+
+  on_pick: function (color) {
+    //print (actor);
+    let child = this.get_child_at_index (0);
+    if (!child) return;
+    child.paint ();
   }
 });
 
