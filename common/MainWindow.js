@@ -58,8 +58,9 @@ var MainWindow = new Lang.Class ({
 
     this.home = new Gtk.Button ({always_show_image: true, tooltip_text:"Home"});
     this.home.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/io.github.konkor.newstream.svg");
-    this.home.get_style_context ().add_class ("hb-button");
-    this.home.margin = 6;
+    //this.home.get_style_context ().add_class ("hb-button");
+    this.home.set_relief (Gtk.ReliefStyle.NONE);
+    //this.home.margin = 4;
     this.hb.add (this.home);
     this.home.connect ('clicked', () => {
      let app = Gio.AppInfo.get_default_for_uri_scheme ("https");
@@ -81,15 +82,16 @@ var MainWindow = new Lang.Class ({
     this.menu_button = new Gtk.MenuButton ({tooltip_text:"Application Menu"});
     this.menu_button.image = Gtk.Image.new_from_icon_name ("open-menu-symbolic",Gtk.IconSize.LARGE_TOOLBAR);
     this.menu_button.get_style_context ().add_class ("hb-button");
+    this.menu_button.set_relief (Gtk.ReliefStyle.NONE);
     //this.menu_button.menu_model = mmenu;
     this.menu_button.set_popup (mmenu);
-    this.menu_button.margin = 6;
+    //this.menu_button.margin = 6;
     this.hb.pack_end (this.menu_button);
 
     this.phones = new Gtk.Button ({always_show_image: true, tooltip_text:"Background Player"});
     this.phones.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/headphones-symbolic.svg");
     this.phones.get_style_context ().add_class ("hb-button");
-    this.phones.margin = 6;
+    //this.phones.margin = 6;
     this.phones.no_show_all = true;
     this.hb.pack_end (this.phones);
     this.phones.connect ('clicked', Lang.bind (this, () => {
@@ -226,10 +228,10 @@ var BackButton = new Lang.Class({
   _init: function () {
     this.parent ({always_show_image: true, tooltip_text:"Back (Escape)"});
     this.get_style_context ().add_class ("hb-button");
-    this.margin = 6;
+    this.set_relief (Gtk.ReliefStyle.NONE);
     this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/back-symbolic.svg");
     this.history = [];
-    this.set_size_request (64,-1);
+    //this.set_size_request (64,-1);
   },
 
   get last () {
