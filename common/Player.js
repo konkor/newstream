@@ -122,15 +122,12 @@ var VideoFrame = new Lang.Class({
 
   toggle_fullscreen: function () {
     this.contents.set_controls_visibility (false, false);
-    if (this.fullscreen) {
-      this.video_window.unfullscreen ();
-      this.video_window.hide ();
-      this.move_internal ();
+    this.get_toplevel ().present ();
 
+    if (this.fullscreen) {
+      this.move_internal ();
     } else {
       this.move_fullscreen ();
-      this.video_window.show ();
-      this.video_window.fullscreen ();
     }
   },
 
@@ -139,11 +136,17 @@ var VideoFrame = new Lang.Class({
       this.contents.reparent (this.video_window);
       this.contents.show_all ();
       this.fullscreen = true;
+      this.get_toplevel ().hide ();
+      this.video_window.show ();
+      this.video_window.fullscreen ();
     }
   },
 
   move_internal: function () {
+    this.video_window.unfullscreen ();
+    this.video_window.hide ();
     if (this.contents.parent != this.frame) {
+      this.get_toplevel ().present ();
       this.contents.reparent (this.frame);
       this.contents.show_all ();
       this.fullscreen = false;
