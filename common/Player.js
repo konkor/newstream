@@ -121,7 +121,7 @@ var VideoFrame = new Lang.Class({
   },
 
   toggle_fullscreen: function () {
-    this.contents.set_controls_visibility (false);
+    this.contents.set_controls_visibility (false, false);
     if (this.fullscreen) {
       this.video_window.unfullscreen ();
       this.video_window.hide ();
@@ -272,16 +272,18 @@ var VideoWidget = new Lang.Class ({
     return false;
   },
 
-  set_controls_visibility: function (visible) {
+  set_controls_visibility: function (visible, animate) {
+    animate = animate || true;
+    let transition = animate ? 250 : 0;
     if (this.player.video && this.player.video.fullscreen || !visible) {
       let [,header_controls_height] = this.header_controls.get_preferred_height (this.header_controls);
       let header_controls_y = visible ? 0 : -header_controls_height;
       //print (header_controls_y);
-      this.header_controls.set_easing_duration (250);
+      this.header_controls.set_easing_duration (transition);
       this.header_controls.set_y (header_controls_y);
     }
     let opacity = visible ? OVERLAY_OPACITY : 0;
-    this.controls.set_easing_duration (250);
+    this.controls.set_easing_duration (transition);
     this.controls.set_opacity (opacity);
 
     this.set_show_cursor (visible);
