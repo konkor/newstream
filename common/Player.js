@@ -162,6 +162,7 @@ var FullscreenWindow = new Lang.Class({
   _init: function (sender) {
     this.parent ({type: Gtk.WindowType.TOPLEVEL});
     this.mainwindow = sender.w;
+    if (this.mainwindow.icon) this.icon = this.mainwindow.icon;
     this.can_focus = true;
     this.decorated = false;
     this.deletable = false;
