@@ -29,6 +29,8 @@ if (!ClutterGst.Content) CG_VERSION = 2;
 GtkClutter.init (null);
 ClutterGst.init(null);
 
+const OVERLAY_OPACITY = 220;
+
 let window_handler = 0;
 
 var Player = new Lang.Class({
@@ -52,6 +54,7 @@ var Player = new Lang.Class({
       } else {
         if (this.item.snippet.title != this.w.section.label)
           this.w.section.label = this.item.snippet.title;
+          this.video.contents.header.label = this.item.snippet.title;
       }
     }));
   },
@@ -187,6 +190,20 @@ var VideoWidget = new Lang.Class ({
     this.control_timeout_id = 0;
     this.parent ();
     this.build ();
+
+    this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
+
+    this.set_controls_visibility (true);
+  },
+
+  build: function () {
+    this.stage = this.get_stage ();
+    this.stage.set_layout_manager (new Clutter.BinLayout ({
+      x_align: Clutter.BinAlignment.FILL,
+      y_align: Clutter.BinAlignment.FILL,
+    }));
+    this.stage.set_background_color (new Clutter.Color ());
+
     if (CG_VERSION < 3) {
       //this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
       this.texture = new Clutter.Texture ({"disable-slicing":true, "reactive":true});
@@ -203,18 +220,23 @@ var VideoWidget = new Lang.Class ({
       this.player.engine.set_videosink (videosink);
     }
     this.stage.add_child (this.frame);
-    this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
 
-    this.set_controls_visibility (true);
-  },
-
-  build: function () {
-    this.stage = this.get_stage ();
-    this.stage.layout_manager = new Clutter.BinLayout ({
-      x_align: Clutter.BinAlignment.FILL,
-      y_align: Clutter.BinAlignment.FILL,
+    /* Fullscreen header controls */
+    this.header_controls = new GtkClutter.Actor ();
+    this.header_controls.set_opacity (OVERLAY_OPACITY);
+    this.header_controls.add_constraint (new Clutter.BindConstraint (this.stage, Clutter.BindCoordinate.WIDTH, 0));
+    let layout = new Clutter.Actor ({
+      "layout-manager": new Clutter.BinLayout ({
+        x_align: Clutter.BinAlignment.CENTER,
+        y_align: Clutter.BinAlignment.START,
+      })
     });
-    this.stage.set_background_color (new Clutter.Color ());
+    layout.add_child (this.header_controls);
+    this.stage.add_child (layout);
+    this.header = new Gtk.Label ({label:"New Stream", wrap: true, lines: 1, ellipsize: 3, xalign:0});
+    this.header_controls.get_widget().add (this.header);
+    this.header.show_all ();
+    this.stage.set_child_above_sibling (layout, this.frame);
   },
 
   on_motion_notify: function (o, event) {
@@ -224,6 +246,14 @@ var VideoWidget = new Lang.Class ({
   },
 
   set_controls_visibility: function (visible) {
+    if (this.player.video && this.player.video.fullscreen || !visible) {
+      let [,header_controls_height] = this.header_controls.get_preferred_height (this.header_controls);
+      let header_controls_y = visible ? 0 : -header_controls_height;
+      //print (header_controls_y);
+      this.header_controls.set_easing_duration (250);
+      this.header_controls.set_y (header_controls_y);
+    }
+
     this.set_show_cursor (visible);
     if (visible) this.schedule_hiding_popup ();
     this.control_visible = visible;
