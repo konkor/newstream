@@ -121,6 +121,7 @@ var VideoFrame = new Lang.Class({
   },
 
   toggle_fullscreen: function () {
+    this.contents.set_controls_visibility (false);
     if (this.fullscreen) {
       this.video_window.unfullscreen ();
       this.video_window.hide ();
