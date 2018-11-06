@@ -237,12 +237,38 @@ var VideoWidget = new Lang.Class ({
     this.header_controls.get_widget().add (this.header);
     this.header.show_all ();
     this.stage.set_child_above_sibling (layout, this.frame);
+
+    /* Video controls */
+    this.controls = new VideoControl (this.player);
+    this.controls.set_opacity (OVERLAY_OPACITY);
+    this.controls.add_constraint (new Clutter.BindConstraint (this.stage, Clutter.BindCoordinate.WIDTH, 0));
+    layout = new Clutter.Actor ({
+      "layout-manager": new Clutter.BinLayout ({
+        x_align: Clutter.BinAlignment.FILL,
+        y_align: Clutter.BinAlignment.END,
+      })
+    });
+    layout.add_child (this.controls);
+    this.stage.add_child (layout);
+    this.stage.set_child_above_sibling (layout, this.frame);
   },
 
   on_motion_notify: function (o, event) {
-    //print (event);
+    //print (o, event);
     if (!this.control_visible)
       this.set_controls_visibility (true);
+    let [,x,y] = event.get_coords ();
+    if (this.ignore_motion (x, y)) {
+      this.unschedule_hiding_popup ();
+    } else {
+      this.schedule_hiding_popup ();
+    }
+  },
+
+  ignore_motion: function (x, y) {
+    let actor = this.stage.get_actor_at_pos (Clutter.PickMode.REACTIVE, x, y);
+    if (actor == this.controls) return true;
+    return false;
   },
 
   set_controls_visibility: function (visible) {
@@ -253,15 +279,18 @@ var VideoWidget = new Lang.Class ({
       this.header_controls.set_easing_duration (250);
       this.header_controls.set_y (header_controls_y);
     }
+    let opacity = visible ? OVERLAY_OPACITY : 0;
+    this.controls.set_easing_duration (250);
+    this.controls.set_opacity (opacity);
 
     this.set_show_cursor (visible);
-    if (visible) this.schedule_hiding_popup ();
+    //if (visible) this.schedule_hiding_popup ();
     this.control_visible = visible;
   },
 
   schedule_hiding_popup: function () {
     this.unschedule_hiding_popup ();
-    this.control_timeout_id = GLib.timeout_add (0, 2000, () => {
+    this.control_timeout_id = GLib.timeout_add (0, 5000, () => {
       this.unschedule_hiding_popup ();
       this.set_controls_visibility (false);
       return false;
@@ -283,6 +312,51 @@ var VideoWidget = new Lang.Class ({
       let cursor = Gdk.Cursor.new (Gdk.CursorType.BLANK_CURSOR);
       window.cursor = cursor;
     }
+  }
+
+});
+
+var VideoControl = new Lang.Class ({
+  Name: "VideoControl",
+  Extends: GtkClutter.Actor,
+
+  _init: function (player) {
+    this.parent ();
+    this.player = player;
+    this.build ();
+    this.show_all ();
+  },
+
+  build: function () {
+    this.box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL, spacing:8});
+    this.box.get_style_context ().add_class ("osd");
+    this.box.get_style_context ().add_class ("bottom");
+    //this.box.override_background_color (0, new Gdk.RGBA ());
+    this.box.hexpand = true;
+    this.get_widget ().add (this.box);
+
+    this.play = new Gtk.ToggleButton ({label:"Play", margin:12});
+    this.box.add (this.play);
+
+    this.time = new Gtk.Label ({label: "0:00"});
+    this.box.add (this.time);
+
+    this.seek_scale = new Gtk.Scale ({
+      orientation:Gtk.Orientation.HORIZONTAL,
+      draw_value:false,
+      restrict_to_fill_level:false
+    });
+    this.seek_scale.adjustment.upper = 10000;
+    this.seek_scale.adjustment.page_increment = 10;
+    this.seek_scale.adjustment.step_increment = 0.1;
+    this.seek_scale.expand = true;
+    this.box.pack_start (this.seek_scale, true, true, 0);
+    //this.box.add (this.seek_scale);
+
+    this.duration = new Gtk.Label ({label: "0:00",margin_right:24});
+    this.box.add (this.duration);
+
+    this.box.show_all ();
   }
 
 });
