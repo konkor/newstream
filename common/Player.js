@@ -199,7 +199,7 @@ var VideoWidget = new Lang.Class ({
 
     this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
 
-    this.set_controls_visibility (true);
+    this.set_controls_visibility (false);
   },
 
   build: function () {
@@ -240,6 +240,7 @@ var VideoWidget = new Lang.Class ({
     layout.add_child (this.header_controls);
     this.stage.add_child (layout);
     this.header = new Gtk.Label ({label:"New Stream", wrap: true, lines: 1, ellipsize: 3, xalign:0});
+    this.header.margin = 8;
     this.header_controls.get_widget().add (this.header);
     this.header.show_all ();
     this.stage.set_child_above_sibling (layout, this.frame);
