@@ -32,7 +32,7 @@ var NewStreamApplication = new Lang.Class ({
 
   vfunc_startup: function() {
     this.parent();
-    this.window = new Window.MainWindow ();
+    this.window = new Window.MainWindow (this);
     this.add_window (this.window);
   },
 

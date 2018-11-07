@@ -142,6 +142,7 @@ var VideoFrame = new Lang.Class({
       this.video_window.show ();
       this.video_window.fullscreen ();
     }
+    this.get_toplevel ().inhibit ();
   },
 
   move_internal: function () {
@@ -154,6 +155,7 @@ var VideoFrame = new Lang.Class({
       this.contents.show_all ();
       this.fullscreen = false;
     }
+    this.get_toplevel ().uninhibit ();
   }
 });
 
