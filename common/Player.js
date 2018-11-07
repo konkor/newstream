@@ -133,6 +133,7 @@ var VideoFrame = new Lang.Class({
   },
 
   move_fullscreen: function () {
+    this.get_toplevel ().save_geometry ();
     if (this.contents.parent != this.video_window) {
       this.contents.reparent (this.video_window);
       this.contents.show_all ();
@@ -144,6 +145,7 @@ var VideoFrame = new Lang.Class({
   },
 
   move_internal: function () {
+    this.get_toplevel ().restore_position ();
     this.video_window.unfullscreen ();
     this.video_window.hide ();
     if (this.contents.parent != this.frame) {

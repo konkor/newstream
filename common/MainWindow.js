@@ -41,7 +41,7 @@ var MainWindow = new Lang.Class ({
     this.settings = new Prefs.Settings ();
     this.provider = new Provider.SearchProvider ();
     this.build ();
-    this.move (this.settings.window_x, this.settings.window_y);
+    this.restore_position ();
     if (this.settings.window_maximized) this.maximize ();
   },
 
@@ -145,9 +145,16 @@ var MainWindow = new Lang.Class ({
       this.phones.visible = true;
      else this.phones.visible = false;
     }));
-    this.connect ('unmap', Lang.bind (this, () => {
-      this.settings.save_geometry (this);
-    }));
+    this.connect ('unmap', Lang.bind (this, this.save_geometry));
+  },
+
+  save_geometry: function () {
+    this.settings.save_geometry (this);
+  },
+
+  restore_position: function () {
+    if (!this.is_maximized)
+      this.move (this.settings.window_x, this.settings.window_y);
   },
 
   on_stack_update: function (o, index) {
