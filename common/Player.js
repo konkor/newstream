@@ -384,7 +384,7 @@ var VideoControl = new Lang.Class ({
     this.box.show_all ();
 
     this.player.engine.connect ('state-changed', Lang.bind (this, (s,o,n,p)=>{
-      //print ("state-changed:", o,n,p);
+      //print ("state-changed:", o,n,p,this.play.state);
       this.play.toggle (n == 4);
     }));
   },
@@ -419,7 +419,7 @@ var PlayButton = new Lang.Class({
   },
 
   toggle: function (state) {
-    state = state || !this.state;
+    state = (typeof state !== 'undefined') ?  state : !this.state;
     if (state == this.state) return;
     this.state = state;
     if (this.state) this.image = this.pause_image;
