@@ -9,17 +9,20 @@
  */
 
 const Lang = imports.lang;
+const Gdk = imports.gi.Gdk;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 let app_data_dir = get_app_data_dir ();
 
-const SAVE_SETTINGS_KEY = 'save-settings';
-const HISTORY_SIZE_KEY = 'history-size';
-
 let save = true;
 let history = [];
 let history_size = 5000;
+let window_height = 480;
+let window_width = 800;
+let window_x = 0;
+let window_y = 0;
+let window_maximized = false;
 
 var Settings = new Lang.Class({
   Name: "Settings",
@@ -49,15 +52,50 @@ var Settings = new Lang.Class({
   },
 
   load: function () {
-    save = this.get_boolean (SAVE_SETTINGS_KEY);
-    history_size = this.get_int (HISTORY_SIZE_KEY);
+    save = this.get_boolean ("save-settings");
+    history_size = this.get_int ("history-size");
     this.load_history ();
+    window_height = this.get_int ("window-height");
+    window_width = this.get_int ("window-width");
+    window_x = this.get_int ("window-x");
+    window_y = this.get_int ("window-y");
+    window_maximized = this.get_boolean ("window-maximized");
   },
 
   get save () { return save; },
   set save (val) {
     save = val;
-    this.set_boolean (SAVE_SETTINGS_KEY, save);
+    this.set_boolean ("save-settings", save);
+  },
+
+  get window_height () { return window_height; },
+  get window_width () { return window_width; },
+  get window_x () { return window_x; },
+  get window_y () { return window_y; },
+  get window_maximized () { return window_maximized; },
+
+  save_geometry: function (o) {
+    let window = o.get_window ();
+    if (!window) return;
+    let ws = window.get_state();
+    let x = 0, y = 0;
+    window_maximized = false;
+
+    if (Gdk.WindowState.MAXIMIZED & ws) {
+      window_maximized = true;
+    } else if ((Gdk.WindowState.TILED & ws) == 0) {
+      [x, y, window_width, window_height] = window.get_geometry ();
+      [, x, y] = window.get_origin ();
+      if (x > 0 && y > 0) {
+        window_x = x; window_y = y;
+      }
+    }
+
+    this.set_int ("window-height", window_height);
+    this.set_int ("window-width", window_width);
+    this.set_int ("window-x", window_x);
+    this.set_int ("window-y", window_y);
+    this.set_boolean ("window-maximized", window_maximized);
   },
 
   get history () { return history; },
@@ -69,7 +107,7 @@ var Settings = new Lang.Class({
   get history_size () { return history_size; },
   set history_size (val) {
     history_size = val;
-    this.set_int (HISTORY_SIZE_KEY, history_size);
+    this.set_int ("history-size", history_size);
   },
 
   history_add: function (text) {

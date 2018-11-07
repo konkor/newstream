@@ -41,10 +41,12 @@ var MainWindow = new Lang.Class ({
     this.settings = new Prefs.Settings ();
     this.provider = new Provider.SearchProvider ();
     this.build ();
+    this.move (this.settings.window_x, this.settings.window_y);
+    if (this.settings.window_maximized) this.maximize ();
   },
 
   build: function() {
-    this.set_default_size (800, 480);
+    this.set_default_size (this.settings.window_width, this.settings.window_height);
     Gtk.Settings.get_default().gtk_application_prefer_dark_theme = true;
     cssp = get_css_provider ();
     if (cssp) {
@@ -142,6 +144,9 @@ var MainWindow = new Lang.Class ({
      if (this.stack.visible_child_name != "item" && this.itemview.playing)
       this.phones.visible = true;
      else this.phones.visible = false;
+    }));
+    this.connect ('unmap', Lang.bind (this, () => {
+      this.settings.save_geometry (this);
     }));
   },
 
