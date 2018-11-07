@@ -16,6 +16,7 @@ const Clutter = imports.gi.Clutter;
 const ClutterGst = imports.gi.ClutterGst;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
 const Lang = imports.lang;
 
 const APPDIR = getCurrentFile ()[1];
@@ -92,6 +93,14 @@ var Player = new Lang.Class({
     } else {
      this.engine.play ();
     }
+  },
+
+  play: function () {
+    if (this.engine) this.engine.play ();
+  },
+
+  pause: function () {
+    if (this.engine) this.engine.pause ();
   }
 });
 
@@ -348,10 +357,12 @@ var VideoControl = new Lang.Class ({
     this.box.hexpand = true;
     this.get_widget ().add (this.box);
 
-    this.play = new Gtk.ToggleButton ({label:"Play", margin:12});
+    this.play = new PlayButton ();
+    this.play.connect ("play", Lang.bind (this, this.on_play));
     this.box.add (this.play);
 
     this.time = new Gtk.Label ({label: "0:00"});
+    this.time.get_style_context ().add_class ("small");
     this.box.add (this.time);
 
     this.seek_scale = new Gtk.Scale ({
@@ -366,12 +377,54 @@ var VideoControl = new Lang.Class ({
     this.box.pack_start (this.seek_scale, true, true, 0);
     //this.box.add (this.seek_scale);
 
-    this.duration = new Gtk.Label ({label: "0:00",margin_right:24});
+    this.duration = new Gtk.Label ({label: "-",margin_right:24});
+    this.duration.get_style_context ().add_class ("small");
     this.box.add (this.duration);
 
     this.box.show_all ();
-  }
 
+    this.player.engine.connect ('state-changed', Lang.bind (this, (s,o,n,p)=>{
+      //print ("state-changed:", o,n,p);
+      this.play.toggle (n == 4);
+    }));
+  },
+
+  on_play: function (o, state) {
+    if (state) this.player.play ();
+    else this.player.pause ();
+  }
+});
+
+var PlayButton = new Lang.Class({
+  Name: "PlayButton",
+  Extends: Gtk.Button,
+  Signals: {
+    'play': {
+    flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
+    param_types: [GObject.TYPE_BOOLEAN]},
+  },
+
+  _init: function () {
+    this.parent ({always_show_image: true, tooltip_text:"Play/Pause (Space)"});
+    this.get_style_context ().add_class ("play-button");
+    this.set_relief (Gtk.ReliefStyle.NONE);
+    this.play_image = Gtk.Image.new_from_icon_name ("media-playback-start-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+    this.pause_image = Gtk.Image.new_from_icon_name ("media-playback-pause-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+    this.image = this.play_image;
+    // States false - paused, true - playing
+    this.state = false;
+    this.connect ("clicked", () => {
+      this.emit ("play", !this.state);
+    });
+  },
+
+  toggle: function (state) {
+    state = state || !this.state;
+    if (state == this.state) return;
+    this.state = state;
+    if (this.state) this.image = this.pause_image;
+    else this.image = this.play_image;
+  }
 });
 
 var AspectFrame = new Lang.Class ({
