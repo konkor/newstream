@@ -35,7 +35,7 @@ var MainWindow = new Lang.Class ({
     this.parent();
     this.set_icon_name ("io.github.konkor.newstream");
     if (!this.icon) try {
-      this.icon = Gtk.Image.new_from_file (APPDIR + "/data/icons/io.github.konkor.newstream.svg").pixbuf;
+      this.icon = Gtk.Image.new_from_file (APPDIR + "/data/icons/hicolor/scalable/apps/io.github.konkor.newstream.svg").pixbuf;
     } catch (e) {
       error (e.message);
     }
