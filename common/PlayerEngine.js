@@ -85,6 +85,20 @@ var PlayerEngine = new Lang.Class({
     this.playbin.set_state (Gst.State.NULL);
   },
 
+  seek: function (pos, accurate) {
+    if (!this.playbin || this.seek_lock) return false;
+    this.seek_lock = true;
+    let flag = Gst.SeekFlags.FLUSH;
+    if (accurate) flag |= Gst.SeekFlags.ACCURATE;
+    let res = this.playbin.seek (1.0,
+      Gst.Format.TIME, flag,
+      Gst.SeekType.SET, pos * Gst.MSECOND,
+      Gst.SeekType.NONE, 0
+    );
+    this.seek_lock = false;
+    return res;
+  },
+
   set_window: function (xid) {
     if (!xid) return;
     this.handler = xid;

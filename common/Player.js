@@ -101,6 +101,10 @@ var Player = new Lang.Class({
 
   pause: function () {
     if (this.engine) this.engine.pause ();
+  },
+
+  seek: function (pos) {
+    if (this.engine) this.engine.seek (pos);
   }
 });
 
@@ -392,6 +396,10 @@ var VideoControl = new Lang.Class ({
       this.play.toggle (n == 4);
     }));
     this.player.engine.connect ('progress', Lang.bind (this, this.on_progress));
+
+    this.seek_scale.connect ('button-press-event', () => {this.seek_lock = true});
+    this.seek_scale.connect ('button-release-event', () => {this.seek_lock = false});
+    this.seek_scale.connect ('value-changed', Lang.bind (this, this.on_seek));
   },
 
   on_play: function (o, state) {
@@ -418,6 +426,13 @@ var VideoControl = new Lang.Class ({
       this.seek_scale.set_value (this.current_position * 65535);
       this.set_time (this.time, pos);
     }
+  },
+
+  on_seek: function (o) {
+    if (!this.seek_lock) return;
+    let pos = o.get_value () / 65535 * this.duration;
+    this.set_time (this.time, pos);
+    this.player.seek (pos);
   },
 
   update_slider_visibility: function (dur) {
