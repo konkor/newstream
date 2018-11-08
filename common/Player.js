@@ -263,7 +263,7 @@ var VideoWidget = new Lang.Class ({
     this.stage.set_child_above_sibling (layout, this.frame);
 
     /* Video controls */
-    this.controls = new VideoControl (this.player);
+    this.controls = new VideoControl (this);
     this.controls.set_opacity (OVERLAY_OPACITY);
     this.controls.add_constraint (new Clutter.BindConstraint (this.stage, Clutter.BindCoordinate.WIDTH, 0));
     layout = new Clutter.Actor ({
@@ -275,6 +275,13 @@ var VideoWidget = new Lang.Class ({
     layout.add_child (this.controls);
     this.stage.add_child (layout);
     this.stage.set_child_above_sibling (layout, this.frame);
+  },
+
+  set_controls_busy: function (val) {
+    if (val) {
+      this.unschedule_hiding_popup ();
+      this.set_controls_visibility (true, false);
+    } else this.schedule_hiding_popup ();
   },
 
   on_motion_notify: function (o, event) {
@@ -346,9 +353,10 @@ var VideoControl = new Lang.Class ({
   Name: "VideoControl",
   Extends: GtkClutter.Actor,
 
-  _init: function (player) {
+  _init: function (sender) {
     this.parent ();
-    this.player = player;
+    this.sender = sender;
+    this.player = sender.player;
     this.seekable = false;
     this.seek_lock = false;
     this.current_position = 0;
@@ -397,8 +405,14 @@ var VideoControl = new Lang.Class ({
     }));
     this.player.engine.connect ('progress', Lang.bind (this, this.on_progress));
 
-    this.seek_scale.connect ('button-press-event', () => {this.seek_lock = true});
-    this.seek_scale.connect ('button-release-event', () => {this.seek_lock = false});
+    this.seek_scale.connect ('button-press-event', () => {
+      this.sender.set_controls_busy (true);
+      this.seek_lock = true;
+    });
+    this.seek_scale.connect ('button-release-event', () => {
+      this.seek_lock = false;
+      this.sender.set_controls_busy (false);
+    });
     this.seek_scale.connect ('value-changed', Lang.bind (this, this.on_seek));
   },
 
