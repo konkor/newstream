@@ -345,6 +345,10 @@ var VideoControl = new Lang.Class ({
   _init: function (player) {
     this.parent ();
     this.player = player;
+    this.seekable = false;
+    this.seek_lock = false;
+    this.current_position = 0;
+    this.duration = 0;
     this.build ();
     this.show_all ();
   },
@@ -370,16 +374,16 @@ var VideoControl = new Lang.Class ({
       draw_value:false,
       restrict_to_fill_level:false
     });
-    this.seek_scale.adjustment.upper = 10000;
+    this.seek_scale.adjustment.upper = 0.0;
     this.seek_scale.adjustment.page_increment = 10;
     this.seek_scale.adjustment.step_increment = 0.1;
     this.seek_scale.expand = true;
     this.box.pack_start (this.seek_scale, true, true, 0);
     //this.box.add (this.seek_scale);
 
-    this.duration = new Gtk.Label ({label: "-",margin_right:24});
-    this.duration.get_style_context ().add_class ("small");
-    this.box.add (this.duration);
+    this.time_duration = new Gtk.Label ({label: "-",margin_right:24});
+    this.time_duration.get_style_context ().add_class ("small");
+    this.box.add (this.time_duration);
 
     this.box.show_all ();
 
@@ -387,11 +391,57 @@ var VideoControl = new Lang.Class ({
       //print ("state-changed:", o,n,p,this.play.state);
       this.play.toggle (n == 4);
     }));
+    this.player.engine.connect ('progress', Lang.bind (this, this.on_progress));
   },
 
   on_play: function (o, state) {
     if (state) this.player.play ();
     else this.player.pause ();
+  },
+
+  on_progress: function (o, pos, dur) {
+    //print ("progress", pos, dur);
+    this.update_slider_visibility (dur);
+
+    if (dur) this.seekable = true;
+    else this.seekable = false;
+
+    if (this.duration != dur) {
+      this.duration = dur;
+      this.set_time (this.time_duration, dur);
+      this.seek_scale.sensitive = this.seekable;
+    }
+    if (dur <= 0) this.current_position = 0;
+    else this.current_position = pos / dur;
+
+    if (!this.seek_lock) {
+      this.seek_scale.set_value (this.current_position * 65535);
+      this.set_time (this.time, pos);
+    }
+  },
+
+  update_slider_visibility: function (dur) {
+    if (this.duration == dur) return;
+    if (this.duration > 0 && dur > 0) return;
+    if (dur > 0) this.seek_scale.set_range (0.0, 65535.0);
+    else this.seek_scale.set_range (0.0, 0.0);
+  },
+
+  set_time: function (label, time) {
+    if (time < 0) {
+      label.set_text ("-");
+      return;
+    }
+    let h = 0, m = 0, s = 0;
+    let t = parseInt (Math.round (time/1000));
+    s = t % 60;
+    t = parseInt (t / 60);
+    m = t % 60;
+    t = parseInt (t / 60);
+    h = t % 60;
+
+    if (h) label.set_text ("%d:%02d:%02d".format (h,m,s));
+    else label.set_text ("%d:%02d".format (m,s));
   }
 });
 

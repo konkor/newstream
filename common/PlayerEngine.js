@@ -9,12 +9,14 @@
  */
 
 const GObject = imports.gi.GObject;
-//const GLib = imports.gi.GLib;
+const GLib = imports.gi.GLib;
 //const Gio = imports.gi.Gio;
 const Gst = imports.gi.Gst;
 const GstVideo = imports.gi.GstVideo;
 const Lang = imports.lang;
 const Signals = imports.signals;
+
+let timer = 0;
 
 var PlayerEngine = new Lang.Class({
   Name: "PlayerEngine",
@@ -22,7 +24,10 @@ var PlayerEngine = new Lang.Class({
   Signals: {
     'state-changed': {
     flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
-    param_types: [GObject.TYPE_INT,GObject.TYPE_INT,GObject.TYPE_INT]},
+    param_types: [GObject.TYPE_INT, GObject.TYPE_INT, GObject.TYPE_INT]},
+    'progress': {
+    flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
+    param_types: [GObject.TYPE_INT, GObject.TYPE_INT]},
   },
 
   _init: function () {
@@ -38,10 +43,28 @@ var PlayerEngine = new Lang.Class({
     this.bus = this.playbin.get_bus();
     this.bus.add_signal_watch();
     this.bus.connect ("message", Lang.bind (this, this.on_bus_message));
+
+    timer = GLib.timeout_add (0, 500, Lang.bind (this, this.on_timer));
   },
 
   get state () {
     return this.current_state;
+  },
+
+  get position () {
+    let pos, res;
+    [res, pos] = this.playbin.query_position (Gst.Format.TIME);
+    if (!res) pos = -1;
+    else pos /= Gst.MSECOND;
+    return pos;
+  },
+
+  get duration () {
+    let dur, res;
+    [res, dur] = this.playbin.query_duration (Gst.Format.TIME);
+    if (!res) dur = -1;
+    else dur /= Gst.MSECOND;
+    return dur;
   },
 
   open: function (uri) {
@@ -100,6 +123,15 @@ var PlayerEngine = new Lang.Class({
       this.emit ('state-changed', oldstate, newstate, pending);
     }
   return true;
+  },
+
+  on_timer: function () {
+    var pos = this.position, dur = this.duration;
+    if (pos >= 0) {
+      this.emit ("progress", pos, dur);
+      //print ("progress", pos, dur);
+    }
+    return true;
   }
 });
 
