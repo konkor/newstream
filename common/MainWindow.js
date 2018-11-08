@@ -22,6 +22,7 @@ const Prefs = imports.common.Settings;
 const Provider = imports.common.SearchProvider;
 const Search = imports.common.Search;
 const Layouts = imports.common.Layouts;
+const Utils = imports.common.Utils;
 
 let theme_gui = APPDIR + "/data/themes/default/gtk.css";
 let cssp = null;
@@ -41,6 +42,9 @@ var MainWindow = new Lang.Class ({
     }
     this.settings = new Prefs.Settings ();
     this.provider = new Provider.SearchProvider ();
+    let ydl_install = Utils.check_install_ydl ();
+    if (!ydl_install) Utils.install_ydl ();
+    else Utils.check_update_ydl ();
     this.build ();
     this.restore_position ();
     if (this.settings.window_maximized) this.maximize ();
