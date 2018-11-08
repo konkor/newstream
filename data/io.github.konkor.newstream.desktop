@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=New Stream
+Comment=Youtube Stream Player
+Exec=new-stream
+Icon=io.github.konkor.newstream
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;AudioVideo;Player;Video;
+Keywords=newstream;Youtube;Stream;Player;Video;Movie;Film;Clip;Series;Internet;
+StartupNotify=true
+Name[en_US]=io.github.konkor.newstream.desktop
