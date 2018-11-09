@@ -8,4 +8,4 @@ Type=Application
 Categories=GTK;GNOME;AudioVideo;Player;Video;
 Keywords=newstream;Youtube;Stream;Player;Video;Movie;Film;Clip;Series;Internet;
 StartupNotify=true
-Name[en_US]=io.github.konkor.newstream.desktop
+Name[en_US]=New Stream
