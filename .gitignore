@@ -1,10 +1,12 @@
 *~
 *.bak
 *.zip
+*.tar.xz
 *.orig
 *.diff
 *.valid
 things
+packaging/debs
 clean.sh
 Makefile
 depcomp

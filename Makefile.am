@@ -10,11 +10,9 @@ jsdir = $(datadir)/$(APP_ID)
 js_DATA = \
     README.md
 
-js_SCRIPTS = new-stream \
-    $(NULL)
+js_SCRIPTS = new-stream
 
-bin_SCRIPTS = new-stream \
-    $(NULL)
+bin_SCRIPTS = new-stream
 
 dist_js_DATA = $(js_SCRIPTS)
 

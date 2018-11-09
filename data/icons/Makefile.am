@@ -1,6 +1,6 @@
 #application data icons
 iconsdir=$(datadir)/newstream/data/icons
-icons_DATA= hicolor/scalable/apps/io.github.konkor.newstream.svg \
+icons_DATA= \
     back-symbolic.svg \
     folder-saved-search-symbolic.svg \
     headphones-symbolic.svg \
