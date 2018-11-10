@@ -289,6 +289,9 @@ var VideoWidget = new Lang.Class ({
     if (!this.control_visible)
       this.set_controls_visibility (true);
     let [,x,y] = event.get_coords ();
+    //let src = event.get_window().get_user_data (); Always NULL
+    //TODO: we could use other methods like handle focus-in event
+    [,x,y] = this.controls.box.translate_coordinates (o, x, y);
     if (this.ignore_motion (x, y)) {
       this.unschedule_hiding_popup ();
     } else {
