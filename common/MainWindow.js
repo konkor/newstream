@@ -267,8 +267,9 @@ var BackButton = new Lang.Class({
   },
 
   set last (value) {
-   if (!this.history.length || this.history[this.history.length-1] != value)
-    this.history.push (value);
+    if (value == "item") return;
+    if (!this.history.length || this.history[this.history.length-1] != value)
+      this.history.push (value);
   }
 });
 
