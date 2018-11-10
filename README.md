@@ -18,7 +18,11 @@
 <a href="https://github.com/konkor/newstream/releases/">other releases</a>
 </p>
 
+## Features
 
+* Searching (video items only)
+* Searching history
+* Basic video player (fullscreen on double-click, play/pause button and a seeking bar)
 
 ## Planned Features
 * Modern styled GTK UI with user-friendly mobile-like behavior
@@ -40,25 +44,29 @@
 
 _Behind the development for the Linux Desktop are ordinary people who spend a lot of time and their own resources to make the Linux Desktop better. Thank you for your contributions!_
 
+## Install
+
+_Debian/Ubuntu flavours_
+Dowload [deb package](https://github.com/konkor/newstream/releases/) and install it.
+
+```sh
+sudo dpkg -i newstream_VERSION.deb
+sudo apt-get -f install
+```
 
 ## Dependencies
 * gjs (core dependency)
 * GTK3 libraries:
- * gir1.2-atk-1.0
- * gir1.2-glib-2.0
  * gir1.2-gtk-3.0
+ * gir1.2-gtkclutter-1.0,
+ * gir1.2-clutter-gst,
+ * gir1.2-gdkpixbuf-2.0,
  * gir1.2-soup-2.4
-* gir1.2-gstreamer-1.0
+ * gir1.2-gstreamer-1.0
  * gir1.2-gstreamer-1.0
  * gstreamer1.0-libav
  * gstreamer1.0-plugins-bad
  * gstreamer1.0-plugins-ugly
-* [youtube-dl](https://github.com/rg3/youtube-dl)
-
-```
-sudo wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin/youtube-dl
-sudo chmod a+rx /usr/local/bin/youtube-dl
-```
 
 ## Testing
 
