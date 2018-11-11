@@ -166,6 +166,15 @@ var SearchProvider = new Lang.Class({
     fetch (url, null, null, callback);
   },
 
+  get_channel_info: function (id, callback) {
+    if (!id) return;
+    let url = '%schannels?part=snippet,statistics&id=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
+      this._base_url,
+      id
+    );
+    fetch (url, null, null, callback);
+  },
+
   get_hot: function (callback) {
     let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
       this._base_url,

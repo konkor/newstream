@@ -174,6 +174,27 @@ var ResultViewItem = new Lang.Class({
     else if (this.details.duration) {
       this.published.set_text (Utils.time_stamp (this.details.duration) + " • " + this.published.get_text());
     }
+    this.get_channel_info ();
+  },
+
+  get_channel_info: function () {
+    let w = this.get_toplevel ();
+    if (!this.details.data.channel.id) return;
+    if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
+      let data = JSON.parse (d);
+      if (data.pageInfo.totalResults > 0) {
+        this.details.parse (data.items[0]);
+        this.get_channel_logo ();
+      }
+    }));
+  },
+
+  get_channel_logo: function () {
+    let url = this.details.get_channel_thumb_url ("default");
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+      if (r != 200) return;
+      this.channel_logo = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 56, 56, true, null);
+    }));
   }
 });
 
@@ -251,11 +272,21 @@ var Details = new Lang.Class({
     return s;
   },
 
+  get_channel_thumb_url: function (preset) {
+    let s = "";
+    if (!this.data.channel.thumbnails) return s;
+    preset = preset || "default";
+    var p = this.data.channel.thumbnails[preset];
+    if (p && p.url) s = p.url;
+    return s;
+  },
+
   parse: function (data) {
     if (!data) return;
     //print (JSON.stringify (search_result));
     if (data.kind == "youtube#searchResult") this.parse_search (data);
     else if (data.kind == "youtube#video") this.parse_search (data);
+    else if (data.kind == "youtube#channel") this.parse_channel (data);
   },
 
   parse_search: function (data) {
@@ -278,6 +309,17 @@ var Details = new Lang.Class({
     if (snippet.thumbnails) this.data.thumbnails = snippet.thumbnails;
     if (snippet.tags) this.data.tags = snippet.tags;
     if (snippet.categoryId) this.data.category_id = snippet.categoryId;
+  },
+
+  parse_channel: function (item) {
+    if (item.snippet.title) this.data.channel.title = item.snippet.title;
+    if (item.snippet.publishedAt) this.data.channel.published = item.snippet.publishedAt;
+    if (item.snippet.description) this.data.channel.description = item.snippet.description;
+    if (item.snippet.thumbnails) this.data.channel.thumbnails = item.snippet.thumbnails;
+    if (!item.statistics) return;
+    if (item.statistics.viewCount) this.data.channel.views = item.statistics.viewCount;
+    if (item.statistics.subscriberCount) this.data.channel.subscribers = item.statistics.subscriberCount;
+    if (item.statistics.videoCount) this.data.channel.videos = item.statistics.videoCount;
   },
 
   parse_content: function (data) {

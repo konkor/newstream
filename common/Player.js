@@ -133,7 +133,7 @@ var VideoDetails = new Lang.Class({
   load: function (item) {
     //this.get_toplevel ().restore_position ();
     if (!item || !item.details) return;
-    this.channel.load (item.details);
+    this.channel.load (item);
     this.statistics.load (item.details);
     this.description.load (item.details);
   }
@@ -167,11 +167,12 @@ var Channel = new Lang.Class({
     //this.sensitive = false;
   },
 
-  load: function (details) {
-    if (!details.data) return;
-    if (details.data.channel.title) this.author.set_text (details.data.channel.title);
-    if (details.data.channel.id) this.id = details.data.channel.id;
-    this.published.set_text (details.date);
+  load: function (item) {
+    if (!item.details.data) return;
+    if (item.details.data.channel.title) this.author.set_text (item.details.data.channel.title);
+    if (item.details.data.channel.id) this.id = item.details.data.channel.id;
+    this.published.set_text (item.details.date);
+    if (item.channel_logo) this.logo.pixbuf = item.channel_logo;
   }
 });
 
