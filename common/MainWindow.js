@@ -87,7 +87,7 @@ var MainWindow = new Lang.Class ({
     mmenu.show_all ();
 
     this.menu_button = new Gtk.MenuButton ({tooltip_text:"Application Menu"});
-    this.menu_button.image = Gtk.Image.new_from_icon_name ("open-menu-symbolic",Gtk.IconSize.LARGE_TOOLBAR);
+    this.menu_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/open-menu-symbolic.svg");
     this.menu_button.get_style_context ().add_class ("hb-button");
     this.menu_button.set_relief (Gtk.ReliefStyle.NONE);
     //this.menu_button.menu_model = mmenu;
