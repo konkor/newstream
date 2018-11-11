@@ -65,7 +65,7 @@ var ResultView = new Lang.Class({
     box.pack_start (space, true, false, 0);
 
     this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
-      var details = a.get_children()[0].details;
+      var details = a.get_children()[0];
       if (details) {
         this.owner.itemview.load (details);
         this.owner.back.last = this.owner.stack.visible_child_name;
@@ -101,10 +101,10 @@ var ResultView = new Lang.Class({
     respond.items.forEach (p => {
       let item = new ResultViewItem (p);
       this.results.add (item);
-      if (item.id) this.provider.get_info (item.id.videoId, Lang.bind (this, (d)=>{
+      if (item.details.id) this.provider.get_info (item.details.id, Lang.bind (this, (d)=>{
         let data = JSON.parse (d);
-        if (data.pageInfo.totalResults == 1) {
-          item.details = data.items[0];
+        if (data.pageInfo.totalResults > 0) {
+          item.details.parse (data.items[0]);
           item.show_details ();
         }
       }));
@@ -126,8 +126,9 @@ var ResultViewItem = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.HORIZONTAL, margin:8, spacing:8});
     //this.get_style_context ().add_class ("sb");
     this.hexpand = false;
-    this.id = item.id;
-    //if (item.snippet.thumbnails) this.thumbnails = item.snippet.thumbnails;
+
+    this.details = new Details (item);
+    this.tooltip_text = this.details.title;
 
     this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/newstream.item.svg");
     this.add (this.image);
@@ -135,87 +136,184 @@ var ResultViewItem = new Lang.Class({
     //box.get_style_context ().add_class ("sb");
     this.pack_start (box, true, true, 8);
 
-    this.title = new Gtk.Label ({xalign:0, wrap: true, lines: 2, ellipsize: 3});
+    this.title = new Gtk.Label ({
+      label:this.details.title, xalign:0, wrap: true, lines: 2, ellipsize: 3
+    });
     this.title.max_width_chars = 24;
-    if (item.snippet.title) {
-      this.tooltip_text = item.snippet.title;
-      this.title.set_text (item.snippet.title);
-    }
     box.pack_start (this.title, false, false, 0);
 
-    this.channel = new Gtk.Label ({xalign:0, opacity: 0.7});
-    //this.channel.opacity = 0.7;
+    this.channel = new Gtk.Label ({label:this.details.channel_title, xalign:0, opacity: 0.7});
     this.channel.get_style_context ().add_class ("small");
-    if (item.snippet.channelTitle) this.channel.set_text (item.snippet.channelTitle);
     box.pack_start (this.channel, true, true, 0);
 
     let dbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
     box.pack_start (dbox, true, true, 0);
 
-    this.published = new Gtk.Label ({xalign:0, opacity: 0.7});
+    this.published = new Gtk.Label ({label:this.details.age, xalign:0, opacity: 0.7});
     this.published.get_style_context ().add_class ("small");
-    if (item.snippet.publishedAt) this.published.set_text (Utils.age (new Date (item.snippet.publishedAt)));
     dbox.pack_start (this.published, true, true, 0);
 
     this.views = new Gtk.Label ({xalign:1, opacity: 0.7});
     this.views.get_style_context ().add_class ("small");
     dbox.pack_end (this.views, false, false, 0);
 
-    if (item.snippet.thumbnails.default.url) Utils.fetch (item.snippet.thumbnails.default.url,null,null, Lang.bind (this, (d,r)=>{
+    let url = this.details.get_thumbnail_url ("default");
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
       //print (d.get_size(),d.get_data().length);
       this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
     }));
-    //print (item.videoId);
-    /*if (item.id.videoId) Utils.fetch_formats (item.id.videoId, Lang.bind (this, (d)=>{
-      this.item.data = d;
-      //print (d.format_id, d.id, d.ext);
-      //if (d.formats) d.formats.forEach ( p => {
-        //print (p.format);
-        //print (p.url);
-      });
-    }));*/
-
-    //this.connect ("notify", (o,a,b,c) => {print (o,a);});
 
     this.show_all ();
   },
 
   show_details: function () {
-    if (this.details.statistics.viewCount)
-      this.views.set_text (Utils.format_size (this.details.statistics.viewCount) + " views");
-    if (this.details.snippet.liveBroadcastContent != "none")
+    if (this.details.views) this.views.set_text (this.details.views + " views");
+    if (this.details.live)
       this.published.set_text ("LIVE • " + this.published.get_text());
-    else if (this.details.contentDetails.duration && this.details.contentDetails.duration.length > 2) {
-      let s = this.details.contentDetails.duration.substring (2);
-      let h = 0, m = 0, sec = 0, i;
-      i = s.indexOf ("H");
-      if (i > -1) {
-        h = parseInt(s.substring (0,i));
-        if (!Number.isInteger (h)) h = 0;
-        s = s.substring (i + 1);
-      }
-      i = s.indexOf ("M");
-      if (i > -1) {
-        m = parseInt(s.substring (0,i));
-        if (!Number.isInteger (m)) m = 0;
-        s = s.substring (i + 1);
-      }
-      i = s.indexOf ("S");
-      if (i > -1) {
-        sec = parseInt(s.substring (0,i));
-        if (!Number.isInteger (sec)) sec = 0;
-      }
-      if (h) s = "%d:%02d:%02d".format (h, m, sec);
-      else if (m) s = "%d:%02d".format (m, sec);
-      else s = "%ds".format (sec);
-      //s = s.replace (/([A-Z])/g, ":");
-      //if (s.length < 3) s += "s";
-      //print (this.details.contentDetails.duration, s);
-      this.published.set_text (s + " • " + this.published.get_text());
-
+    else if (this.details.duration) {
+      this.published.set_text (Utils.time_stamp (this.details.duration) + " • " + this.published.get_text());
     }
+  }
+});
 
+var Details = new Lang.Class({
+  Name: "Details",
+
+  _init: function (search_result) {
+    this.data = {kind:"", id:"", channel:{}, live:false, duration:0};
+    this.parse (search_result);
+  },
+
+  get id () {
+    return this.data.id;
+  },
+
+  get title () {
+    if (this.data.title) return this.data.title;
+    else return "";
+  },
+
+  get age () {
+    if (!this.data.published) return "";
+    return Utils.age (new Date (this.data.published));
+  },
+
+  get date () {
+    if (!this.data.published) return "";
+    var d = new Date (this.data.published);
+    return "Published: " + d.toLocaleDateString();
+  },
+
+  get channel_title () {
+    var channel = this.data.channel;
+    let s = "";
+    if (channel && channel.title) s = channel.title;
+    return s;
+  },
+
+  get channel_id () {
+    var channel = this.data.channel;
+    let s = "";
+    if (channel && channel.id) s = channel.id;
+    return s;
+  },
+
+  get live () {
+    return this.data.live || false;
+  },
+
+  get views () {
+    if (this.data.views) return Utils.format_size (this.data.views);
+    else return "";
+  },
+
+  get likes () {
+    if (this.data.likes) return Utils.format_size (this.data.likes);
+    else return "";
+  },
+
+  get dislikes () {
+    if (this.data.dislikes) return Utils.format_size (this.data.dislikes);
+    else return "";
+  },
+
+  get duration () {
+    return this.data.duration;
+  },
+
+  get_thumbnail_url: function (preset) {
+    let s = "";
+    if (!this.data.thumbnails) return s;
+    preset = preset || "default";
+    var p = this.data.thumbnails[preset];
+    if (p && p.url) s = p.url;
+    return s;
+  },
+
+  parse: function (data) {
+    if (!data) return;
+    //print (JSON.stringify (search_result));
+    if (data.kind == "youtube#searchResult") this.parse_search (data);
+    else if (data.kind == "youtube#video") this.parse_search (data);
+  },
+
+  parse_search: function (data) {
+    if (!data.id) return;
+    if (data.id.kind) this.data.kind = data.id.kind;
+    if (data.id.videoId) this.data.id = data.id.videoId;
+    if (data.snippet) this.parse_snippet (data.snippet);
+    if (data.contentDetails) this.parse_content (data.contentDetails);
+    if (data.statistics) this.parse_statistics (data.statistics);
+  },
+
+  parse_snippet: function (snippet) {
+    if (snippet.liveBroadcastContent && snippet.liveBroadcastContent != "none") this.data.live = true;
+    if (snippet.title) this.data.title = snippet.title;
+    if (snippet.publishedAt) this.data.published = snippet.publishedAt;
+    if (snippet.description) this.data.description = snippet.description;
+    if (snippet.channelId) this.data.channel.id = snippet.channelId;
+    if (snippet.channelTitle) this.data.channel.title = snippet.channelTitle;
+    // "name":{url:"",width:n,height:n}
+    if (snippet.thumbnails) this.data.thumbnails = snippet.thumbnails;
+    if (snippet.tags) this.data.tags = snippet.tags;
+    if (snippet.categoryId) this.data.category_id = snippet.categoryId;
+  },
+
+  parse_content: function (data) {
+    if (data.duration) this.data.duration = this.parse_duration (data.duration);
+    // dimension, definition, caption, licensedContent, projection
+  },
+
+  parse_duration: function (data) {
+    let s = data.substring (2);
+    let h = 0, m = 0, sec = 0, i;
+    if (s.length < 3) return 0;
+    i = s.indexOf ("H");
+    if (i > -1) {
+      h = parseInt(s.substring (0,i));
+      if (!Number.isInteger (h)) h = 0;
+      s = s.substring (i + 1);
+    }
+    i = s.indexOf ("M");
+    if (i > -1) {
+      m = parseInt(s.substring (0,i));
+      if (!Number.isInteger (m)) m = 0;
+      s = s.substring (i + 1);
+    }
+    i = s.indexOf ("S");
+    if (i > -1) {
+      sec = parseInt(s.substring (0,i));
+      if (!Number.isInteger (sec)) sec = 0;
+    }
+    return h*3600 + m*60 + sec;
+  },
+
+  parse_statistics: function (data) {
+    if (data.viewCount) this.data.views = data.viewCount;
+    if (data.likeCount) this.data.likes = data.likeCount;
+    if (data.dislikeCount) this.data.dislikes = data.dislikeCount;
+    // favoriteCount, commentCount
   }
 });
 

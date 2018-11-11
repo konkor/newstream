@@ -60,7 +60,7 @@ function fetch_formats (id, callback) {
   let pipe = new SpawnPipe ([ydl, "--all-formats", "--dump-single-json", "https://www.youtube.com/watch?v=" + id], "/",
     (info, error) => {
     if (!error) data = JSON.parse (info);
-    else print (error);
+    else print ("FORMATS ERROR:", error);
     callback (data);
   });
 }
@@ -159,6 +159,21 @@ function get_round (number, base) {
   if (s.length > 3)
     s = Math.round (number/base, 0).toString();
   return s;
+}
+
+function time_stamp (time) {
+  time = time || 0;
+  let h = 0, m = 0, s = 0;
+  let t = parseInt (Math.round (time));
+  if (!Number.isInteger (t)) t = 0;
+  s = t % 60;
+  t = parseInt (t / 60);
+  m = t % 60;
+  t = parseInt (t / 60);
+  h = t % 60;
+
+  if (h) return "%d:%02d:%02d".format (h,m,s);
+  else return "%d:%02d".format (m,s);
 }
 
 let current_version = "";

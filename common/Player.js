@@ -46,6 +46,9 @@ var Player = new Lang.Class({
     this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
 
+    this.details = new VideoDetails ();
+    this.pack_start (this.details, true, true, 0);
+
     this.connect ('unrealize', Lang.bind (this, (o)=>{
       this.engine.stop ();
     }));
@@ -54,21 +57,19 @@ var Player = new Lang.Class({
       if (this.w.stack.visible_child_name != "item") {
         this.w.phones.visible = n == 4;
       } else {
-        if (this.item.snippet.title != this.w.section.label)
-          this.w.section.label = this.item.snippet.title;
-          this.video.contents.header.label = this.item.snippet.title;
+        if (this.item.details.title != this.w.section.label)
+          this.w.section.label = this.item.details.title;
+          this.video.contents.header.label = this.item.details.title;
       }
     }));
   },
 
   load: function (item) {
-    //print (item, "\n\n\n");
-    let data = item;
-    if (!data || !data.id) return;
-    if (!this.item || (this.item.id != data.id)) {
-      this.item = data;
-      //return;
-      if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
+    if (!item || !item.details.id) return;
+    if (!this.item || (this.item.details.id != item.details.id)) {
+      this.item = item;
+      this.details.load (this.item);
+      if (this.item.details.id) Utils.fetch_formats (this.item.details.id, Lang.bind (this, (d)=>{
         this.formats = d;
         print (d);
         var url = "";
@@ -105,6 +106,126 @@ var Player = new Lang.Class({
 
   seek: function (pos) {
     if (this.engine) this.engine.seek (pos);
+  }
+});
+
+var VideoDetails = new Lang.Class({
+  Name: "VideoDetails",
+  Extends: Gtk.Box,
+
+  _init: function () {
+    this.parent ({orientation:Gtk.Orientation.VERTICAL});
+    this.get_style_context ().add_class ("search-bar");
+
+    let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    this.pack_start (box, true, true, 0);
+
+    this.channel = new Channel ();
+    box.pack_start (this.channel, true, true, 0);
+
+    this.statistics = new Statistics ();
+    box.pack_end (this.statistics, false, false, 0);
+
+    this.description = new Description ();
+    this.add (this.description);
+  },
+
+  load: function (item) {
+    //this.get_toplevel ().restore_position ();
+    if (!item || !item.details) return;
+    this.channel.load (item.details);
+    this.statistics.load (item.details);
+    this.description.load (item.details);
+  }
+});
+
+var Channel = new Lang.Class({
+  Name: "Channel",
+  Extends: Gtk.Button,
+
+  _init: function () {
+    this.parent ();
+    this.id = "";
+    this.set_relief (Gtk.ReliefStyle.NONE);
+    this.contents = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL, margin: 8});
+    this.add (this.contents);
+
+    this.logo = Gtk.Image.new_from_file (APPDIR + "/data/icons/author.svg");
+    //this.image.get_style_context ().add_class ("author-image");
+    this.contents.pack_start (this.logo, false, false, 8);
+
+    let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
+    this.contents.add (box, false, false, 0);
+
+    this.author = new Gtk.Label ({xalign:0.0});
+    box.pack_start (this.author, true, true, 0);
+    this.published = new Gtk.Label ({xalign:0.0, yalign:0.0, opacity:0.7});
+    this.published.get_style_context ().add_class ("small");
+    box.pack_start (this.published, true, true, 0);
+
+    this.show_all ();
+    //this.sensitive = false;
+  },
+
+  load: function (details) {
+    if (!details.data) return;
+    if (details.data.channel.title) this.author.set_text (details.data.channel.title);
+    if (details.data.channel.id) this.id = details.data.channel.id;
+    this.published.set_text (details.date);
+  }
+});
+
+var Statistics = new Lang.Class({
+  Name: "Statistics",
+  Extends: Gtk.Box,
+
+  _init: function () {
+    this.parent ({orientation:Gtk.Orientation.VERTICAL, margin: 8});
+
+    this.views = new Gtk.Label ({xalign:0.5, yalign:1.0, opacity:0.8});
+    this.pack_start (this.views, true, true, 0);
+
+    let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    this.pack_start (box, true, true, 0);
+
+    this.likes = new Gtk.Label ({xalign:0.5, yalign:0.0, opacity:0.8});
+    this.likes.get_style_context ().add_class ("small");
+    box.pack_start (this.likes, true, true, 0);
+
+    this.show_all ();
+    this.sensitive = false;
+  },
+
+  load: function (details) {
+    if (!details.data) return;
+    this.views.set_text (details.views + " views");
+    this.likes.set_text (details.likes + " / " + details.dislikes);
+  }
+});
+
+var Description = new Lang.Class({
+  Name: "Description",
+  Extends: Gtk.Expander,
+
+  _init: function () {
+    this.parent ({
+      label:"Description", label_fill:false, expanded:false,
+      resize_toplevel:false, opacity:0.8, margin: 8
+    });
+
+    this.info = new Gtk.Label ({
+      xalign:0.0, yalign:1.0, wrap: true, margin:8
+    });
+    this.info.margin_left = 18;
+    this.info.get_style_context ().add_class ("small");
+    this.add (this.info);
+
+    this.show_all ();
+  },
+
+  load: function (details) {
+    if (!details.data) return;
+    this.info.set_text (details.data.description);
   }
 });
 
@@ -464,16 +585,7 @@ var VideoControl = new Lang.Class ({
       label.set_text ("-");
       return;
     }
-    let h = 0, m = 0, s = 0;
-    let t = parseInt (Math.round (time/1000));
-    s = t % 60;
-    t = parseInt (t / 60);
-    m = t % 60;
-    t = parseInt (t / 60);
-    h = t % 60;
-
-    if (h) label.set_text ("%d:%02d:%02d".format (h,m,s));
-    else label.set_text ("%d:%02d".format (m,s));
+    label.set_text (Utils.time_stamp (time/1000));
   }
 });
 

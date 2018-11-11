@@ -7,10 +7,10 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="22"
+   height="18"
    width="24"
    version="1.1"
-   viewBox="0 0 6.3499997 5.8208335"
+   viewBox="0 0 6.3499997 4.7625003"
    id="svg8"
    sodipodi:docname="io.github.konkor.newstream.svg"
    inkscape:version="0.92.1 r15371">
@@ -22,6 +22,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -40,28 +41,24 @@
      inkscape:window-height="849"
      id="namedview10"
      showgrid="false"
-     inkscape:zoom="10.727273"
-     inkscape:cx="-1.6101695"
-     inkscape:cy="10.813559"
+     inkscape:zoom="21.454545"
+     inkscape:cx="6.8251244"
+     inkscape:cy="10.817635"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg8" />
   <path
-     d="m1.12 0.526c-0.57 0-1.03 0.459-1.03 1.03v2.4c0 0.57 0.459 1.03 1.03 1.03h4.12c0.57 0 1.03-0.459 1.03-1.03v-2.41c0-0.574-0.46-1.03-1.03-1.03zm1.39 1.02 2.07 1.18-2.07 1.26z"
-     stroke-opacity=".484"
-     fill-opacity=".659"
-     stroke="#1f1f1f"
-     stroke-width=".185"
-     fill="#d4d4d4"
+     d="m 1.1093749,0.17020817 c -0.5699999,0 -1.0299999,0.459 -1.0299999,1.03000023 v 2.4000001 c 0,0.57 0.459,1.03 1.0299999,1.03 h 4.12 c 0.57,0 1.03,-0.459 1.03,-1.03 V 1.1902084 c 0,-0.57400023 -0.46,-1.03000023 -1.03,-1.03000023 z m 1.39,1.02000023 2.07,1.1800001 -2.07,1.26 z"
      id="path2"
-     style="fill:#bebebe;fill-opacity:1;stroke:none" />
+     style="fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:0.185;stroke-opacity:0.48399999"
+     inkscape:connector-curvature="0" />
   <rect
-     rx=".132"
-     height=".478"
-     width="1.32"
-     y="6.61"
-     x=".0741"
-     fill="#fff"
-     id="rect6" />
+     rx="0.132"
+     height="0.47799999"
+     width="1.3200001"
+     y="5.5516677"
+     x="0.074100003"
+     id="rect6"
+     style="fill:#ffffff" />
 </svg>

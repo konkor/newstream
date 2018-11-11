@@ -33,7 +33,7 @@ var ItemLayout = new Lang.Class({
   },
 
   setup: function (o, e) {
-    if (this.player.item) this.w.section.label = this.player.item.snippet.title;
+    if (this.player.item) this.w.section.label = this.player.item.details.title;
     this.w.home.visible = false;
     this.w.back.visible = true;
     this.w.searchbar.visible = false;

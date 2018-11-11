@@ -51,7 +51,7 @@ var ItemView = new Lang.Class({
 
   load: function (item) {
     this.player.load (item);
-    this.results.url = this.w.provider.get_relaited (this.player.item.id,Lang.bind (this.results, this.results.on_results));
+    this.results.url = this.w.provider.get_relaited (this.player.item.details.id,Lang.bind (this.results, this.results.on_results));
   },
 
   get playing () {
