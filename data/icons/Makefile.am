@@ -7,7 +7,9 @@ icons_DATA= \
     history-symbolic.svg \
     io.github.konkor.newstream.svg \
     newstream.item.svg \
-    window-close-symbolic.svg
+    window-close-symbolic.svg\
+    open-menu-symbolic.svg\
+    author.svg
 
 #system application icons
 icondir=$(datadir)/icons
