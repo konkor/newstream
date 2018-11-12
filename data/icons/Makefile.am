@@ -15,7 +15,8 @@ icons_DATA= \
     share.svg\
     social/gplus.svg\
     social/fb.svg\
-    social/mail.svg
+    social/mail.svg\
+    social/link.svg
 
 #system application icons
 icondir=$(datadir)/icons

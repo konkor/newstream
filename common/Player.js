@@ -135,12 +135,11 @@ var Itembar = new Lang.Class({
   build_menu: function () {
     let menu = new Gtk.Menu ();
 
-    this.link = new Gtk.MenuItem ({label:"https://youtu.be/", sensitive: false});
+    this.link = new Gtk.ImageMenuItem ({label:"https://youtu.be/", always_show_image: true, sensitive: false});
+    this.link.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/social/link.svg");
     menu.add (this.link);
 
-    let btn = new Gtk.ImageMenuItem ({label:"Copy to clipboard", always_show_image: true});
-    btn.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/edit-copy-symbolic.svg");
-    //menu.add (btn);
+    if (Gtk.Clipboard.get_default) menu.add (this.add_clipboard ());
 
     this.app = Gio.AppInfo.get_default_for_uri_scheme ("https");
     if (!this.app) return menu;
@@ -154,11 +153,18 @@ var Itembar = new Lang.Class({
 
     menu.show_all ();
 
-    this.browser.connect ('activate', Lang.bind (this, (o) => {
-      if (this.app) this.app.launch_uris ([this.link.label], null);
-    }));
-
     return menu;
+  },
+
+  add_clipboard: function () {
+    let btn = new Gtk.ImageMenuItem ({label:"Copy to clipboard", always_show_image: true});
+    btn.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/edit-copy-symbolic.svg");
+    btn.connect ('activate', Lang.bind (this, (o) => {
+      let clipboard = Gtk.Clipboard.get_default (Gdk.Display.get_default ());
+      if (!clipboard) return;
+      clipboard.set_text (this.link.label);
+    }));
+    return btn;
   },
 
   add_button: function (name, label, icon) {
