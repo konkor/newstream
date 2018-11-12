@@ -56,7 +56,6 @@ function fetch_formats (id, callback) {
 
   if (!ydl) ydl = GLib.find_program_in_path ("youtube-dl");
   if (!ydl) return;
-  print (ydl);
   let pipe = new SpawnPipe ([ydl, "--all-formats", "--dump-single-json", "https://www.youtube.com/watch?v=" + id], "/",
     (info, error) => {
     if (!error) data = JSON.parse (info);

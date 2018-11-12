@@ -71,14 +71,13 @@ var Player = new Lang.Class({
       this.details.load (this.item);
       if (this.item.details.id) Utils.fetch_formats (this.item.details.id, Lang.bind (this, (d)=>{
         this.formats = d;
-        print (d);
         var url = "";
         //print (o,item);
         if (d && d.formats) d.formats.forEach (p => {
           if (d.format_id == p.format_id) url = p.url;
         });
         if (url) {
-          print (url);
+          //print (url);
           //url = Gio.File.new_for_path ("/home/kapa/projects/gjs-templates/video-player/test.webm").get_uri();
           //url = "https://download.blender.org/durian/trailer/sintel_trailer-480p.ogv";
           //if (window_handler) this.engine.set_window (window_handler);
