@@ -9,7 +9,13 @@ icons_DATA= \
     newstream.item.svg \
     window-close-symbolic.svg\
     open-menu-symbolic.svg\
-    author.svg
+    edit-copy-symbolic.svg\
+    author.svg\
+    bookmark.svg\
+    share.svg\
+    social/gplus.svg\
+    social/fb.svg\
+    social/mail.svg
 
 #system application icons
 icondir=$(datadir)/icons

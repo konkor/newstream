@@ -108,6 +108,98 @@ var Player = new Lang.Class({
   }
 });
 
+var Itembar = new Lang.Class({
+  Name: "Itembar",
+  Extends: Gtk.Box,
+
+  _init: function () {
+    this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
+    //this.get_style_context ().add_class ("sb");
+
+    this.bookmark = new Gtk.Button ({always_show_image: true, tooltip_text:"Bookmark"});
+    this.bookmark.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/bookmark.svg");
+    this.bookmark.set_relief (Gtk.ReliefStyle.NONE);
+    this.pack_start (this.bookmark, true, true, 0);
+
+    this.share = new Gtk.MenuButton ({tooltip_text:"Share"});
+    this.share.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/share.svg");
+    this.share.set_relief (Gtk.ReliefStyle.NONE);
+    this.share.set_popup (this.build_menu ());
+    this.pack_start (this.share, true, true, 0);
+
+    this.bookmark.connect ('clicked', Lang.bind (this, () => {
+     //TODO: bookmark video
+    }));
+  },
+
+  build_menu: function () {
+    let menu = new Gtk.Menu ();
+
+    this.link = new Gtk.MenuItem ({label:"https://youtu.be/", sensitive: false});
+    menu.add (this.link);
+
+    let btn = new Gtk.ImageMenuItem ({label:"Copy to clipboard", always_show_image: true});
+    btn.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/edit-copy-symbolic.svg");
+    //menu.add (btn);
+
+    this.app = Gio.AppInfo.get_default_for_uri_scheme ("https");
+    if (!this.app) return menu;
+
+    this.browser = this.add_button ("browser", "");
+    menu.add (this.browser);
+
+    menu.add (this.add_button ("plus", "Google+", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/gplus.svg")));
+    menu.add (this.add_button ("fb", "Facebook", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/fb.svg")));
+    menu.add (this.add_button ("email", "E-mail", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/mail.svg")));
+
+    menu.show_all ();
+
+    this.browser.connect ('activate', Lang.bind (this, (o) => {
+      if (this.app) this.app.launch_uris ([this.link.label], null);
+    }));
+
+    return menu;
+  },
+
+  add_button: function (name, label, icon) {
+    if (!this.app) return null;
+    icon = icon || Gtk.Image.new_from_gicon (this.app.get_icon (), Gtk.IconSize.MENU);
+    label = label || "Open with " + this.app.get_name ();
+
+    let btn = new Gtk.ImageMenuItem ({label:label, always_show_image: true});
+    btn.image = icon;
+    btn.name = name;
+    btn.connect ("activate", Lang.bind (this, this.on_activate));
+
+    return btn;
+  },
+
+  on_activate: function (o) {
+    if (!this.app) return;
+    let uri = this.link.label;
+    let title = this.link.title || uri;
+    if (o.name == "plus") uri = "https://plus.google.com/share?url=" + uri;
+    else if (o.name == "fb") uri = "https://www.facebook.com/sharer/sharer.php?u=" + uri;
+    else if (o.name == "tweat") uri = "https://twitter.com/intent/tweet?text=" + title + "&url=https://obmin.github.io/obmin/news/2018/07/03/docker.html" + uri;
+    else if (o.name == "red") uri = "http://www.reddit.com/submit?url=" + uri;
+    else if (o.name == "linkedin") uri = "https://www.linkedin.com/shareArticle?mini=true&url=" + uri + "&title=" + title + "&summary=&source=webjeda";
+    else if (o.name == "email") uri = "mailto:?subject=" + title + "&body=Check out this video " + uri;
+
+    try {
+      if (this.app) this.app.launch_uris ([uri], null);
+    } catch (e) {
+      print (e);
+    }
+  },
+
+  set_link: function (id, title) {
+    if (!id) return;
+    this.link.label = "https://youtu.be/" + id;
+    title = title || this.link.label;
+    this.link.title = title;
+  }
+});
+
 var VideoDetails = new Lang.Class({
   Name: "VideoDetails",
   Extends: Gtk.Box,
@@ -115,6 +207,9 @@ var VideoDetails = new Lang.Class({
   _init: function () {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.get_style_context ().add_class ("search-bar");
+
+    this.itembar = new Itembar ();
+    this.pack_start (this.itembar, true, true, 0);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
     this.pack_start (box, true, true, 0);
@@ -135,6 +230,7 @@ var VideoDetails = new Lang.Class({
     this.channel.load (item);
     this.statistics.load (item.details);
     this.description.load (item.details);
+    this.itembar.set_link (item.details.id, item.details.title);
   }
 });
 
