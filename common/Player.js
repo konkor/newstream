@@ -145,6 +145,7 @@ var Channel = new Lang.Class({
 
   _init: function () {
     this.parent ();
+    this.get_style_context ().add_class ("channel-button");
     this.id = "";
     this.set_relief (Gtk.ReliefStyle.NONE);
     this.contents = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL, margin: 8});

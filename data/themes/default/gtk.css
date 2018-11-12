@@ -9,3 +9,15 @@
 .small {
   font-size: 85%;
 }
+
+.channel-button {
+  border-radius: 0;
+  border-style:none;
+  box-shadow:none;
+  outline-width:0;
+  border-image:none;
+  background-image: none;
+}
+.channel-button:active {
+  background-color: @newstream_bg_color;
+}
