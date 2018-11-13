@@ -130,6 +130,7 @@ var PlayerEngine = new Lang.Class({
       overlay.set_window_handle (this.handler);
     } else if (msg.type == Gst.MessageType.EOS) {
       this.playbin.set_state(Gst.State.READY);
+      this.emit ('state-changed', this.current_state, Gst.State.READY, 0);
     } else if (msg.type == Gst.MessageType.STATE_CHANGED) {
       let [oldstate, newstate, pending] = msg.parse_state_changed ();
       if (this.current_state == newstate) return true;

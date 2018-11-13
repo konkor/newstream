@@ -20,6 +20,7 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const Lang = imports.lang;
+const System = imports.system;
 
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
@@ -96,6 +97,7 @@ var Player = new Lang.Class({
     } else {
      this.engine.play ();
     }
+    System.gc ();
   },
 
   play: function () {
@@ -111,6 +113,7 @@ var Player = new Lang.Class({
   },
 
   get_cover: function () {
+    this.video.contents.set_cover (null);
     this.item.get_cover (Lang.bind (this, () => {
       this.video.contents.set_cover (this.item.cover);
     }));
@@ -518,8 +521,9 @@ var VideoWidget = new Lang.Class ({
     this.stage.add_child (layout);
     this.stage.set_child_above_sibling (layout, this.cover_frame);
 
-    var theme = Gtk.IconTheme.get_for_screen (this.player.get_screen ());
-    this.logo_pixbuf = theme.load_icon ("applications-multimedia", 256, 0);
+    //var theme = Gtk.IconTheme.get_for_screen (this.player.get_screen ());
+    //this.logo_pixbuf = theme.load_icon ("applications-multimedia", 256, 0);
+    this.logo_pixbuf = GdkPixbuf.Pixbuf.new_from_file (APPDIR + "/data/icons/newstream.cover.svg");
     this.set_cover ();
   },
 
@@ -529,7 +533,7 @@ var VideoWidget = new Lang.Class ({
   },
 
   set_cover: function (cover) {
-    if (cover) this.cover_pixbuf = cover;
+    this.cover_pixbuf = cover || null;
     var pb = this.get_cover_pixbuf ();
     if (!pb) return;
     this.cover.set_data (
@@ -540,17 +544,29 @@ var VideoWidget = new Lang.Class ({
 
   set_cover_visiblity: function (val) {
     if (val) {
+      /*if (this.cover_id) {
+        GLib.source_remove (this.cover_id);
+        this.cover_id = 0;
+      }*/
       this.cover_frame.show ();
+      //this.cover_frame.set_opacity (255);
       this.frame.hide ();
     } else {
       this.frame.show ();
       this.cover_frame.hide ();
+      /*this.cover_frame.set_easing_duration (500);
+      this.cover_frame.set_opacity (0);
+      this.cover_id = GLib.timeout_add (0, 500, () => {
+        this.cover_id = 0;
+        this.cover_frame.hide ();
+        return false;
+      });*/
     }
   },
 
   on_player_state: function (engine, o,n,p) {
-    //print (engine, o,n,p);
-    this.set_cover_visiblity (n != 4);
+    //print (o,n,p,!((n == 4) || (n == 3)));
+    this.set_cover_visiblity (!((n == 4) || (n == 3)));
   },
 
   set_controls_busy: function (val) {
