@@ -31,7 +31,7 @@ var ResultView = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     scroll = (typeof scroll !== 'undefined') ?  scroll : true;
     let box = null;
-    this.owner = parent;
+    this.w = parent;
     this.provider = parent.provider;
 
     if (scroll) {
@@ -67,9 +67,9 @@ var ResultView = new Lang.Class({
     this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
       var details = a.get_children()[0];
       if (details) {
-        this.owner.itemview.load (details);
-        this.owner.back.last = this.owner.stack.visible_child_name;
-        this.owner.stack.visible_child_name = "item";
+        this.w.itemview.load (details);
+        this.w.back.last = this.w.stack.visible_child_name;
+        this.w.stack.visible_child_name = "item";
       }
     }));
     this.pager.connect ("page-selected", (o, token) => {
@@ -216,8 +216,12 @@ var Details = new Lang.Class({
   Name: "Details",
 
   _init: function (search_result) {
-    this.data = {kind:"", id:"", channel:{}, live:false, duration:0};
-    this.parse (search_result);
+    if (search_result && search_result.local)
+      this.data = search_result;
+    else {
+      this.data = {kind:"", id:"", channel:{}, live:false, duration:0};
+      this.parse (search_result);
+    }
   },
 
   get id () {
@@ -302,6 +306,12 @@ var Details = new Lang.Class({
     var p = this.data.channel.thumbnails[preset];
     if (p && p.url) s = p.url;
     return s;
+  },
+
+  set_viewed: function () {
+    if (!this.data.local) this.data.local = {views: 1};
+    else this.data.local.views += 1;
+    this.data.local.last = Date.now ();
   },
 
   parse: function (data) {

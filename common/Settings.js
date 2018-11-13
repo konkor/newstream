@@ -58,6 +58,7 @@ var Settings = new Lang.Class({
     history_size = this.get_int ("history-size");
     view_history_size = this.get_int ("view-history-size");
     this.load_history ();
+    this.load_view_history ();
     window_height = this.get_int ("window-height");
     window_width = this.get_int ("window-width");
     window_x = this.get_int ("window-x");
@@ -150,13 +151,19 @@ var Settings = new Lang.Class({
     this.set_int ("view-history-size", view_history_size);
   },
 
-  view_history_add: function (details) {
+  get view_history () { return view_history; },
+
+  add_view_history: function (details) {
     if (!details || !details.id) return;
     let s = details.id;
-    if (!view_history.length) this.load_view_history ();
+    //if (!view_history.length) this.load_view_history ();
 
     var i = view_history.indexOf (s);
-    if (i > -1) view_history.splice (i, 1);
+    if (i > -1) {
+      view_history.splice (i, 1);
+      let it = this.get_view_history_item (s);
+      if (it && it.local) details.data.local.views = it.local.views + 1;
+    }
     view_history.unshift (s);
 
     //saving history
@@ -172,9 +179,23 @@ var Settings = new Lang.Class({
     this.save_view_history (details.data);
   },
 
+  get_view_history_item: function (id) {
+    let data = null;
+    let f = Gio.file_new_for_path (app_data_dir + "/data/" + id + ".json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        data = JSON.parse (ar);
+      } catch (e) {
+        print ("Can't load item " + app_data_dir + "/" + s + ".json ...");
+      }
+    }
+    return data;
+  },
+
   save_view_history: function (data) {
     GLib.file_set_contents (app_data_dir + "/view_history.json", JSON.stringify (view_history));
-    if (data) GLib.file_set_contents (app_data_dir + "/" + data.id + ".json", JSON.stringify (data));
+    if (data) GLib.file_set_contents (app_data_dir + "/data/" + data.id + ".json", JSON.stringify (data));
   },
 
   load_view_history: function () {

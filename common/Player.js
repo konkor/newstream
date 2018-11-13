@@ -81,6 +81,8 @@ var Player = new Lang.Class({
           if (d.format_id == p.format_id) url = p.url;
         });
         if (url) {
+          this.item.details.set_viewed ();
+          this.w.settings.add_view_history (this.item.details);
           //print (url);
           //url = Gio.File.new_for_path ("/home/kapa/projects/gjs-templates/video-player/test.webm").get_uri();
           //url = "https://download.blender.org/durian/trailer/sintel_trailer-480p.ogv";
@@ -95,7 +97,11 @@ var Player = new Lang.Class({
         //print (p.url);
       }));
     } else {
-     this.engine.play ();
+      if (this.engine.state != 4) {
+        this.item.details.set_viewed ();
+        this.w.settings.add_view_history (this.item.details);
+      }
+      this.engine.play ();
     }
     System.gc ();
   },
@@ -339,7 +345,7 @@ var Description = new Lang.Class({
   },
 
   load: function (details) {
-    if (!details.data) return;
+    if (!details.data || !details.data.description) return;
     this.info.set_text (details.data.description);
   }
 });

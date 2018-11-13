@@ -15,7 +15,31 @@ const Lang = imports.lang;
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const ResultView = imports.common.ResultView;
+const HistoryView = imports.common.HistoryView;
 const Item = imports.common.ItemView;
+
+
+var HistoryLayout = new Lang.Class({
+  Name: "HistoryLayout",
+  Extends: HistoryView.HistoryView,
+
+  _init: function (parent) {
+    this.parent (parent);
+    this.first = true;
+
+    this.connect ("map", Lang.bind (this, this.setup));
+  },
+
+  setup: function (o, e) {
+    if (this.first) this.query ();
+    this.first = false;
+    this.w.section.label = "History";
+    this.w.home.visible = false;
+    this.w.back.visible = true;
+    this.w.searchbar.visible = false;
+    this.w.topbar.visible = false;
+  }
+});
 
 var ItemLayout = new Lang.Class({
   Name: "ItemLayout",
