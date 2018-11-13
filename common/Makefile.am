@@ -2,6 +2,7 @@
 commondir = $(datadir)/newstream/common
 common_DATA = \
     Application.js \
+    HistoryView.js \
     ItemView.js \
     Layouts.js \
     MainWindow.js \
@@ -17,4 +18,3 @@ common_DATA = \
 
 EXTRA_DIST = \
     $(common_DATA)
-
