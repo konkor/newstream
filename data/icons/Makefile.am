@@ -7,6 +7,7 @@ icons_DATA= \
     history-symbolic.svg \
     io.github.konkor.newstream.svg \
     newstream.item.svg \
+    newstream.cover.svg \
     window-close-symbolic.svg\
     open-menu-symbolic.svg\
     edit-copy-symbolic.svg\
