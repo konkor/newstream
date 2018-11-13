@@ -15,6 +15,12 @@
       <description>History Size To Remember</description>
     </key>
 
+    <key type="i" name="view-history-size">
+      <default>1000</default>
+      <summary>View History Size</summary>
+      <description>Viewed History Size</description>
+    </key>
+
     <key type="i" name="window-height">
       <default>480</default>
       <summary>Window Height</summary>
