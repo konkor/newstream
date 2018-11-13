@@ -195,6 +195,20 @@ var ResultViewItem = new Lang.Class({
       if (r != 200) return;
       this.channel_logo = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 56, 56, true, null);
     }));
+  },
+
+  get_cover: function (callback) {
+    if (!this.details.id) return;
+    if (this.cover) {
+      if (callback) callback ();
+      return;
+    }
+    let url = this.details.cover_url;
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+      if (r == 200)
+        this.cover = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
+      if (callback) callback ();
+    }));
   }
 });
 
@@ -261,6 +275,15 @@ var Details = new Lang.Class({
 
   get duration () {
     return this.data.duration;
+  },
+
+  get cover_url () {
+    let url = this.get_thumbnail_url ("maxres");
+    if (!url) url = this.get_thumbnail_url ("standard");
+    if (!url) url = this.get_thumbnail_url ("high");
+    if (!url) url = this.get_thumbnail_url ("medium");
+    if (!url) url = this.get_thumbnail_url ("default");
+    return url;
   },
 
   get_thumbnail_url: function (preset) {

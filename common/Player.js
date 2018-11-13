@@ -11,8 +11,10 @@
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GdkX11 = imports.gi.GdkX11;
+const GdkPixbuf = imports.gi.GdkPixbuf;
 const GtkClutter = imports.gi.GtkClutter;
 const Clutter = imports.gi.Clutter;
+//const Cogl = imports.gi.Cogl;
 const ClutterGst = imports.gi.ClutterGst;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
@@ -68,6 +70,7 @@ var Player = new Lang.Class({
     if (!item || !item.details.id) return;
     if (!this.item || (this.item.details.id != item.details.id)) {
       this.item = item;
+      this.get_cover ();
       this.details.load (this.item);
       if (this.item.details.id) Utils.fetch_formats (this.item.details.id, Lang.bind (this, (d)=>{
         this.formats = d;
@@ -105,6 +108,12 @@ var Player = new Lang.Class({
 
   seek: function (pos) {
     if (this.engine) this.engine.seek (pos);
+  },
+
+  get_cover: function () {
+    this.item.get_cover (Lang.bind (this, () => {
+      this.video.contents.set_cover (this.item.cover);
+    }));
   }
 });
 
@@ -439,6 +448,7 @@ var VideoWidget = new Lang.Class ({
     this.build ();
 
     this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
+    this.player.engine.connect ('state-changed', Lang.bind (this, this.on_player_state));
 
     this.set_controls_visibility (false);
   },
@@ -450,6 +460,13 @@ var VideoWidget = new Lang.Class ({
       y_align: Clutter.BinAlignment.FILL,
     }));
     this.stage.set_background_color (new Clutter.Color ());
+
+    this.cover_frame = new GtkClutter.Actor ();
+    this.cover = Clutter.Image.new ();
+    this.cover_frame.set_content (this.cover);
+    this.cover_frame.set_content_gravity (Clutter.ContentGravity.RESIZE_ASPECT);
+    this.stage.add_child (this.cover_frame);
+    //this.cover_frame.hide ();
 
     if (CG_VERSION < 3) {
       //this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
@@ -467,6 +484,7 @@ var VideoWidget = new Lang.Class ({
       this.player.engine.set_videosink (videosink);
     }
     this.stage.add_child (this.frame);
+    this.stage.set_child_above_sibling (this.cover_frame, this.frame);
 
     /* Fullscreen header controls */
     this.header_controls = new GtkClutter.Actor ();
@@ -498,7 +516,41 @@ var VideoWidget = new Lang.Class ({
     });
     layout.add_child (this.controls);
     this.stage.add_child (layout);
-    this.stage.set_child_above_sibling (layout, this.frame);
+    this.stage.set_child_above_sibling (layout, this.cover_frame);
+
+    var theme = Gtk.IconTheme.get_for_screen (this.player.get_screen ());
+    this.logo_pixbuf = theme.load_icon ("applications-multimedia", 256, 0);
+    this.set_cover ();
+  },
+
+  get_cover_pixbuf: function () {
+    if (this.cover_pixbuf) return this.cover_pixbuf;
+    else return this.logo_pixbuf;
+  },
+
+  set_cover: function (cover) {
+    if (cover) this.cover_pixbuf = cover;
+    var pb = this.get_cover_pixbuf ();
+    if (!pb) return;
+    this.cover.set_data (
+      pb.get_pixels(), pb.get_has_alpha() ? 19 : 2,
+      pb.get_width (), pb.get_height (), pb.get_rowstride ()
+    );
+  },
+
+  set_cover_visiblity: function (val) {
+    if (val) {
+      this.cover_frame.show ();
+      this.frame.hide ();
+    } else {
+      this.frame.show ();
+      this.cover_frame.hide ();
+    }
+  },
+
+  on_player_state: function (engine, o,n,p) {
+    //print (engine, o,n,p);
+    this.set_cover_visiblity (n != 4);
   },
 
   set_controls_busy: function (val) {
