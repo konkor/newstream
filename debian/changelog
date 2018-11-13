@@ -1,5 +1,15 @@
-newstream (0.1.1-1) unstable; urgency=low
+newstream (0.1.2-1) UNRELEASED; urgency=low
+
+  * Add video description
+  * Add item toolbar
+  * Add video covers
+  * Update minor fixes and improvements
+
+ -- konkor <kapa76@gmail.com>  Tue, 13 Nov 2018 18:10:00 +0200 
+ 
+newstream (0.1.1-1) UNRELEASED; urgency=low
 
   * Initial release
 
- -- konkor <kapa76@gmail.com>  Thu, 08 Nov 2018 23:52:00 +0000
+ -- konkor <kapa76@gmail.com>  Thu, 08 Nov 2018 23:52:00 +0200
+ 
