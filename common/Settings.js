@@ -18,6 +18,8 @@ let app_data_dir = get_app_data_dir ();
 let save = true;
 let history = [];
 let history_size = 5000;
+let view_history = [];
+let view_history_size = 1000;
 let window_height = 480;
 let window_width = 800;
 let window_x = 0;
@@ -54,6 +56,7 @@ var Settings = new Lang.Class({
   load: function () {
     save = this.get_boolean ("save-settings");
     history_size = this.get_int ("history-size");
+    view_history_size = this.get_int ("view-history-size");
     this.load_history ();
     window_height = this.get_int ("window-height");
     window_width = this.get_int ("window-width");
@@ -139,6 +142,51 @@ var Settings = new Lang.Class({
         history = [];
       }
     }
+  },
+
+  get view_history_size () { return view_history_size; },
+  set view_history_size (val) {
+    view_history_size = val;
+    this.set_int ("view-history-size", view_history_size);
+  },
+
+  view_history_add: function (details) {
+    if (!details || !details.id) return;
+    let s = details.id;
+    if (!view_history.length) this.load_view_history ();
+
+    var i = view_history.indexOf (s);
+    if (i > -1) view_history.splice (i, 1);
+    view_history.unshift (s);
+
+    //saving history
+    if (view_history_size < 1) return;
+    if (view_history.length > view_history_size) {
+      s = view_history.pop ();
+      if (s) try {
+        Gio.File.new_for_path (app_data_dir + "/" + s + ".json").delete (null);
+      } catch (e) {
+        print ("Can't delete " + app_data_dir + "/" + s + ".json ...");
+      }
+    }
+    this.save_view_history (details.data);
+  },
+
+  save_view_history: function (data) {
+    GLib.file_set_contents (app_data_dir + "/view_history.json", JSON.stringify (view_history));
+    if (data) GLib.file_set_contents (app_data_dir + "/" + data.id + ".json", JSON.stringify (data));
+  },
+
+  load_view_history: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/view_history.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        view_history = JSON.parse (ar);
+      } catch (e) {
+        view_history = [];
+      }
+    }
   }
 
 });
@@ -147,6 +195,8 @@ function get_app_data_dir () {
   let path = GLib.build_filenamev ([GLib.get_user_data_dir(),"newstream"]);
   if (!GLib.file_test (path, GLib.FileTest.EXISTS))
     GLib.mkdir_with_parents (path, 484);
+  if (!GLib.file_test (path + "/data", GLib.FileTest.EXISTS))
+    GLib.mkdir_with_parents (path + "/data", 484);
   return path;
 }
 
