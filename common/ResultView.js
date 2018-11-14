@@ -90,6 +90,7 @@ var ResultView = new Lang.Class({
     this.emit ('ready');
     this.clear_all ();
     this.add_items (JSON.parse (data.toString()));
+    if (this.scroll) this.scroll.vadjustment.value = 0;
   },
 
   add_items: function (respond) {
@@ -143,9 +144,12 @@ var ResultViewItem = new Lang.Class({
     this.title.max_width_chars = 24;
     box.pack_start (this.title, false, false, 0);
 
+    this.cbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    box.pack_start (this.cbox, true, true, 0);
+
     this.channel = new Gtk.Label ({label:this.details.channel_title, xalign:0, opacity: 0.7});
     this.channel.get_style_context ().add_class ("small");
-    box.pack_start (this.channel, true, true, 0);
+    this.cbox.pack_start (this.channel, true, true, 0);
 
     this.dbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
     box.pack_start (this.dbox, true, true, 0);
