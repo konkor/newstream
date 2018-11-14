@@ -181,7 +181,7 @@ var Itembar = new Lang.Class({
     btn.connect ('activate', Lang.bind (this, (o) => {
       let clipboard = Gtk.Clipboard.get_default (Gdk.Display.get_default ());
       if (!clipboard) return;
-      clipboard.set_text (this.link.label);
+      clipboard.set_text (this.link.label, -1);
     }));
     return btn;
   },
