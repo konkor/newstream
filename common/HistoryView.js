@@ -30,9 +30,7 @@ var HistoryView = new Lang.Class({
     this.results.max_children_per_line = 1;
     this.results.homogeneous = false;
 
-    var d = new Date (Date.now ());
-    this.date_options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    this.date = d.toLocaleDateString ("lookup", this.date_options);
+    this.date = "";
   },
 
   query: function (page) {
@@ -43,7 +41,6 @@ var HistoryView = new Lang.Class({
     //print (page*IPP, (page+1)*IPP,history.length,this.settings.view_history);
     if (!history.length) return;
     this.clear_all ();
-    this.add_date (this.date);
     history.forEach (p => {
       let item = new HistoryViewItem (this.settings.get_view_history_item (p));
       item.show_details ();

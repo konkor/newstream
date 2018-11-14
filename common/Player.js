@@ -82,6 +82,7 @@ var Player = new Lang.Class({
         });
         if (url) {
           this.item.details.set_viewed ();
+          this.w.history.first = true;
           this.w.settings.add_view_history (this.item.details);
           //print (url);
           //url = Gio.File.new_for_path ("/home/kapa/projects/gjs-templates/video-player/test.webm").get_uri();
