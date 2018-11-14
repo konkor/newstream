@@ -31,6 +31,7 @@ var HistoryView = new Lang.Class({
     this.results.homogeneous = false;
 
     this.date = "";
+    this.date_options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   },
 
   query: function (page) {
