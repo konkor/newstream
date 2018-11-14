@@ -28,7 +28,7 @@ var ResultView = new Lang.Class({
   },
 
   _init: function (parent, scroll) {
-    this.parent ({orientation:Gtk.Orientation.VERTICAL});
+    this.parent ({orientation:Gtk.Orientation.VERTICAL, margin:8});
     scroll = (typeof scroll !== 'undefined') ?  scroll : true;
     let box = null;
     this.w = parent;
@@ -47,7 +47,8 @@ var ResultView = new Lang.Class({
     let space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);
 
-    let results_box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
+    let results_box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL, valign:0});
+    results_box.valign = Gtk.Align.START;
     box.pack_start (results_box, true, false, 0);
 
     this.results = new Gtk.FlowBox ({
@@ -65,9 +66,9 @@ var ResultView = new Lang.Class({
     box.pack_start (space, true, false, 0);
 
     this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
-      var details = a.get_children()[0];
-      if (details) {
-        this.w.itemview.load (details);
+      var child = a.get_children()[0];
+      if (child && child.details) {
+        this.w.itemview.load (child);
         this.w.back.last = this.w.stack.visible_child_name;
         this.w.stack.visible_child_name = "item";
       }
@@ -146,23 +147,18 @@ var ResultViewItem = new Lang.Class({
     this.channel.get_style_context ().add_class ("small");
     box.pack_start (this.channel, true, true, 0);
 
-    let dbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
-    box.pack_start (dbox, true, true, 0);
+    this.dbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    box.pack_start (this.dbox, true, true, 0);
 
     this.published = new Gtk.Label ({label:this.details.age, xalign:0, opacity: 0.7});
     this.published.get_style_context ().add_class ("small");
-    dbox.pack_start (this.published, true, true, 0);
+    this.dbox.pack_start (this.published, true, true, 0);
 
     this.views = new Gtk.Label ({xalign:1, opacity: 0.7});
     this.views.get_style_context ().add_class ("small");
-    dbox.pack_end (this.views, false, false, 0);
+    this.dbox.pack_end (this.views, false, false, 0);
 
-    let url = this.details.get_thumbnail_url ("default");
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
-      if (r != 200) return;
-      //print (d.get_size(),d.get_data().length);
-      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
-    }));
+    this.get_thumb ();
 
     this.show_all ();
   },
@@ -177,10 +173,20 @@ var ResultViewItem = new Lang.Class({
     this.get_channel_info ();
   },
 
+  get_thumb: function () {
+    let url = this.details.get_thumbnail_url ("default");
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+      if (r != 200) return;
+      //print (d.get_size(),d.get_data().length);
+      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
+    }));
+  },
+
   get_channel_info: function () {
     let w = this.get_toplevel ();
     if (!this.details.data.channel.id) return;
-    if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
+    if (this.details.data.channel.thumbnails) this.get_channel_logo ();
+    else if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
       let data = JSON.parse (d);
       if (data.pageInfo.totalResults > 0) {
         this.details.parse (data.items[0]);

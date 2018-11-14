@@ -10,10 +10,12 @@
 
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const GdkPixbuf = imports.gi.GdkPixbuf;
 const Lang = imports.lang;
 
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
+const Utils = imports.common.Utils;
 const ResultView = imports.common.ResultView;
 
 const IPP = 20; //items per page
@@ -26,7 +28,11 @@ var HistoryView = new Lang.Class({
     this.parent (parent);
     this.settings = parent.settings;
     this.results.max_children_per_line = 1;
+    this.results.homogeneous = false;
 
+    var d = new Date (Date.now ());
+    this.date_options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    this.date = d.toLocaleDateString ("lookup", this.date_options);
   },
 
   query: function (page) {
@@ -37,10 +43,46 @@ var HistoryView = new Lang.Class({
     //print (page*IPP, (page+1)*IPP,history.length,this.settings.view_history);
     if (!history.length) return;
     this.clear_all ();
+    this.add_date (this.date);
     history.forEach (p => {
-      let item = new ResultView.ResultViewItem (this.settings.get_view_history_item (p));
+      let item = new HistoryViewItem (this.settings.get_view_history_item (p));
+      item.show_details ();
+      var d = new Date (item.details.data.local.last).toLocaleDateString ("lookup", this.date_options);
+      if (this.date != d) {
+        this.add_date (d);
+      }
       this.results.add (item);
     });
+  },
+
+  add_date: function (date) {
+    this.date = date;
+    let label = new Gtk.Label({label:this.date, xalign:0.0, margin:6, sensitive:true});
+    label.show_all ();
+    this.results.add (label);
+  }
+});
+
+var HistoryViewItem = new Lang.Class({
+  Name: "HistoryViewItem",
+  Extends: ResultView.ResultViewItem,
+
+  _init: function (data) {
+    this.parent (data);
+    this.margin = 2;
+    this.title.max_width_chars = 64;
+    this.title.lines = 1;
+    //this.image.pixbuf = this.image.pixbuf.scale_simple (16, 16, 2);
+    this.dbox.no_show_all = true;
+    this.dbox.visible = false;
+  },
+
+  get_thumb: function () {
+    let url = this.details.get_thumbnail_url ("default");
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+      if (r != 200) return;
+      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 48, true, null);
+    }));
   }
 });
 
