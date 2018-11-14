@@ -276,7 +276,7 @@ var Channel = new Lang.Class({
     this.contents.pack_start (this.logo, false, false, 8);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
-    this.contents.add (box, false, false, 0);
+    this.contents.add (box);
 
     this.author = new Gtk.Label ({xalign:0.0});
     box.pack_start (this.author, true, true, 0);
