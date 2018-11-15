@@ -66,9 +66,9 @@ var ResultView = new Lang.Class({
     box.pack_start (space, true, false, 0);
 
     this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
-      var child = a.get_children()[0];
-      if (child && child.details) {
-        this.w.itemview.load (child);
+      var child = a.get_children()[0].details;
+      if (child && child.data) {
+        this.w.itemview.load (child.data);
         this.w.back.last = this.w.stack.visible_child_name;
         this.w.stack.visible_child_name = "item";
       }
@@ -168,13 +168,14 @@ var ResultViewItem = new Lang.Class({
   },
 
   show_details: function () {
-    if (this.details.views) this.views.set_text (this.details.views + " views");
+    if (this.details.data.views) this.views.set_text (Utils.format_size (this.details.data.views) + " views");
     if (this.details.live)
       this.published.set_text ("LIVE • " + this.published.get_text());
     else if (this.details.duration) {
       this.published.set_text (Utils.time_stamp (this.details.duration) + " • " + this.published.get_text());
     }
     this.get_channel_info ();
+    this.details.set_cover_url ();
   },
 
   get_thumb: function () {
@@ -189,36 +190,19 @@ var ResultViewItem = new Lang.Class({
   get_channel_info: function () {
     let w = this.get_toplevel ();
     if (!this.details.data.channel.id) return;
-    if (this.details.data.channel.thumbnails) this.get_channel_logo ();
+    if (this.details.data.channel.thumbnails) this.get_channel_logo_url ();
     else if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
       let data = JSON.parse (d);
       if (data.pageInfo.totalResults > 0) {
         this.details.parse (data.items[0]);
-        this.get_channel_logo ();
+        this.get_channel_logo_url ();
       }
     }));
   },
 
-  get_channel_logo: function () {
+  get_channel_logo_url: function () {
     let url = this.details.get_channel_thumb_url ("default");
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
-      if (r != 200) return;
-      this.channel_logo = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 56, 56, true, null);
-    }));
-  },
-
-  get_cover: function (callback) {
-    if (!this.details.id) return;
-    if (this.cover) {
-      if (callback) callback ();
-      return;
-    }
-    let url = this.details.cover_url;
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
-      if (r == 200)
-        this.cover = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
-      if (callback) callback ();
-    }));
+    if (url) this.details.data.channel_thumb_url = url;
   }
 });
 
@@ -248,12 +232,6 @@ var Details = new Lang.Class({
     return Utils.age (new Date (this.data.published));
   },
 
-  get date () {
-    if (!this.data.published) return "";
-    var d = new Date (this.data.published);
-    return "Published: " + d.toLocaleDateString();
-  },
-
   get channel_title () {
     var channel = this.data.channel;
     let s = "";
@@ -272,7 +250,7 @@ var Details = new Lang.Class({
     return this.data.live || false;
   },
 
-  get views () {
+  /*get views () {
     if (this.data.views) return Utils.format_size (this.data.views);
     else return "";
   },
@@ -285,19 +263,19 @@ var Details = new Lang.Class({
   get dislikes () {
     if (this.data.dislikes) return Utils.format_size (this.data.dislikes);
     else return "";
-  },
+  },*/
 
   get duration () {
     return this.data.duration;
   },
 
-  get cover_url () {
+  set_cover_url: function () {
     let url = this.get_thumbnail_url ("maxres");
     if (!url) url = this.get_thumbnail_url ("standard");
     if (!url) url = this.get_thumbnail_url ("high");
     if (!url) url = this.get_thumbnail_url ("medium");
     if (!url) url = this.get_thumbnail_url ("default");
-    return url;
+    this.data.cover_url = url;
   },
 
   get_thumbnail_url: function (preset) {
@@ -318,11 +296,11 @@ var Details = new Lang.Class({
     return s;
   },
 
-  set_viewed: function () {
+  /*set_viewed: function () {
     if (!this.data.local) this.data.local = {views: 1};
     else this.data.local.views += 1;
     this.data.local.last = Date.now ();
-  },
+  },*/
 
   parse: function (data) {
     if (!data) return;

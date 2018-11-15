@@ -51,6 +51,7 @@ var Settings = new Lang.Class({
                       'Please check your installation.');
     this.parent ({ settings_schema: schemaObj });
     this.load ();
+    this.view_history_modified = true;
   },
 
   load: function () {
@@ -153,16 +154,18 @@ var Settings = new Lang.Class({
 
   get view_history () { return view_history; },
 
-  add_view_history: function (details) {
-    if (!details || !details.id) return;
-    let s = details.id;
+  add_view_history: function (data) {
+    if (!data || !data.id) return;
+    let s = data.id;
     //if (!view_history.length) this.load_view_history ();
+    if (!data.local) data.local = {views: 1};
+    data.local.last = Date.now ();
 
     var i = view_history.indexOf (s);
     if (i > -1) {
       view_history.splice (i, 1);
       let it = this.get_view_history_item (s);
-      if (it && it.local) details.data.local.views = it.local.views + 1;
+      if (it && it.local) data.local.views = it.local.views + 1;
     }
     view_history.unshift (s);
 
@@ -176,7 +179,8 @@ var Settings = new Lang.Class({
         print ("Can't delete " + app_data_dir + "/" + s + ".json ...");
       }
     }
-    this.save_view_history (details.data);
+    this.save_view_history (data);
+    this.view_history_modified = true;
   },
 
   get_view_history_item: function (id) {
@@ -186,6 +190,8 @@ var Settings = new Lang.Class({
       var [res, ar, tags] = f.load_contents (null);
       if (res) try {
         data = JSON.parse (ar);
+        ///if (!data.local) data.local = {views: 1};
+        //if (!data.local.last) data.local.last = Date.now ();
       } catch (e) {
         print ("Can't load item " + app_data_dir + "/" + s + ".json ...");
       }

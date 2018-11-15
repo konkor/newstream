@@ -60,20 +60,20 @@ var Player = new Lang.Class({
       if (this.w.stack.visible_child_name != "item") {
         this.w.phones.visible = n == 4;
       } else {
-        if (this.item.details.title != this.w.section.label)
-          this.w.section.label = this.item.details.title;
-          this.video.contents.header.label = this.item.details.title;
+        if (this.item.title != this.w.section.label)
+          this.w.section.label = this.item.title;
+          this.video.contents.header.label = this.item.title;
       }
     }));
   },
 
   load: function (item) {
-    if (!item || !item.details.id) return;
-    if (!this.item || (this.item.details.id != item.details.id)) {
+    if (!item || !item.id) return;
+    if (!this.item || (this.item.id != item.id)) {
       this.item = item;
       this.get_cover ();
       this.details.load (this.item);
-      if (this.item.details.id) Utils.fetch_formats (this.item.details.id, Lang.bind (this, (d)=>{
+      if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
         this.formats = d;
         var url = "";
         //print (o,item);
@@ -81,9 +81,9 @@ var Player = new Lang.Class({
           if (d.format_id == p.format_id) url = p.url;
         });
         if (url) {
-          this.item.details.set_viewed ();
-          this.w.history.first = true;
-          this.w.settings.add_view_history (this.item.details);
+          //this.item.details.set_viewed ();
+          //this.w.history.first = true;
+          this.w.settings.add_view_history (this.item);
           //print (url);
           //url = Gio.File.new_for_path ("/home/kapa/projects/gjs-templates/video-player/test.webm").get_uri();
           //url = "https://download.blender.org/durian/trailer/sintel_trailer-480p.ogv";
@@ -121,8 +121,11 @@ var Player = new Lang.Class({
 
   get_cover: function () {
     this.video.contents.set_cover (null);
-    this.item.get_cover (Lang.bind (this, () => {
-      this.video.contents.set_cover (this.item.cover);
+    if (!this.item.id) return;
+
+    if (this.item.cover_url) Utils.fetch (this.item.cover_url, null, null, Lang.bind (this, (d,r)=>{
+      if (r == 200)
+        this.video.contents.set_cover (GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null));
     }));
   }
 });
@@ -251,11 +254,11 @@ var VideoDetails = new Lang.Class({
 
   load: function (item) {
     //this.get_toplevel ().restore_position ();
-    if (!item || !item.details) return;
+    if (!item || !item.id) return;
     this.channel.load (item);
-    this.statistics.load (item.details);
-    this.description.load (item.details);
-    this.itembar.set_link (item.details.id, item.details.title);
+    this.statistics.load (item);
+    this.description.load (item);
+    this.itembar.set_link (item.id, item.title);
   }
 });
 
@@ -288,12 +291,18 @@ var Channel = new Lang.Class({
     //this.sensitive = false;
   },
 
-  load: function (item) {
-    if (!item.details.data) return;
-    if (item.details.data.channel.title) this.author.set_text (item.details.data.channel.title);
-    if (item.details.data.channel.id) this.id = item.details.data.channel.id;
-    this.published.set_text (item.details.date);
-    if (item.channel_logo) this.logo.pixbuf = item.channel_logo;
+  load: function (data) {
+    if (!data) return;
+    if (data.channel.title) this.author.set_text (data.channel.title);
+    if (data.channel.id) this.id = data.channel.id;
+    if (data.published) {
+      var d = new Date (data.published);
+      this.published.set_text ("Published: " + d.toLocaleDateString());
+    }
+    if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, Lang.bind (this, (d,r)=>{
+      if (r != 200) return;
+      this.logo.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 56, 56, true, null);
+    }));
   }
 });
 
@@ -318,10 +327,10 @@ var Statistics = new Lang.Class({
     this.sensitive = false;
   },
 
-  load: function (details) {
-    if (!details.data) return;
-    this.views.set_text (details.views + " views");
-    this.likes.set_text (details.likes + " / " + details.dislikes);
+  load: function (data) {
+    if (!data) return;
+    this.views.set_text (Utils.format_size (data.views) + " views");
+    this.likes.set_text (Utils.format_size (data.likes) + " / " + Utils.format_size (data.dislikes));
   }
 });
 
@@ -345,9 +354,9 @@ var Description = new Lang.Class({
     this.show_all ();
   },
 
-  load: function (details) {
-    if (!details.data || !details.data.description) return;
-    this.info.set_text (details.data.description);
+  load: function (data) {
+    if (!data || !data.description) return;
+    this.info.set_text (data.description);
   }
 });
 

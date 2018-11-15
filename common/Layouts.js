@@ -25,14 +25,13 @@ var HistoryLayout = new Lang.Class({
 
   _init: function (parent) {
     this.parent (parent);
-    this.first = true;
 
     this.connect ("map", Lang.bind (this, this.setup));
   },
 
   setup: function (o, e) {
-    if (this.first) this.query ();
-    this.first = false;
+    if (this.w.settings.view_history_modified) this.query ();
+    this.w.settings.view_history_modified = false;
     this.w.section.label = "History";
     this.w.home.visible = false;
     this.w.back.visible = true;
@@ -57,7 +56,7 @@ var ItemLayout = new Lang.Class({
   },
 
   setup: function (o, e) {
-    if (this.player.item) this.w.section.label = this.player.item.details.title;
+    //if (this.player.item) this.w.section.label = this.player.item.title;
     this.w.home.visible = false;
     this.w.back.visible = true;
     this.w.searchbar.visible = false;
