@@ -95,7 +95,7 @@ var HistoryViewItem = new Lang.Class({
     let url = this.details.get_thumbnail_url ("default");
     if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
-      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 48, true, null);
+      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 30, 2, null);
     }));
   }
 });
