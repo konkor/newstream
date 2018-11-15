@@ -80,10 +80,9 @@ var HistoryViewItem = new Lang.Class({
     this.margin = 2;
     this.title.max_width_chars = 64;
     this.title.lines = 1;
-    //this.image.pixbuf = this.image.pixbuf.scale_simple (16, 16, 2);
     this.dbox.no_show_all = true;
     this.dbox.visible = false;
-    this.image.pixbuf = this.image.pixbuf.scale_simple (48, 48, true);
+    this.image.pixbuf = this.image.pixbuf.scale_simple (48, 30, 2);
 
     this.local = new Gtk.Label ({label:this.details.data.local.views + " views", xalign:1, opacity: 0.7});
     this.local.get_style_context ().add_class ("small");
@@ -95,7 +94,7 @@ var HistoryViewItem = new Lang.Class({
     let url = this.details.get_thumbnail_url ("default");
     if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
-      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 30, 2, null);
+      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 48, true, null);
     }));
   }
 });

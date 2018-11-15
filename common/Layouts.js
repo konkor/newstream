@@ -37,6 +37,7 @@ var HistoryLayout = new Lang.Class({
     this.w.back.visible = true;
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
+    this.w.menu_button.visible = true;
   }
 });
 
@@ -56,10 +57,12 @@ var ItemLayout = new Lang.Class({
   },
 
   setup: function (o, e) {
+    if (this.player.item) this.w.section.label = this.player.item.title;
     this.w.home.visible = false;
     this.w.back.visible = true;
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
+    this.w.menu_button.visible = false;
   }
 });
 
@@ -84,6 +87,7 @@ var HotView = new Lang.Class({
     this.w.back.visible = false;
     this.w.searchbar.visible = true;
     this.w.topbar.visible = true;
+    this.w.menu_button.visible = true;
   }
 });
 
@@ -137,6 +141,7 @@ var SearchView = new Lang.Class({
     this.w.back.visible = true;
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
+    this.w.menu_button.visible = true;
   }
 });
 
