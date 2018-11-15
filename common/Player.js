@@ -49,7 +49,7 @@ var Player = new Lang.Class({
     this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
 
-    this.details = new VideoDetails ();
+    this.details = new VideoDetails (this.w);
     this.pack_start (this.details, true, true, 0);
 
     this.connect ('unrealize', Lang.bind (this, (o)=>{
@@ -125,11 +125,12 @@ var Itembar = new Lang.Class({
   Name: "Itembar",
   Extends: Gtk.Box,
 
-  _init: function () {
+  _init: function (parent) {
     this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
+    this.settings = parent.settings;
     //this.get_style_context ().add_class ("sb");
 
-    this.bookmark = new Gtk.Button ({always_show_image: true, tooltip_text:"Bookmark"});
+    this.bookmark = new Gtk.ToggleButton ({always_show_image: true, tooltip_text:"Bookmark"});
     this.bookmark.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/bookmark.svg");
     this.bookmark.set_relief (Gtk.ReliefStyle.NONE);
     this.pack_start (this.bookmark, true, true, 0);
@@ -140,8 +141,8 @@ var Itembar = new Lang.Class({
     this.share.set_popup (this.build_menu ());
     this.pack_start (this.share, true, true, 0);
 
-    this.bookmark.connect ('clicked', Lang.bind (this, () => {
-     //TODO: bookmark video
+    this.bookmark.connect ('toggled', Lang.bind (this, (o) => {
+      this.settings.toggle_bookmark (this.id, o.active);
     }));
   },
 
@@ -212,9 +213,11 @@ var Itembar = new Lang.Class({
 
   set_link: function (id, title) {
     if (!id) return;
+    this.id = id;
     this.link.label = "https://youtu.be/" + id;
     title = title || this.link.label;
     this.link.title = title;
+    this.bookmark.active = this.settings.booked (id);
   }
 });
 
@@ -222,11 +225,11 @@ var VideoDetails = new Lang.Class({
   Name: "VideoDetails",
   Extends: Gtk.Box,
 
-  _init: function () {
+  _init: function (parent) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.get_style_context ().add_class ("search-bar");
 
-    this.itembar = new Itembar ();
+    this.itembar = new Itembar (parent);
     this.pack_start (this.itembar, true, true, 0);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});

@@ -220,11 +220,7 @@ var Settings = new Lang.Class({
   },
 
   booked: function (id) {
-    let mark = false;
-    if (id) {
-      mark = bookmarks.indexOf (id) > -1;
-    }
-    return mark;
+    return id && (bookmarks.indexOf (id) > -1);
   },
 
   load_bookmarks: function () {
@@ -239,11 +235,12 @@ var Settings = new Lang.Class({
     }
   },
 
-  add_bookmark: function (id) {
-    if (id || this.booked (id)) return;
-    bookmarks.unshift (id);
+  toggle_bookmark: function (id, state) {
+    if (!id || (this.booked (id) && state) || (!this.booked (id) && !state)) return;
+    if (state) bookmarks.unshift (id);
+    else bookmarks.splice (bookmarks.indexOf (id), 1);
     try {
-      GLib.file_set_contents (app_data_dir + "/bookmarks", JSON.stringify (bookmarks));
+      GLib.file_set_contents (app_data_dir + "/bookmarks.json", JSON.stringify (bookmarks));
     } catch (e) {
       print (e);
     }
