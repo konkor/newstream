@@ -160,8 +160,11 @@ var Itembar = new Lang.Class({
     this.browser = this.add_button ("browser", "");
     menu.add (this.browser);
 
-    menu.add (this.add_button ("plus", "Google+", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/gplus.svg")));
-    menu.add (this.add_button ("fb", "Facebook", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/fb.svg")));
+    menu.add (this.add_button ("fb", "Facebook", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/fb.png")));
+    menu.add (this.add_button ("twit", "Twitter", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/twit.png")));
+    menu.add (this.add_button ("red", "Reddit", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/red.png")));
+    menu.add (this.add_button ("id", "LinkedIn", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/id.png")));
+    menu.add (this.add_button ("plus", "Google+", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/gplus.png")));
     menu.add (this.add_button ("email", "E-mail", Gtk.Image.new_from_file (APPDIR + "/data/icons/social/mail.svg")));
 
     menu.show_all ();
@@ -199,9 +202,9 @@ var Itembar = new Lang.Class({
     let title = this.link.title || uri;
     if (o.name == "plus") uri = "https://plus.google.com/share?url=" + uri;
     else if (o.name == "fb") uri = "https://www.facebook.com/sharer/sharer.php?u=" + uri;
-    else if (o.name == "tweat") uri = "https://twitter.com/intent/tweet?text=" + title + "&url=https://obmin.github.io/obmin/news/2018/07/03/docker.html" + uri;
+    else if (o.name == "twit") uri = "https://twitter.com/intent/tweet?text=" + title + "&url=https://obmin.github.io/obmin/news/2018/07/03/docker.html" + uri;
     else if (o.name == "red") uri = "http://www.reddit.com/submit?url=" + uri;
-    else if (o.name == "linkedin") uri = "https://www.linkedin.com/shareArticle?mini=true&url=" + uri + "&title=" + title + "&summary=&source=webjeda";
+    else if (o.name == "id") uri = "https://www.linkedin.com/shareArticle?mini=true&url=" + uri + "&title=" + title + "&summary=&source=webjeda";
     else if (o.name == "email") uri = "mailto:?subject=" + title + "&body=Check out this video " + uri;
 
     Utils.launch_uri (uri);

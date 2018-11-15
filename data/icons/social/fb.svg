@@ -7,13 +7,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="16"
-   width="16"
+   height="18"
+   width="18"
    version="1.1"
-   viewBox="0 0 4.2333332 4.2333333"
+   viewBox="0 0 4.7624998 4.7625"
    id="svg8"
    sodipodi:docname="fb.svg"
-   inkscape:version="0.92.1 r15371">
+   inkscape:version="0.92.1 r15371"
+   inkscape:export-filename="/home/kapa/projects/NewStream/data/icons/social/fb.png"
+   inkscape:export-xdpi="108"
+   inkscape:export-ydpi="108">
   <metadata
      id="metadata14">
     <rdf:RDF>
@@ -42,26 +45,27 @@
      id="namedview10"
      showgrid="false"
      inkscape:zoom="21.454545"
-     inkscape:cx="10.221065"
-     inkscape:cy="8.9861539"
-     inkscape:window-x="36"
-     inkscape:window-y="95"
+     inkscape:cx="10.338006"
+     inkscape:cy="7.4987377"
+     inkscape:window-x="416"
+     inkscape:window-y="179"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg8" />
   <path
-     style="opacity:1;fill:#4d58f3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.17839572;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.77142861"
-     d="M 4.233333,2.1166662 A 2.116667,2.116667 0 0 1 2.116667,4.2333332 2.116667,2.116667 0 0 1 0,2.1166662 2.116667,2.116667 0 0 1 2.116667,-4.0000001e-8 2.116667,2.116667 0 0 1 4.233333,2.1166662 Z"
+     style="opacity:1;fill:#4d58f3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.2006952;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.77142861"
+     d="M 4.7624999,2.3812494 A 2.3812505,2.3812505 0 0 1 2.3812505,4.7624999 2.3812505,2.3812505 0 0 1 0,2.3812494 2.3812505,2.3812505 0 0 1 2.3812505,-3.2625002e-7 2.3812505,2.3812505 0 0 1 4.7624999,2.3812494 Z"
      id="path4482"
      inkscape:connector-curvature="0" />
-  <text
-     xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:4.22431421px;line-height:4.95036793px;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.19801474px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="1.3297642"
-     y="3.703032"
-     id="text4517"><tspan
-       sodipodi:role="line"
-       id="tspan4515"
-       x="1.3297642"
-       y="3.703032"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';fill:#ffffff;fill-opacity:1;stroke-width:0.19801474px">f</tspan></text>
+  <g
+     aria-label="f"
+     style="font-style:normal;font-weight:normal;font-size:3.73767662px;line-height:4.38008928px;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.17520359px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="text4517"
+     transform="translate(0.26470698,0.26469974)">
+    <path
+       d="M 1.7671719,3.5180478 V 2.0412558 H 1.4733409 V 1.5433573 h 0.293831 V 1.3754539 c 0,-0.2214379 0.063268,-0.39299139 0.1898039,-0.51466056 0.1277526,-0.12288585 0.3059979,-0.18432878 0.534736,-0.18432878 0.073002,0 0.1624283,0.0121669 0.2682805,0.0365007 l -0.00548,0.40880834 c -0.043801,-0.01095 -0.097335,-0.016425 -0.1606033,-0.016425 -0.1983207,0 -0.2974811,0.093077 -0.2974811,0.2792306 v 0.1587783 h 0.392383 V 2.041256 h -0.392383 v 1.4767921 z"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';fill:#ffffff;fill-opacity:1;stroke-width:0.17520359px"
+       id="path4484"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccscsccsscccccc" />
+  </g>
 </svg>

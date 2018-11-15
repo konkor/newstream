@@ -18,8 +18,11 @@ icons_DATA= \
 #application social icons
 socialdir=$(datadir)/newstream/data/icons/social
 social_DATA= \
-    social/gplus.svg \
-    social/fb.svg \
+    social/gplus.png \
+    social/fb.png \
+    social/twit.png \
+    social/red.png \
+    social/id.png \
     social/mail.svg \
     social/link.svg
 
