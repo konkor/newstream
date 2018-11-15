@@ -157,7 +157,6 @@ var Settings = new Lang.Class({
   add_view_history: function (data) {
     if (!data || !data.id) return;
     let s = data.id;
-    //if (!view_history.length) this.load_view_history ();
     if (!data.local) data.local = {views: 1};
     data.local.last = Date.now ();
 
@@ -190,8 +189,6 @@ var Settings = new Lang.Class({
       var [res, ar, tags] = f.load_contents (null);
       if (res) try {
         data = JSON.parse (ar);
-        ///if (!data.local) data.local = {views: 1};
-        //if (!data.local.last) data.local.last = Date.now ();
       } catch (e) {
         print ("Can't load item " + app_data_dir + "/" + s + ".json ...");
       }

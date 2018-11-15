@@ -76,20 +76,12 @@ var Player = new Lang.Class({
       if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
         this.formats = d;
         var url = "";
-        //print (o,item);
         if (d && d.formats) d.formats.forEach (p => {
           if (d.format_id == p.format_id) url = p.url;
         });
         if (url) {
-          //this.item.details.set_viewed ();
-          //this.w.history.first = true;
           this.w.settings.add_view_history (this.item);
-          //print (url);
-          //url = Gio.File.new_for_path ("/home/kapa/projects/gjs-templates/video-player/test.webm").get_uri();
-          //url = "https://download.blender.org/durian/trailer/sintel_trailer-480p.ogv";
-          //if (window_handler) this.engine.set_window (window_handler);
           this.engine.open (url);
-          //GLib.animate_event = GLib.timeout_add (100, 2000, Lang.bind (this, ()=>{this.engine.play ();}));
           this.show_all ();
         }
         //print (d.format_id, d.id, d.ext);
@@ -847,7 +839,6 @@ var AspectFrame = new Lang.Class ({
   },
 
   on_pick: function (color) {
-    //print (actor);
     let child = this.get_child_at_index (0);
     if (!child) return;
     child.paint ();

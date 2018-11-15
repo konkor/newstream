@@ -84,9 +84,7 @@ var ResultView = new Lang.Class({
   },
 
   on_results: function (data, res) {
-    //print (res, data.toString());
     if (res != 200) return;
-    //this.stack.visible_child_name = "search";
     this.emit ('ready');
     this.clear_all ();
     this.add_items (JSON.parse (data.toString()));
@@ -250,21 +248,6 @@ var Details = new Lang.Class({
     return this.data.live || false;
   },
 
-  /*get views () {
-    if (this.data.views) return Utils.format_size (this.data.views);
-    else return "";
-  },
-
-  get likes () {
-    if (this.data.likes) return Utils.format_size (this.data.likes);
-    else return "";
-  },
-
-  get dislikes () {
-    if (this.data.dislikes) return Utils.format_size (this.data.dislikes);
-    else return "";
-  },*/
-
   get duration () {
     return this.data.duration;
   },
@@ -295,12 +278,6 @@ var Details = new Lang.Class({
     if (p && p.url) s = p.url;
     return s;
   },
-
-  /*set_viewed: function () {
-    if (!this.data.local) this.data.local = {views: 1};
-    else this.data.local.views += 1;
-    this.data.local.last = Date.now ();
-  },*/
 
   parse: function (data) {
     if (!data) return;
