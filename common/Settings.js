@@ -24,6 +24,7 @@ let history = [];
 let history_size = 5000;
 let view_history = [];
 let view_history_size = 1000;
+let bookmarks = [];
 let window_height = 480;
 let window_width = 800;
 let window_x = 0;
@@ -64,6 +65,7 @@ var Settings = new Lang.Class({
     view_history_size = this.get_int ("view-history-size");
     this.load_history ();
     this.load_view_history ();
+    this.load_bookmarks ();
     window_height = this.get_int ("window-height");
     window_width = this.get_int ("window-width");
     window_x = this.get_int ("window-x");
@@ -177,9 +179,9 @@ var Settings = new Lang.Class({
     if (view_history.length > view_history_size) {
       s = view_history.pop ();
       if (s) try {
-        Gio.File.new_for_path (app_data_dir + "/" + s + ".json").delete (null);
+        Gio.File.new_for_path (app_data_dir + "/data/" + s + ".json").delete (null);
       } catch (e) {
-        print ("Can't delete " + app_data_dir + "/" + s + ".json ...");
+        print ("Can't delete " + app_data_dir + "/data/" + s + ".json ...");
       }
     }
     this.save_view_history (data);
@@ -215,6 +217,37 @@ var Settings = new Lang.Class({
         view_history = [];
       }
     }
+  },
+
+  booked: function (id) {
+    let mark = false;
+    if (id) {
+      mark = bookmarks.indexOf (id) > -1;
+    }
+    return mark;
+  },
+
+  load_bookmarks: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/bookmarks.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        bookmarks = JSON.parse (Utils.bytesToString (ar));
+      } catch (e) {
+        bookmarks = [];
+      }
+    }
+  },
+
+  add_bookmark: function (id) {
+    if (id || this.booked (id)) return;
+    bookmarks.unshift (id);
+    try {
+      GLib.file_set_contents (app_data_dir + "/bookmarks", JSON.stringify (bookmarks));
+    } catch (e) {
+      print (e);
+    }
+    this.bookmarks_modified = true;
   }
 
 });
