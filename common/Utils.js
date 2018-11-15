@@ -11,6 +11,7 @@
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Soup = imports.gi.Soup;
+const ByteArray = imports.byteArray;
 const Lang = imports.lang;
 
 const USER_AGENT = 'GNOME Shell - YouTubeSearchProvider - extension';
@@ -256,6 +257,9 @@ function check_update_ydl (callback) {
   }));
 }
 
+function bytesToString (array) {
+    return array instanceof Uint8Array ? ByteArray.toString (array) : array;
+}
 
 function get_app_data_dir () {
   let path = GLib.build_filenamev ([GLib.get_user_data_dir(),"newstream"]);
