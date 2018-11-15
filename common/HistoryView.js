@@ -83,6 +83,7 @@ var HistoryViewItem = new Lang.Class({
     //this.image.pixbuf = this.image.pixbuf.scale_simple (16, 16, 2);
     this.dbox.no_show_all = true;
     this.dbox.visible = false;
+    this.image.pixbuf = this.image.pixbuf.scale_simple (48, 48, true);
 
     this.local = new Gtk.Label ({label:this.details.data.local.views + " views", xalign:1, opacity: 0.7});
     this.local.get_style_context ().add_class ("small");
