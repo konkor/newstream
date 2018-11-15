@@ -87,7 +87,7 @@ var ResultView = new Lang.Class({
     if (res != 200) return;
     this.emit ('ready');
     this.clear_all ();
-    this.add_items (JSON.parse (data.toString()));
+    this.add_items (JSON.parse (Utils.bytesToString (data).toString()));
     if (this.scroll) this.scroll.vadjustment.value = 0;
   },
 
@@ -106,7 +106,7 @@ var ResultView = new Lang.Class({
       let item = new ResultViewItem (p);
       this.results.add (item);
       if (item.details.id) this.provider.get_info (item.details.id, Lang.bind (this, (d)=>{
-        let data = JSON.parse (d);
+        let data = JSON.parse (Utils.bytesToString (d));
         if (data.pageInfo.totalResults > 0) {
           item.details.parse (data.items[0]);
           item.show_details ();
@@ -194,7 +194,7 @@ var ResultViewItem = new Lang.Class({
     if (!this.details.data.channel.id) return;
     if (this.details.data.channel.thumbnails) this.get_channel_logo_url ();
     else if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
-      let data = JSON.parse (d);
+      let data = JSON.parse (Utils.bytesToString (d));
       if (data.pageInfo.totalResults > 0) {
         this.details.parse (data.items[0]);
         this.get_channel_logo_url ();

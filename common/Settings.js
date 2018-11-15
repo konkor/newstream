@@ -13,6 +13,10 @@ const Gdk = imports.gi.Gdk;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
+const APPDIR = getCurrentFile ()[1];
+imports.searchPath.unshift(APPDIR);
+const Utils = imports.common.Utils;
+
 let app_data_dir = get_app_data_dir ();
 
 let save = true;
@@ -139,7 +143,7 @@ var Settings = new Lang.Class({
     if (f.query_exists(null)) {
       var [res, ar, tags] = f.load_contents (null);
       if (res) try {
-        history = JSON.parse (ar);
+        history = JSON.parse (Utils.bytesToString (ar));
       } catch (e) {
         history = [];
       }
@@ -188,7 +192,7 @@ var Settings = new Lang.Class({
     if (f.query_exists(null)) {
       var [res, ar, tags] = f.load_contents (null);
       if (res) try {
-        data = JSON.parse (ar);
+        data = JSON.parse (Utils.bytesToString (ar));
       } catch (e) {
         print ("Can't load item " + app_data_dir + "/" + s + ".json ...");
       }
@@ -206,7 +210,7 @@ var Settings = new Lang.Class({
     if (f.query_exists(null)) {
       var [res, ar, tags] = f.load_contents (null);
       if (res) try {
-        view_history = JSON.parse (ar);
+        view_history = JSON.parse (Utils.bytesToString (ar));
       } catch (e) {
         view_history = [];
       }

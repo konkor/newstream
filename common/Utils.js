@@ -247,7 +247,7 @@ function check_update_ydl (callback) {
   fetch ("https://rg3.github.io/youtube-dl/update/LATEST_VERSION",
     null, null, Lang.bind (this, (text, s) => {
       if ((s == 200) && text) {
-        latest_version = text.toString().split("\n")[0];
+        latest_version = bytesToString (text).toString().split("\n")[0];
       }
       if (latest_version != current_version) {
         install_ydl ();
@@ -271,7 +271,7 @@ function get_app_data_dir () {
 let cmd_out, info_out;
 function get_info_string (cmd) {
     cmd_out = GLib.spawn_command_line_sync (cmd);
-    if (cmd_out[0]) info_out = cmd_out[1].toString().split("\n")[0];
+    if (cmd_out[0]) info_out = bytesToString (cmd_out[1]).toString().split("\n")[0];
     if (info_out) return info_out;
     return "";
 }
