@@ -41,6 +41,11 @@ var HistoryView = new Lang.Class({
     let history = this.settings.view_history.slice (page*IPP, (page+1)*IPP);
     //print (page*IPP, (page+1)*IPP,history.length,this.settings.view_history);
     if (!history.length) return;
+    if (page) this.pager.prev.token = (page - 1).toString ();
+    else this.pager.prev.token = "";
+    if ((this.settings.view_history.length - (page+1)*IPP) > 0) this.pager.next.token = (page + 1).toString ();
+    else this.pager.next.token = "";
+    this.pager.toggle ();
     this.clear_all ();
     history.forEach (p => {
       let item = new HistoryViewItem (this.settings.get_view_history_item (p));
@@ -51,6 +56,7 @@ var HistoryView = new Lang.Class({
       }
       this.results.add (item);
     });
+    if (this.scroll) this.scroll.vadjustment.value = 0;
   },
 
   add_date: function (date) {
@@ -58,6 +64,10 @@ var HistoryView = new Lang.Class({
     let label = new Gtk.Label({label:this.date, xalign:0.0, margin:6, sensitive:true});
     label.show_all ();
     this.results.add (label);
+  },
+
+  on_page_selected: function (o, token) {
+    this.query (parseInt (token));
   }
 });
 

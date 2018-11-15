@@ -91,8 +91,7 @@ var Player = new Lang.Class({
       }));
     } else {
       if (this.engine.state != 4) {
-        this.item.details.set_viewed ();
-        this.w.settings.add_view_history (this.item.details);
+        this.w.settings.add_view_history (this.item);
       }
       this.engine.play ();
     }
@@ -205,11 +204,7 @@ var Itembar = new Lang.Class({
     else if (o.name == "linkedin") uri = "https://www.linkedin.com/shareArticle?mini=true&url=" + uri + "&title=" + title + "&summary=&source=webjeda";
     else if (o.name == "email") uri = "mailto:?subject=" + title + "&body=Check out this video " + uri;
 
-    try {
-      if (this.app) this.app.launch_uris ([uri], null);
-    } catch (e) {
-      print (e);
-    }
+    Utils.launch_uri (uri);
   },
 
   set_link: function (id, title) {
@@ -300,29 +295,37 @@ var Channel = new Lang.Class({
 
 var Statistics = new Lang.Class({
   Name: "Statistics",
-  Extends: Gtk.Box,
+  Extends: Gtk.Button,
 
   _init: function () {
-    this.parent ({orientation:Gtk.Orientation.VERTICAL, margin: 8});
+    this.parent ();
+    this.get_style_context ().add_class ("channel-button");
+    this.set_relief (Gtk.ReliefStyle.NONE);
+    let contents = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL, margin: 8});
+    this.add (contents);
 
     this.views = new Gtk.Label ({xalign:0.5, yalign:1.0, opacity:0.8});
-    this.pack_start (this.views, true, true, 0);
+    this.views.get_style_context ().add_class ("small");
+    contents.pack_start (this.views, true, true, 0);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
-    this.pack_start (box, true, true, 0);
+    contents.pack_start (box, true, true, 0);
 
     this.likes = new Gtk.Label ({xalign:0.5, yalign:0.0, opacity:0.8});
     this.likes.get_style_context ().add_class ("small");
     box.pack_start (this.likes, true, true, 0);
 
     this.show_all ();
-    this.sensitive = false;
+    this.connect ("clicked", () => {
+      Utils.launch_uri (this.url);
+    });
   },
 
   load: function (data) {
     if (!data) return;
-    this.views.set_text (Utils.format_size (data.views) + " views");
+    this.views.set_text (Utils.format_size_long (data.views) + " views");
     this.likes.set_text (Utils.format_size (data.likes) + " / " + Utils.format_size (data.dislikes));
+    this.url = "https://youtu.be/" + data.id;
   }
 });
 

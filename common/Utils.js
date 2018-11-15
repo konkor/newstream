@@ -119,6 +119,16 @@ var SpawnPipe = new Lang.Class({
   }
 });
 
+function launch_uri (uri) {
+  let app = Gio.AppInfo.get_default_for_uri_scheme ("https");
+  if (!app || !uri) return;
+  try {
+    if (app) app.launch_uris ([uri], null);
+  } catch (e) {
+    print (e);
+  }
+}
+
 function age (date) {
   let s = "just now";
   if (!date) return "";
@@ -152,6 +162,20 @@ function format_size (number) {
   return s;
 }
 
+function format_size_long (number) {
+  let s = "", n;
+  if (!number) return "0";
+  n = number.toString ().trim (); s = "";
+  if (!n) return "0";
+
+  for (let i = n.length - 1; i > -1; i -= 3) {
+    var start = i - 2;
+    if (start < 0) start = 0;
+    s = n.substring (start, i + 1) + " " + s;
+  }
+
+  return s.trim ();
+}
 function get_round (number, base) {
   if (!base) return "0";
   var s = Math.round (number/base, 1).toString();

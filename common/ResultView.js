@@ -60,7 +60,7 @@ var ResultView = new Lang.Class({
     results_box.pack_start (this.results, true, false, 0);
 
     this.pager = new Pager ();
-    results_box.add (this.pager);
+    this.add (this.pager);
 
     space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);
@@ -74,7 +74,7 @@ var ResultView = new Lang.Class({
       }
     }));
     this.pager.connect ("page-selected", (o, token) => {
-      this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
+      this.on_page_selected (o, token);
     });
 
   },
@@ -91,11 +91,15 @@ var ResultView = new Lang.Class({
     if (this.scroll) this.scroll.vadjustment.value = 0;
   },
 
+  on_page_selected: function (o, token) {
+    this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
+  },
+
   add_items: function (respond) {
     if (respond.prevPageToken) this.pager.prev.token = respond.prevPageToken;
     else this.pager.prev.token = "";
     if (respond.nextPageToken) this.pager.next.token = respond.nextPageToken;
-    else this.pager.prev.token = "";
+    else this.pager.next.token = "";
     if (respond.etag) this.etag = respond.etag;
     this.pager.toggle ();
     respond.items.forEach (p => {
@@ -402,9 +406,9 @@ var Pager = new Lang.Class({
   },
 
   toggle: function () {
-    this.first.visible = this.prev.token;
-    this.prev.visible = this.prev.token;
-    this.next.visible = this.next.token;
+    this.first.visible = !!this.prev.token;
+    this.prev.visible = !!this.prev.token;
+    this.next.visible = !!this.next.token;
   }
 });
 
