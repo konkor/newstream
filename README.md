@@ -11,7 +11,7 @@
 
 `It's very first initial versions and all could be changed any time.`
 
-![screencast](https://i.imgur.com/FS7gWU6.png)
+![screencast](https://i.imgur.com/NZdkhYd.png)
 
 <p align="center">
 <a href="https://github.com/konkor/newstream/releases/download/v0.1.2/newstream_0.1.2-1_all.deb"><img src="https://i.imgur.com/Oe4O8bm.png" alt="Latest deb package" title="Ubuntu/Debian/Mint/Elementary..."></a></br>
