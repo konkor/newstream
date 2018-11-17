@@ -12,7 +12,7 @@ icons_DATA= \
     open-menu-symbolic.svg\
     edit-copy-symbolic.svg\
     author.svg\
-    bookmark.svg\
+    bookmark_off.svg\
     share.svg
 
 #application social icons

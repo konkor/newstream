@@ -1,6 +1,7 @@
 @define-color newstream_base_color shade (@theme_base_color, 0.9);
 @define-color newstream_fg_color shade (@theme_fg_color, 0.9);
 @define-color newstream_bg_color shade (@theme_bg_color, 0.9);
+@define-color newstream_selection_color @theme_selected_bg_color;
 
 * {
   font-family: Roboto, Cantarell, Sans-Serif;
@@ -20,4 +21,11 @@
 }
 .channel-button:active {
   background-color: @newstream_bg_color;
+}
+.bookmark {
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 0;
+}.selected {
+  color: @newstream_selection_color;
 }
