@@ -227,7 +227,8 @@ var MainWindow = new Lang.Class ({
       license_type: Gtk.License.GPL_3_0,
       authors: ["konkor"],
       website: "https://github.com/konkor/newstream",
-      logo: this.icon
+      logo: this.icon,
+      logo_icon_name: "io.github.konkor.newstream"
     });
     dlg.run ();
     dlg.destroy ();
