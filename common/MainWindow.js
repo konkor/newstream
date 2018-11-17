@@ -146,6 +146,7 @@ var MainWindow = new Lang.Class ({
 
     mii = new Gtk.MenuItem ({label:"About"});
     mmenu.add (mii);
+    mii.connect ("activate", () => {this.about ()});
     mmenu.show_all ();
 
     this.menu_button.set_popup (mmenu);
@@ -197,10 +198,10 @@ var MainWindow = new Lang.Class ({
   },
 
   on_search: function () {
-   if (!this.searchbar.entry.text) return;
-   this.back.last = this.stack.visible_child_name;
-   this.searchview.query (this.searchbar.entry.text);
-   this.settings.history_add (this.searchbar.entry.text);
+    if (!this.searchbar.entry.text) return;
+    this.back.last = this.stack.visible_child_name;
+    this.searchview.query (this.searchbar.entry.text);
+    this.settings.history_add (this.searchbar.entry.text);
   },
 
   on_back: function () {
@@ -210,12 +211,26 @@ var MainWindow = new Lang.Class ({
   },
 
   on_key_press: function (e) {
-   var [,key] = e.get_keyval ();
-   switch (key) {
-    case Gdk.KEY_Escape:
-     if (this.back.visible) this.on_back ();
-     break;
-   }
+    var [,key] = e.get_keyval ();
+    switch (key) {
+     case Gdk.KEY_Escape:
+      if (this.back.visible) this.on_back ();
+      break;
+    }
+  },
+
+  about: function () {
+    let dlg = new Gtk.AboutDialog ({
+      transient_for: this,
+      program_name: "New Stream",
+      copyright: "Copyright © 2018 konkor <konkor.github.io>",
+      license_type: Gtk.License.GPL_3_0,
+      authors: ["konkor"],
+      website: "https://github.com/konkor/newstream",
+      logo: this.icon
+    });
+    dlg.run ();
+    dlg.destroy ();
   }
 });
 
