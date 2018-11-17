@@ -2,6 +2,7 @@
 commondir = $(datadir)/newstream/common
 common_DATA = \
     Application.js \
+    BookmarkView.js \
     HistoryView.js \
     ItemView.js \
     Layouts.js \
