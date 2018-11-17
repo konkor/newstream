@@ -82,7 +82,11 @@ var MainWindow = new Lang.Class ({
     this.hb.add (this.section);
 
     let mmenu = new Gtk.Menu ();
-    let mii = new Gtk.MenuItem ({label:"History"});
+    let mii = new Gtk.MenuItem ({label:"Bookmarks"});
+    mmenu.add (mii);
+    mii.connect ("activate", () => {this.on_stack_update (this, "bookmarks")});
+
+    mii = new Gtk.MenuItem ({label:"History"});
     mmenu.add (mii);
     mii.connect ("activate", () => {this.on_stack_update (this, "history")});
 
@@ -140,6 +144,9 @@ var MainWindow = new Lang.Class ({
 
     this.history = new Layouts.HistoryLayout (this);
     this.stack.add_named (this.history, "history");
+
+    //this.bookmarks = new Layouts.BookmarkLayout (this);
+    //this.stack.add_named (this.bookmarks, "bookmarks");
 
     this.hotview.query ();
 

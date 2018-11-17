@@ -227,6 +227,8 @@ var Settings = new Lang.Class({
     }
   },
 
+  //get bookmarks () { return bookmarks; },
+
   booked: function (id) {
     return id && (bookmarks.indexOf (id) > -1);
   },
