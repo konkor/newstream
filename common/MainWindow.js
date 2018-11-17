@@ -81,25 +81,11 @@ var MainWindow = new Lang.Class ({
     this.section.width_chars = 12;
     this.hb.add (this.section);
 
-    let mmenu = new Gtk.Menu ();
-    let mii = new Gtk.MenuItem ({label:"Bookmarks"});
-    mmenu.add (mii);
-    mii.connect ("activate", () => {this.on_stack_update (this, "bookmarks")});
-
-    mii = new Gtk.MenuItem ({label:"History"});
-    mmenu.add (mii);
-    mii.connect ("activate", () => {this.on_stack_update (this, "history")});
-
-    mii = new Gtk.MenuItem ({label:"About"});
-    mmenu.add (mii);
-    mmenu.show_all ();
-
     this.menu_button = new Gtk.MenuButton ({tooltip_text:"Application Menu"});
     this.menu_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/open-menu-symbolic.svg");
     this.menu_button.get_style_context ().add_class ("hb-button");
     this.menu_button.set_relief (Gtk.ReliefStyle.NONE);
     //this.menu_button.menu_model = mmenu;
-    this.menu_button.set_popup (mmenu);
     //this.menu_button.margin = 6;
     this.hb.pack_end (this.menu_button);
 
@@ -145,8 +131,24 @@ var MainWindow = new Lang.Class ({
     this.history = new Layouts.HistoryLayout (this);
     this.stack.add_named (this.history, "history");
 
-    //this.bookmarks = new Layouts.BookmarkLayout (this);
-    //this.stack.add_named (this.bookmarks, "bookmarks");
+    this.bookmarks = new Layouts.BookmarkLayout (this);
+    this.stack.add_named (this.bookmarks, "bookmarks");
+
+    let mmenu = new Gtk.Menu (), mii;
+
+    mii = new Gtk.MenuItem ({label:"Bookmarks"});
+    mmenu.add (mii);
+    mii.connect ("activate", () => {this.on_stack_update (this, "bookmarks")});
+
+    mii = new Gtk.MenuItem ({label:"History"});
+    mmenu.add (mii);
+    mii.connect ("activate", () => {this.on_stack_update (this, "history")});
+
+    mii = new Gtk.MenuItem ({label:"About"});
+    mmenu.add (mii);
+    mmenu.show_all ();
+
+    this.menu_button.set_popup (mmenu);
 
     this.hotview.query ();
 

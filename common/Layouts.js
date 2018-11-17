@@ -16,7 +16,7 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const ResultView = imports.common.ResultView;
 const HistoryView = imports.common.HistoryView;
-//const BookmarkView = imports.common.BookmarkView;
+const BookmarkView = imports.common.BookmarkView;
 const Item = imports.common.ItemView;
 
 
@@ -42,7 +42,7 @@ var HistoryLayout = new Lang.Class({
   }
 });
 
-/*var BookmarkLayout = new Lang.Class({
+var BookmarkLayout = new Lang.Class({
   Name: "BookmarkLayout",
   Extends: BookmarkView.BookmarkView,
 
@@ -53,9 +53,9 @@ var HistoryLayout = new Lang.Class({
   },
 
   setup: function (o, e) {
-    if (this.w.settings.view_history_modified) this.query ();
-    this.w.settings.view_history_modified = false;
-    this.w.section.label = "History";
+    if (this.w.settings.bookmarks_modified) this.query ();
+    this.w.settings.bookmarks_modified = false;
+    this.w.section.label = "Bookmarks";
     this.w.home.visible = false;
     this.w.back.visible = true;
     this.w.searchbar.visible = false;
@@ -63,7 +63,6 @@ var HistoryLayout = new Lang.Class({
     this.w.menu_button.visible = true;
   }
 });
-*/
 
 var ItemLayout = new Lang.Class({
   Name: "ItemLayout",

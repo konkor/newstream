@@ -29,9 +29,6 @@ var BookmarkView = new Lang.Class({
     this.settings = parent.settings;
     this.results.max_children_per_line = 1;
     this.results.homogeneous = false;
-
-    this.date = "";
-    this.date_options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   },
 
   query: function (page) {
@@ -43,27 +40,16 @@ var BookmarkView = new Lang.Class({
     if (!marks.length) return;
     if (page) this.pager.prev.token = (page - 1).toString ();
     else this.pager.prev.token = "";
-    if ((this.settings.view_history.length - (page+1)*IPP) > 0) this.pager.next.token = (page + 1).toString ();
+    if ((this.settings.bookmarks.length - (page+1)*IPP) > 0) this.pager.next.token = (page + 1).toString ();
     else this.pager.next.token = "";
     this.pager.toggle ();
     this.clear_all ();
     marks.forEach (p => {
       let item = new BookmarkViewItem (this.settings.get_view_history_item (p));
       item.show_details ();
-      var d = new Date (item.details.data.local.last).toLocaleDateString ("lookup", this.date_options);
-      if (this.date != d) {
-        this.add_date (d);
-      }
       this.results.add (item);
     });
     if (this.scroll) this.scroll.vadjustment.value = 0;
-  },
-
-  add_date: function (date) {
-    this.date = date;
-    let label = new Gtk.Label({label:this.date, xalign:0.0, margin:6, sensitive:true});
-    label.show_all ();
-    this.results.add (label);
   },
 
   on_page_selected: function (o, token) {

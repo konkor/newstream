@@ -227,7 +227,7 @@ var Settings = new Lang.Class({
     }
   },
 
-  //get bookmarks () { return bookmarks; },
+  get bookmarks () { return bookmarks; },
 
   booked: function (id) {
     return id && (bookmarks.indexOf (id) > -1);
@@ -243,6 +243,7 @@ var Settings = new Lang.Class({
         bookmarks = [];
       }
     }
+    this.bookmarks_modified = true;
   },
 
   toggle_bookmark: function (id, state) {

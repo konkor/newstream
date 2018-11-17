@@ -242,7 +242,7 @@ var Itembar = new Lang.Class({
 
   get_bookmark: function () {
     let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"16\" width=\"18\" version=\"1.1\" viewBox=\"0 0 4.7624999 4.2333333\"><path d=\"m3.53 3.94c-0.21 0.15-0.94-0.42-1.2-0.42-0.25 0-0.99 0.57-1.19 0.42-0.208-0.15 0.11-1.03 0.03-1.27-0.07-0.24-0.846-0.76-0.767-1 0.078-0.25 1.01-0.21 1.22-0.36s0.46-1.05 0.72-1.04c0.25-0.005 0.51 0.89 0.71 1.04 0.21 0.15 1.14 0.12 1.22 0.36s-0.7 0.77-0.78 1.01c-0.07 0.24 0.24 1.12 0.04 1.26z\" fill=\"#bebebe\"/></svg>";
-    let c = this.bookmark.get_style_context().get_property ("color", 0);
+    let c = this.bookmark.get_style_context().get_color (0);
     if (c) svg = svg.replace (/bebebe/g, "%02x%02x%02x".format (c.red*255,c.green*255,c.blue*255));
     let stream = Gio.MemoryInputStream.new_from_data (svg, null);
     return GdkPixbuf.Pixbuf.new_from_stream (stream, null);
