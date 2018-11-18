@@ -103,6 +103,22 @@ var NewStreamApplication = new Lang.Class ({
       { name: "toggle-play",
         activate: () => {this.on_toggle_play ()},
         accels: ["space"]
+      },
+      { name: "seek-forward",
+        activate: () => {
+          var player = this.window.itemview.player;
+          if (player.engine.state == 4) player.seek_delta (10);
+          else player.seek_frame (1);
+        },
+        accels: ["Right"]
+      },
+      { name: "seek-backward",
+        activate: () => {
+          var player = this.window.itemview.player;
+          if (player.engine.state == 4) player.seek_delta (-10);
+          else player.seek_frame (-1);
+        },
+        accels: ["Left"]
       }
     ];
     action_entries.forEach (Lang.bind (this, (entry) => {

@@ -70,6 +70,7 @@ var Player = new Lang.Class({
 
   load: function (item) {
     if (!item || !item.id) return;
+    this.seek_unshedule ();
     if (!this.item || (this.item.id != item.id)) {
       this.item = item;
       this.get_cover ();
@@ -113,8 +114,37 @@ var Player = new Lang.Class({
     else this.engine.play ();
   },
 
-  seek: function (pos) {
-    if (this.engine) this.engine.seek (pos);
+  seek: function (pos, accurate) {
+    accurate = accurate || false;
+    if (this.engine) this.engine.seek (pos, accurate);
+  },
+
+  seek_delta: function (offset, accurate) {
+    if (!this.item) return;
+    let pos = this.video.contents.controls.current_position + offset * 1000;
+    let dur = this.video.contents.controls.duration;
+    if (pos > dur) pos = dur;
+    if (pos < 0) pos = 0;
+    this.seek_unshedule ();
+    this.seek_id = GLib.timeout_add (100, 250, ()=>{
+      this.seek_id = 0;
+      this.seek (pos, accurate);
+      return false;
+    });
+    //this.seek (pos, accurate);
+  },
+
+  seek_frame: function (offset) {
+    if (!this.item) return;
+    this.pause ();
+    this.seek_delta (offset / 30, 3, true);
+  },
+
+  seek_unshedule: function () {
+    if (this.seek_id) {
+      GLib.source_remove (this.seek_id);
+      this.seek_id = 0;
+    }
   },
 
   get_cover: function () {
@@ -782,11 +812,11 @@ var VideoControl = new Lang.Class ({
       this.set_time (this.time_duration, dur);
       this.seek_scale.sensitive = this.seekable;
     }
-    if (dur <= 0) this.current_position = 0;
-    else this.current_position = pos / dur;
+    if (dur <= 0) dur = 1;
+    this.current_position = pos;
 
     if (!this.seek_lock) {
-      this.seek_scale.set_value (this.current_position * 65535);
+      this.seek_scale.set_value (this.current_position / dur * 65535);
       this.set_time (this.time, pos);
     }
   },
