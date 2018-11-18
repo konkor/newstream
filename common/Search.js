@@ -26,6 +26,8 @@ var Searchbar = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.settings = sender.settings;
     this.get_style_context ().add_class ("search-bar");
+    let search_actions = new Gio.SimpleActionGroup ();
+    this.insert_action_group ("search", search_actions);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
     box.margin = 8;
@@ -70,10 +72,14 @@ var Searchbar = new Lang.Class({
       this.history.update ();
     }));
     this.entry.connect ('focus-in-event', Lang.bind (this, (o, e)=>{
+      let app = Gio.Application.get_default();
+      app.disable_global_actions ();
       this.history.visible = true;
     }));
     this.entry.connect ('focus-out-event', Lang.bind (this, (o, e)=>{
       //this.history.visible = false;
+      let app = Gio.Application.get_default();
+      app.enable_global_actions ();
       GLib.timeout_add (0, 200, Lang.bind (this, ()=>{
         this.history.visible = false;
         return false;

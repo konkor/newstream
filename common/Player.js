@@ -89,6 +89,7 @@ var Player = new Lang.Class({
         //print (p.format);
         //print (p.url);
       }));
+      this.w.application.lookup_action ("player-enabled").activate (null);
     } else {
       if (this.engine.state != 4) {
         this.w.settings.add_view_history (this.item);
@@ -104,6 +105,11 @@ var Player = new Lang.Class({
 
   pause: function () {
     if (this.engine) this.engine.pause ();
+  },
+
+  toggle_play: function () {
+    if (this.engine.state == 4) this.engine.pause ();
+    else this.engine.play ();
   },
 
   seek: function (pos) {
@@ -466,7 +472,9 @@ var FullscreenWindow = new Lang.Class({
     this.deletable = false;
     this.transient_for = null;
 
-    this.control = null;
+    //this.control = null;
+    let app = Gio.Application.get_default();
+    this.application = app;
 
     this.connect ('window_state_event', Lang.bind (this, (o, e)=>{
       var state = this.window.get_state();

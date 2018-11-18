@@ -34,11 +34,123 @@ var NewStreamApplication = new Lang.Class ({
     this.parent();
     this.window = new Window.MainWindow (this);
     this.add_window (this.window);
+
+    let action_entries = [
+      { name: "bookmarks",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "bookmarks");
+        },
+        accels: ["b", "<Primary>b"]
+      },
+      { name: "history",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "history");
+        },
+        accels: ["h", "<Primary>h"]
+      },
+      { name: "search",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "search");
+        },
+        accels: ["s", "<Primary>s"],
+        enabled: false
+      },
+      { name: "search-enabled",
+        activate: () => {
+          this.search_enabled = true;
+          this.lookup_action ("search").set_enabled (true);
+        }
+      },
+      { name: "player",
+        activate: () => {
+          this.unfullscreen ();
+          if (this.window.itemview.player.item)
+            this.window.on_stack_update (this, "item");
+        },
+        accels: ["p", "<Primary>p"],
+        enabled: false
+      },
+      { name: "player-enabled",
+        activate: () => {
+          this.player_enabled = true;
+          this.lookup_action ("player").set_enabled (true);
+        }
+      },
+      { name: "back-layout",
+        activate: () => {this.on_back_layout ()},
+        accels: ["Escape"]
+      },
+      { name: "toggle-fullscreen",
+        activate: () => {this.on_toggle_fullscreen ()},
+        accels: ["f", "<Alt>Return"]
+      },
+      { name: "toggle-play",
+        activate: () => {this.on_toggle_play ()},
+        accels: ["space"]
+      }
+    ];
+    action_entries.forEach (Lang.bind (this, (entry) => {
+      let props = {};
+      ['name', 'state', 'parameter_type'].forEach ((prop) => {
+        if (entry[prop]) props[prop] = entry[prop];
+      });
+      let action = new Gio.SimpleAction (props);
+      if (entry.create_hook) entry.create_hook (action);
+      if (entry.activate) action.connect ('activate', entry.activate);
+      if (entry.change_state) action.connect ('change-state', entry.change_state);
+      if (entry.accels) this.set_accels_for_action ('app.' + entry.name, entry.accels);
+      if (typeof entry.enabled !== 'undefined' ) action.set_enabled (entry.enabled);
+      this.add_action (action);
+    }));
   },
 
-  vfunc_activate: function() {
+  vfunc_activate: function () {
     this.window.show_all ();
     this.window.present ();
+  },
+
+  on_toggle_fullscreen: function () {
+    if (this.window.stack.visible_child_name == "item")
+      this.window.itemview.player.video.toggle_fullscreen ();
+  },
+
+  unfullscreen: function () {
+    if (this.window.itemview.player.video.fullscreen)
+      this.window.itemview.player.video.toggle_fullscreen ();
+  },
+
+  on_back_layout: function () {
+    if (this.window.itemview.player.video.fullscreen)
+      this.window.itemview.player.video.toggle_fullscreen ();
+    else if (this.window.back.visible) this.window.on_back ();
+  },
+
+  on_toggle_play: function () {
+    if (this.window.itemview.player.item)
+      this.window.itemview.player.toggle_play ();
+  },
+
+  enable_global_actions: function () {
+    this.lookup_action ("back-layout").set_enabled (true);
+    this.lookup_action ("toggle-fullscreen").set_enabled (true);
+    this.lookup_action ("toggle-play").set_enabled (true);
+    this.lookup_action ("bookmarks").set_enabled (true);
+    this.lookup_action ("history").set_enabled (true);
+    this.lookup_action ("player").set_enabled (this.player_enabled);
+    this.lookup_action ("search").set_enabled (this.search_enabled);
+  },
+
+  disable_global_actions: function () {
+    this.lookup_action ("back-layout").set_enabled (false);
+    this.lookup_action ("toggle-fullscreen").set_enabled (false);
+    this.lookup_action ("toggle-play").set_enabled (false);
+    this.lookup_action ("bookmarks").set_enabled (false);
+    this.lookup_action ("history").set_enabled (false);
+    this.lookup_action ("player").set_enabled (false);
+    this.lookup_action ("search").set_enabled (false);
   }
 });
 

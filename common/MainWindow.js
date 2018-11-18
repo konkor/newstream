@@ -136,19 +136,31 @@ var MainWindow = new Lang.Class ({
 
     let mmenu = new Gtk.Menu (), mii;
 
-    mii = new Gtk.MenuItem ({label:"Bookmarks"});
+    this.player_mi = new Gtk.MenuItem ({label:"Player", sensitive:false});
+    this.set_accel (this.player_mi, "P");
+    this.player_mi.set_action_name ("app.player");
+    mmenu.add (this.player_mi);
+
+    mii = new Gtk.MenuItem ({label:"Search"});
+    this.set_accel (mii, "<Primary>S");
+    mii.set_action_name ("app.search");
     mmenu.add (mii);
-    mii.connect ("activate", () => {this.on_stack_update (this, "bookmarks")});
+
+    mii = new Gtk.MenuItem ({label:"Bookmarks"});
+    this.set_accel (mii, "<Ctrl>B");
+    mii.set_action_name ("app.bookmarks");
+    mmenu.add (mii);
 
     mii = new Gtk.MenuItem ({label:"History"});
+    this.set_accel (mii, "<Ctrl>H");
+    mii.set_action_name ("app.history");
     mmenu.add (mii);
-    mii.connect ("activate", () => {this.on_stack_update (this, "history")});
 
     mii = new Gtk.MenuItem ({label:"About"});
     mmenu.add (mii);
     mii.connect ("activate", () => {this.about ()});
-    mmenu.show_all ();
 
+    mmenu.show_all ();
     this.menu_button.set_popup (mmenu);
 
     this.hotview.query ();
@@ -156,11 +168,12 @@ var MainWindow = new Lang.Class ({
     this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
     this.searchview.connect ('ready', Lang.bind (this, ()=>{
       this.stack.visible_child_name = "search";
+      this.application.lookup_action ("search-enabled").activate (null);
     }));
     this.searchbar.search_button.connect ('clicked', Lang.bind (this, this.on_search));
     this.back.connect ('clicked', Lang.bind (this, this.on_back));
-    this.connect ('key-press-event', Lang.bind (this, (o,e)=>{
-     this.on_key_press (e);
+    this.connect ('delete_event', Lang.bind (this, ()=>{
+      this.application.quit ();
     }));
     this.stack.connect ('notify::visible-child-name', Lang.bind (this, (o,e)=>{
      if (this.stack.visible_child_name != "item" && this.itemview.playing)
@@ -168,6 +181,13 @@ var MainWindow = new Lang.Class ({
      else this.phones.visible = false;
     }));
     this.connect ('unmap', Lang.bind (this, this.save_geometry));
+  },
+
+  set_accel: function (mi, accel) {
+    if (!accel || !mi) return;
+    let [key,mods] = Gtk.accelerator_parse (accel);
+    let label = mi.get_child ();
+    if (label && key) label.set_accel (key, mods);
   },
 
   save_geometry: function () {
@@ -208,15 +228,6 @@ var MainWindow = new Lang.Class ({
     var view = this.back.last;
     if (!view) return;
     this.stack.visible_child_name = view;
-  },
-
-  on_key_press: function (e) {
-    var [,key] = e.get_keyval ();
-    switch (key) {
-     case Gdk.KEY_Escape:
-      if (this.back.visible) this.on_back ();
-      break;
-    }
   },
 
   about: function () {
