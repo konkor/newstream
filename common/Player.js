@@ -79,7 +79,11 @@ var Player = new Lang.Class({
         this.formats = d;
         var url = "";
         if (d && d.formats) d.formats.forEach (p => {
-          if (d.format_id == p.format_id) url = p.url;
+          if (d.format_id == p.format_id) {
+            url = p.url;
+            if (p.fps) this.fps = p.fps;
+            else this.fps = 30;
+          }
         });
         if (url) {
           this.w.settings.add_view_history (this.item);
@@ -136,8 +140,9 @@ var Player = new Lang.Class({
 
   seek_frame: function (offset) {
     if (!this.item) return;
+    let fps = this.fps || 30;
     this.pause ();
-    this.seek_delta (offset / 30, 3, true);
+    this.seek_delta (offset / fps, true);
   },
 
   seek_unshedule: function () {
