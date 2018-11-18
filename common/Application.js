@@ -17,6 +17,8 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const Window = imports.common.MainWindow;
 
+let inhibit_id = 0;
+
 var NewStreamApplication = new Lang.Class ({
   Name: "NewStreamApplication",
   Extends: Gtk.Application,
@@ -83,6 +85,17 @@ var NewStreamApplication = new Lang.Class ({
         activate: () => {this.on_back_layout ()},
         accels: ["Escape"]
       },
+      { name: "inhibit",
+        activate: () => {
+          this.uninhibit_cb ();
+          inhibit_id = this.inhibit (this.window, Gtk.ApplicationInhibitFlags.IDLE, "Media playing");
+        }
+      },
+      { name: "uninhibit",
+        activate: () => {
+          this.uninhibit_cb ();
+        }
+      },
       { name: "toggle-fullscreen",
         activate: () => {this.on_toggle_fullscreen ()},
         accels: ["f", "<Alt>Return"]
@@ -110,6 +123,11 @@ var NewStreamApplication = new Lang.Class ({
   vfunc_activate: function () {
     this.window.show_all ();
     this.window.present ();
+  },
+
+  uninhibit_cb: function () {
+    if (inhibit_id) this.uninhibit (inhibit_id);
+    inhibit_id = 0;
   },
 
   on_toggle_fullscreen: function () {

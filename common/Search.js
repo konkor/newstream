@@ -26,8 +26,6 @@ var Searchbar = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.settings = sender.settings;
     this.get_style_context ().add_class ("search-bar");
-    let search_actions = new Gio.SimpleActionGroup ();
-    this.insert_action_group ("search", search_actions);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
     box.margin = 8;

@@ -442,7 +442,7 @@ var VideoFrame = new Lang.Class({
       this.video_window.show ();
       this.video_window.fullscreen ();
     }
-    this.get_toplevel ().inhibit ();
+    this.get_toplevel ().application.lookup_action ("inhibit").activate (null);
   },
 
   move_internal: function () {
@@ -455,7 +455,7 @@ var VideoFrame = new Lang.Class({
       this.contents.show_all ();
       this.fullscreen = false;
     }
-    this.get_toplevel ().uninhibit ();
+    this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
   }
 });
 

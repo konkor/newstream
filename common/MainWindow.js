@@ -26,7 +26,6 @@ const Utils = imports.common.Utils;
 
 let theme_gui = APPDIR + "/data/themes/default/gtk.css";
 let cssp = null;
-let inhibit_id = 0;
 
 var MainWindow = new Lang.Class ({
   Name: "MainWindow",
@@ -197,16 +196,6 @@ var MainWindow = new Lang.Class ({
   restore_position: function () {
     if (!this.is_maximized)
       this.move (this.settings.window_x, this.settings.window_y);
-  },
-
-  inhibit: function () {
-    this.uninhibit ();
-    inhibit_id = this.application.inhibit (this, Gtk.ApplicationInhibitFlags.IDLE, "Media playing");
-  },
-
-  uninhibit: function () {
-    if (inhibit_id) this.application.uninhibit (inhibit_id);
-    inhibit_id = 0;
   },
 
   on_stack_update: function (o, index) {
