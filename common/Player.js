@@ -64,6 +64,7 @@ var Player = new Lang.Class({
           this.w.section.label = this.item.title;
           this.video.contents.header.label = this.item.title;
       }
+      if (n != 4) this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
     }));
   },
 
