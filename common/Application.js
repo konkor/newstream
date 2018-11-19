@@ -119,6 +119,20 @@ var NewStreamApplication = new Lang.Class ({
           else player.seek_frame (-1);
         },
         accels: ["Left"]
+      },
+      { name: "volume-up",
+        activate: () => {
+          var player = this.window.itemview.player;
+          if (player) player.set_volume_delta (0.05);
+        },
+        accels: ["Up"]
+      },
+      { name: "volume-down",
+        activate: () => {
+          var player = this.window.itemview.player;
+          if (player) player.set_volume_delta (-0.05);
+        },
+        accels: ["Down"]
       }
     ];
     action_entries.forEach (Lang.bind (this, (entry) => {

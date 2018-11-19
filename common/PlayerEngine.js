@@ -40,6 +40,8 @@ var PlayerEngine = new Lang.Class({
     //this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
     //this.playbin.set_property("video-sink", this.videosink);
 
+    this.current_volume = 0;
+
     this.bus = this.playbin.get_bus();
     this.bus.add_signal_watch();
     this.bus.connect ("message", Lang.bind (this, this.on_bus_message));
@@ -65,6 +67,20 @@ var PlayerEngine = new Lang.Class({
     if (!res) dur = -1;
     else dur /= Gst.MSECOND;
     return dur;
+  },
+
+  get volume () {
+    if (!this.current_volume && this.playbin)
+      this.current_volume = this.playbin.get_volume (1);
+    return this.current_volume;
+  },
+
+  set volume (val) {
+    if (!this.playbin) return;
+    val = val || 0;
+    if (val > 1) val = 1.0;
+    this.playbin.set_volume (1, val);
+    this.current_volume = val;
   },
 
   open: function (uri) {

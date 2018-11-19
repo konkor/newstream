@@ -65,6 +65,7 @@ var Player = new Lang.Class({
           this.video.contents.header.label = this.item.title;
       }
       if (n != 4) this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
+      else if (this.video.fullscreen) this.get_toplevel ().application.lookup_action ("inhibit").activate (null);
     }));
   },
 
@@ -96,6 +97,7 @@ var Player = new Lang.Class({
         //print (p.url);
       }));
       this.w.application.lookup_action ("player-enabled").activate (null);
+      //this.engine.volume = 0.5;
     } else {
       if (this.engine.state != 4) {
         this.w.settings.add_view_history (this.item);
@@ -150,6 +152,18 @@ var Player = new Lang.Class({
       GLib.source_remove (this.seek_id);
       this.seek_id = 0;
     }
+  },
+
+  set_volume: function (volume) {
+    if (!this.engine) return;
+    this.engine.volume = volume;
+  },
+
+  set_volume_delta: function (offset) {
+    let vol = this.engine.volume + offset;
+    if (vol > 1) vol = 1;
+    if (vol < 0) vol = 0;
+    this.set_volume (vol);
   },
 
   get_cover: function () {
