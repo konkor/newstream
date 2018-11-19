@@ -12,6 +12,7 @@ const GObject = imports.gi.GObject;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Lang = imports.lang;
 
@@ -57,6 +58,8 @@ var ResultView = new Lang.Class({
       max_children_per_line: 3,
       valign: Gtk.Align.START
     });
+    this.results.can_focus = true;
+    this.results.events |= Gdk.EventMask.FOCUS_CHANGE_MASK;
     results_box.pack_start (this.results, true, false, 0);
 
     this.pager = new Pager ();
@@ -76,7 +79,28 @@ var ResultView = new Lang.Class({
     this.pager.connect ("page-selected", (o, token) => {
       this.on_page_selected (o, token);
     });
+    this.results.connect ('key_release_event', Lang.bind (this, (o, e)=>{
+      let state = o.get_selected_children ().length < 1;
+      let app = Gio.Application.get_default();
+      app.lookup_action ("seek-forward").set_enabled (state);
+      app.lookup_action ("seek-backward").set_enabled (state);
+      app.lookup_action ("volume-up").set_enabled (state);
+      app.lookup_action ("volume-down").set_enabled (state);
+    }));
+    this.results.connect ('key_press_event', Lang.bind (this, (o, e)=>{
+      this.enable_global_actions ();
+    }));
+    this.results.connect ('leave_notify_event', Lang.bind (this, (o, e)=>{
+      this.enable_global_actions ();
+    }));
+  },
 
+  enable_global_actions: function () {
+    let app = Gio.Application.get_default();
+    app.lookup_action ("seek-forward").set_enabled (true);
+    app.lookup_action ("seek-backward").set_enabled (true);
+    app.lookup_action ("volume-up").set_enabled (true);
+    app.lookup_action ("volume-down").set_enabled (true);
   },
 
   query: function (words) {

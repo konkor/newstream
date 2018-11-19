@@ -189,6 +189,10 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("history").set_enabled (true);
     this.lookup_action ("player").set_enabled (this.player_enabled);
     this.lookup_action ("search").set_enabled (this.search_enabled);
+    this.lookup_action ("seek-forward").set_enabled (true);
+    this.lookup_action ("seek-backward").set_enabled (true);
+    this.lookup_action ("volume-up").set_enabled (true);
+    this.lookup_action ("volume-down").set_enabled (true);
   },
 
   disable_global_actions: function () {
@@ -199,6 +203,10 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("history").set_enabled (false);
     this.lookup_action ("player").set_enabled (false);
     this.lookup_action ("search").set_enabled (false);
+    this.lookup_action ("seek-forward").set_enabled (false);
+    this.lookup_action ("seek-backward").set_enabled (false);
+    this.lookup_action ("volume-up").set_enabled (false);
+    this.lookup_action ("volume-down").set_enabled (false);
   }
 });
 
