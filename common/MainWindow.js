@@ -133,6 +133,9 @@ var MainWindow = new Lang.Class ({
     this.bookmarks = new Layouts.BookmarkLayout (this);
     this.stack.add_named (this.bookmarks, "bookmarks");
 
+    this.channelview = new Layouts.ChannelLayout (this);
+    this.stack.add_named (this.channelview, "channel");
+
     let mmenu = new Gtk.Menu (), mii;
 
     this.player_mi = new Gtk.MenuItem ({label:"Player", sensitive:false});
@@ -169,15 +172,19 @@ var MainWindow = new Lang.Class ({
       this.stack.visible_child_name = "search";
       this.application.lookup_action ("search-enabled").activate (null);
     }));
+    this.channelview.connect ('ready', Lang.bind (this, ()=>{
+      this.stack.visible_child_name = "channel";
+      //this.application.lookup_action ("search-enabled").activate (null);
+    }));
     this.searchbar.search_button.connect ('clicked', Lang.bind (this, this.on_search));
     this.back.connect ('clicked', Lang.bind (this, this.on_back));
     this.connect ('delete_event', Lang.bind (this, ()=>{
       this.application.quit ();
     }));
     this.stack.connect ('notify::visible-child-name', Lang.bind (this, (o,e)=>{
-     if (this.stack.visible_child_name != "item" && this.itemview.playing)
-      this.phones.visible = true;
-     else this.phones.visible = false;
+      if (this.stack.visible_child_name != "item" && this.itemview.playing)
+        this.phones.visible = true;
+      else this.phones.visible = false;
     }));
     this.connect ('unmap', Lang.bind (this, this.save_geometry));
   },

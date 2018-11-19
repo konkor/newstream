@@ -18,8 +18,6 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const fetch = imports.common.Utils.fetch;
 
-const BASE_URL = 'https://www.googleapis.com/youtube/v3/';
-
 const ORDER = {
   0: "date",
   1: "rating",
@@ -71,11 +69,13 @@ const VIDEOTYPE = {
   2: "movie"
 }
 
+const BASE_URL = 'https://www.googleapis.com/youtube/v3/';
+const KEY = 'AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o';
+
 var SearchProvider = new Lang.Class({
   Name: "SearchProvider",
 
   _init: function () {
-    this._base_url = BASE_URL;
     this._order = ORDER[0];
     this._time = TIME[4];
     this._safesearch = SAFESEARCH[0];
@@ -126,8 +126,8 @@ var SearchProvider = new Lang.Class({
   },
 
   _build_query_url: function (query) {
-    let url = '%ssearch?part=snippet&q=%s&order=%s&maxResults=%s&type=video&safeSearch=%s&videoCaption=%s&videoDefinition=%s&videoDimension=%s&videoDuration=%s&videoLicense=%s&videoType=%s%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
+    let url = '%ssearch?part=snippet&q=%s&order=%s&maxResults=%s&type=video&safeSearch=%s&videoCaption=%s&videoDefinition=%s&videoDimension=%s&videoDuration=%s&videoLicense=%s&videoType=%s%s&key=%s'.format (
+      BASE_URL,
       encodeURIComponent (query),
       this._order,
       this._max_results,
@@ -138,7 +138,7 @@ var SearchProvider = new Lang.Class({
       this._videoduration,
       this._videolicense,
       this._videotype,
-      this.calculate_time (this._time)
+      this.calculate_time (this._time), KEY
     );
     return url;
   },
@@ -158,55 +158,57 @@ var SearchProvider = new Lang.Class({
 
   get_info: function (id, callback) {
     if (!id) return;
-    let url = '%svideos?part=snippet,contentDetails,statistics&id=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
-      id
+    let url = '%svideos?part=snippet,contentDetails,statistics&id=%s&key=%s'.format (
+      BASE_URL, id, KEY
     );
     //print (url);
     fetch (url, null, null, callback);
   },
 
+  get_channel: function (id, callback) {
+    if (!id) return "";
+    let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video&channelId=%s&key=%s'.format (
+      BASE_URL, this._max_results, id, KEY
+    );
+    fetch (url, null, null, callback);
+    return url;
+  },
+
   get_channel_info: function (id, callback) {
     if (!id) return;
-    let url = '%schannels?part=snippet,statistics&id=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
-      id
+    let url = '%schannels?part=snippet,statistics&id=%s&key=%s'.format (
+      BASE_URL, id, KEY
     );
     fetch (url, null, null, callback);
   },
 
   get_hot: function (callback) {
-    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
-      this._max_results,
-      this.calculate_time ("last_7_days")
+    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=%s'.format (
+      BASE_URL, this._max_results, this.calculate_time ("last_7_days"), KEY
     );
     fetch (url, null, null, callback);
     return url;
   },
 
   get_day: function (callback) {
-    let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
-      this._max_results,
-      this.calculate_time ("last_24_hours")
+    let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video%s&key=%s'.format (
+      BASE_URL, this._max_results, this.calculate_time ("last_24_hours"), KEY
     );
     fetch (url, null, null, callback);
     return url;
   },
 
   get_hit: function (callback) {
-    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url,
-      this._max_results
+    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&key=%s'.format (
+      BASE_URL, this._max_results, KEY
     );
     fetch (url, null, null, callback);
     return url;
   },
 
   get_relaited: function (id, callback) {
-    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&relatedToVideoId=%s&key=AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o'.format (
-      this._base_url, 12, id
+    let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&relatedToVideoId=%s&key=%s'.format (
+      BASE_URL, 12, id, KEY
     );
     fetch (url, null, null, callback);
     return url;

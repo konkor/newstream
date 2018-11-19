@@ -168,6 +168,36 @@ var SearchView = new Lang.Class({
   }
 });
 
+var ChannelLayout = new Lang.Class({
+  Name: "ChannelLayout",
+  Extends: SearchView,
+
+  _init: function (parent) {
+    this.parent (parent);
+    this.channel = null;
+  },
+
+  query: function (words) {
+    if (this.channel)
+      this.url = this.provider.get_channel (this.channel.id, Lang.bind (this, this.on_results));
+  },
+
+  load: function (channel) {
+    this.channel = channel;
+    this.query ();
+    if (this.channel.title) this.words = this.channel.title;
+  },
+
+  setup: function (o, e) {
+    this.w.section.label = this.words;
+    this.w.home.visible = false;
+    this.w.back.visible = true;
+    this.w.searchbar.visible = false;
+    this.w.topbar.visible = false;
+    this.w.menu_button.visible = true;
+  }
+});
+
 function getCurrentFile () {
   let stack = (new Error()).stack;
   let stackLine = stack.split("\n")[1];

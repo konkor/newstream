@@ -35,6 +35,9 @@ var ResultView = new Lang.Class({
     this.w = parent;
     this.provider = parent.provider;
 
+    this.header = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    this.add (this.header);
+
     if (scroll) {
       this.scroll = new Gtk.ScrolledWindow ();
       this.scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
@@ -214,7 +217,7 @@ var ResultViewItem = new Lang.Class({
   },
 
   get_channel_info: function () {
-    let w = this.get_toplevel ();
+    let w = Gio.Application.get_default ().window;
     if (!this.details.data.channel.id) return;
     if (this.details.data.channel.thumbnails) this.get_channel_logo_url ();
     else if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{

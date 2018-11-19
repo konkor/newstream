@@ -346,7 +346,7 @@ var Channel = new Lang.Class({
   _init: function () {
     this.parent ();
     this.get_style_context ().add_class ("channel-button");
-    this.id = "";
+    this.channel = null;
     this.set_relief (Gtk.ReliefStyle.NONE);
     this.contents = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL, margin: 8});
     this.add (this.contents);
@@ -366,12 +366,17 @@ var Channel = new Lang.Class({
 
     this.show_all ();
     //this.sensitive = false;
+    this.connect ("clicked", ()=>{
+      if (!this.channel && !this.channel.id) return;
+      let app = Gio.Application.get_default ();
+      app.window.channelview.load (this.channel);
+    });
   },
 
   load: function (data) {
     if (!data) return;
     if (data.channel.title) this.author.set_text (data.channel.title);
-    if (data.channel.id) this.id = data.channel.id;
+    if (data.channel.id) this.channel = data.channel;
     if (data.published) {
       var d = new Date (data.published);
       this.published.set_text ("Published: " + d.toLocaleDateString());
