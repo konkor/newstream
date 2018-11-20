@@ -35,7 +35,7 @@ var ResultView = new Lang.Class({
     this.w = parent;
     this.provider = parent.provider;
 
-    this.header = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    this.header = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.add (this.header);
 
     if (scroll) {

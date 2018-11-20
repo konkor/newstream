@@ -143,7 +143,12 @@ var MainWindow = new Lang.Class ({
     this.player_mi.set_action_name ("app.player");
     mmenu.add (this.player_mi);
 
-    mii = new Gtk.MenuItem ({label:"Search"});
+    mii = new Gtk.MenuItem ({label:"Last Channel", sensitive:false});
+    this.set_accel (mii, "C");
+    mii.set_action_name ("app.channel");
+    mmenu.add (mii);
+
+    mii = new Gtk.MenuItem ({label:"Last Search"});
     this.set_accel (mii, "<Primary>S");
     mii.set_action_name ("app.search");
     mmenu.add (mii);
@@ -158,6 +163,7 @@ var MainWindow = new Lang.Class ({
     mii.set_action_name ("app.history");
     mmenu.add (mii);
 
+    mmenu.add (new Gtk.SeparatorMenuItem ());
     mii = new Gtk.MenuItem ({label:"About"});
     mmenu.add (mii);
     mii.connect ("activate", () => {this.about ()});

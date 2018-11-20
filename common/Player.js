@@ -79,6 +79,7 @@ var Player = new Lang.Class({
       if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
         this.formats = d;
         var url = "";
+        if (d && d.format) print (d.format, d.vcodec, d.acodec);
         if (d && d.formats) d.formats.forEach (p => {
           if (d.format_id == p.format_id) {
             url = p.url;

@@ -184,17 +184,9 @@ var ChannelLayout = new Lang.Class({
 
   load: function (channel) {
     this.channel = channel;
+    print (JSON.stringify (channel));
     this.query ();
     if (this.channel.title) this.words = this.channel.title;
-  },
-
-  setup: function (o, e) {
-    this.w.section.label = this.words;
-    this.w.home.visible = false;
-    this.w.back.visible = true;
-    this.w.searchbar.visible = false;
-    this.w.topbar.visible = false;
-    this.w.menu_button.visible = true;
   }
 });
 

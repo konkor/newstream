@@ -66,6 +66,20 @@ var NewStreamApplication = new Lang.Class ({
           this.lookup_action ("search").set_enabled (true);
         }
       },
+      { name: "channel",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "channel");
+        },
+        accels: ["c", "<Primary>c"],
+        enabled: false
+      },
+      { name: "channel-enabled",
+        activate: () => {
+          this.channel_enabled = true;
+          this.lookup_action ("channel").set_enabled (true);
+        }
+      },
       { name: "player",
         activate: () => {
           this.unfullscreen ();
@@ -189,6 +203,7 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("history").set_enabled (true);
     this.lookup_action ("player").set_enabled (this.player_enabled);
     this.lookup_action ("search").set_enabled (this.search_enabled);
+    this.lookup_action ("channel").set_enabled (this.channel_enabled);
     this.lookup_action ("seek-forward").set_enabled (true);
     this.lookup_action ("seek-backward").set_enabled (true);
     this.lookup_action ("volume-up").set_enabled (true);
@@ -202,6 +217,7 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("bookmarks").set_enabled (false);
     this.lookup_action ("history").set_enabled (false);
     this.lookup_action ("player").set_enabled (false);
+    this.lookup_action ("channel").set_enabled (false);
     this.lookup_action ("search").set_enabled (false);
     this.lookup_action ("seek-forward").set_enabled (false);
     this.lookup_action ("seek-backward").set_enabled (false);
