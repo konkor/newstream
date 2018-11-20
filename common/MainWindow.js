@@ -180,7 +180,7 @@ var MainWindow = new Lang.Class ({
     }));
     this.channelview.connect ('ready', Lang.bind (this, ()=>{
       this.stack.visible_child_name = "channel";
-      //this.application.lookup_action ("search-enabled").activate (null);
+      this.application.lookup_action ("channel-enabled").activate (null);
     }));
     this.searchbar.search_button.connect ('clicked', Lang.bind (this, this.on_search));
     this.back.connect ('clicked', Lang.bind (this, this.on_back));
