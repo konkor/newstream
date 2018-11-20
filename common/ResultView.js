@@ -75,7 +75,8 @@ var ResultView = new Lang.Class({
       var child = a.get_children()[0].details;
       if (child && child.data) {
         this.w.itemview.load (child.data);
-        this.w.back.last = this.w.stack.visible_child_name;
+        if (this.w.stack.visible_child_name != "item")
+          this.w.back.last = this.w.stack.visible_child_name;
         this.w.stack.visible_child_name = "item";
       }
     }));

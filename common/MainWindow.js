@@ -212,7 +212,8 @@ var MainWindow = new Lang.Class ({
   },
 
   on_stack_update: function (o, index) {
-    this.back.last = this.stack.visible_child_name;
+    if (this.stack.visible_child_name != index.toString ())
+      this.back.last = this.stack.visible_child_name;
     this.stack.visible_child_name = index.toString ();
     if (index == 0) this.hotview.query ();
     else if (index == 1) this.newview.query ();
@@ -312,7 +313,7 @@ var BackButton = new Lang.Class({
   },
 
   set last (value) {
-    if (value == "item") return;
+    //if (value == "item") return;
     if (!this.history.length || this.history[this.history.length-1] != value)
       this.history.push (value);
   }
