@@ -74,9 +74,8 @@ var Itembar = new Lang.Class({
   Name: "Itembar",
   Extends: Gtk.Box,
 
-  _init: function (parent) {
+  _init: function () {
     this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
-    this.settings = parent.settings;
     //this.get_style_context ().add_class ("sb");
 
     this.bookmark = new Gtk.Button ({label:"", always_show_image: true, tooltip_text:"Bookmark"});
@@ -95,10 +94,6 @@ var Itembar = new Lang.Class({
     this.share.set_popup (this.build_menu ());
     this.pack_start (this.share, true, true, 0);
 
-    this.bookmark.connect ('clicked', Lang.bind (this, (o) => {
-      this.settings.toggle_bookmark (this.id, !this.bookmark.get_style_context().has_class ("selected"));
-      this.set_bookmark (!this.bookmark.get_style_context().has_class ("selected"));
-    }));
   },
 
   build_menu: function () {
@@ -172,7 +167,6 @@ var Itembar = new Lang.Class({
     this.link.label = "https://youtu.be/" + id;
     title = title || this.link.label;
     this.link.title = title;
-    this.set_bookmark (this.settings.booked (id));
   },
 
   set_bookmark: function (state) {
@@ -205,8 +199,9 @@ var VideoDetails = new Lang.Class({
   _init: function (parent) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.get_style_context ().add_class ("search-bar");
+    this.settings = parent.settings;
 
-    this.itembar = new Itembar (parent);
+    this.itembar = new Itembar ();
     this.pack_start (this.itembar, true, true, 0);
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
@@ -220,6 +215,10 @@ var VideoDetails = new Lang.Class({
 
     this.description = new Description ();
     this.add (this.description);
+
+    this.itembar.bookmark.connect ('clicked', Lang.bind (this, (o) => {
+      this.on_bookmark (o);
+    }));
   },
 
   load: function (item) {
@@ -229,6 +228,12 @@ var VideoDetails = new Lang.Class({
     this.statistics.load (item);
     this.description.load (item);
     this.itembar.set_link (item.id, item.title);
+    this.itembar.set_bookmark (this.settings.booked (item.id));
+  },
+
+  on_bookmark: function (o) {
+    this.settings.toggle_bookmark (this.itembar.id, !o.get_style_context().has_class ("selected"));
+    this.itembar.set_bookmark (!o.get_style_context().has_class ("selected"));
   }
 });
 
@@ -262,7 +267,7 @@ var Channel = new Lang.Class({
     this.connect ("clicked", ()=>{
       if (!this.channel && !this.channel.id) return;
       let app = Gio.Application.get_default ();
-      app.window.channelview.load (this.channel);
+      app.window.channelview.load (this.channel, this.pixbuf);
     });
   },
 
@@ -276,7 +281,8 @@ var Channel = new Lang.Class({
     }
     if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
-      this.logo.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 56, 56, true, null);
+      this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
+      this.logo.pixbuf = this.pixbuf.scale_simple (56, 56, 2);
     }));
   }
 });

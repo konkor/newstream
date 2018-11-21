@@ -29,7 +29,7 @@ var ResultView = new Lang.Class({
   },
 
   _init: function (parent, scroll) {
-    this.parent ({orientation:Gtk.Orientation.VERTICAL, margin:8});
+    this.parent ({orientation:Gtk.Orientation.VERTICAL});
     scroll = (typeof scroll !== 'undefined') ?  scroll : true;
     let box = null;
     this.w = parent;
@@ -44,7 +44,7 @@ var ResultView = new Lang.Class({
       this.scroll.shadow_type = Gtk.ShadowType.NONE;
       this.pack_start (this.scroll, true, true, 0);
 
-      box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+      box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL, margin:8});
       this.scroll.add (box);
     } else box = this;
 

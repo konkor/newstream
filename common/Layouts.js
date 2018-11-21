@@ -17,8 +17,8 @@ imports.searchPath.unshift(APPDIR);
 const ResultView = imports.common.ResultView;
 const HistoryView = imports.common.HistoryView;
 const BookmarkView = imports.common.BookmarkView;
+const ChannelView = imports.common.ChannelView;
 const Item = imports.common.ItemView;
-
 
 var HistoryLayout = new Lang.Class({
   Name: "HistoryLayout",
@@ -175,6 +175,9 @@ var ChannelLayout = new Lang.Class({
   _init: function (parent) {
     this.parent (parent);
     this.channel = null;
+
+    this.details = new ChannelView.ChannelDetails ();
+    this.header.add (this.details);
   },
 
   query: function (words) {
@@ -182,9 +185,12 @@ var ChannelLayout = new Lang.Class({
       this.url = this.provider.get_channel (this.channel.id, Lang.bind (this, this.on_results));
   },
 
-  load: function (channel) {
+  load: function (channel, pixbuf) {
+    if (!channel) return;
+    if (!this.channel || (this.channel.id != channel.id))
+      this.details.load (channel, pixbuf);
     this.channel = channel;
-    print (JSON.stringify (channel));
+    //print (JSON.stringify (channel));
     this.query ();
     if (this.channel.title) this.words = this.channel.title;
   }
