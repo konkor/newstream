@@ -135,10 +135,10 @@ var ResultView = new Lang.Class({
       this.results.add (item);
       if (item.details.id) this.provider.get_info (item.details.id, Lang.bind (this, (d)=>{
         let data = JSON.parse (Utils.bytesToString (d));
-        if (data.pageInfo.totalResults > 0) {
+        if (data.pageInfo && data.pageInfo.totalResults > 0) {
           item.details.parse (data.items[0]);
           item.show_details ();
-        }
+        } else print ("WARNING: failed detailed info for", item.details.id, "\nRecived:\n", Utils.bytesToString (d));
       }));
     });
   },
@@ -147,6 +147,17 @@ var ResultView = new Lang.Class({
     this.results.get_children().forEach (p => {
       this.results.remove (p);
     });
+  },
+
+  get first_item_data () {
+    let child = this.results.get_children()[0];
+    if (child) {
+      child = child.get_children()[0].details;
+      if (child && child.data) {
+        child = child.data;
+      }
+    }
+    return child;
   }
 });
 

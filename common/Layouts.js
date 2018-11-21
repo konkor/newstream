@@ -176,7 +176,7 @@ var ChannelLayout = new Lang.Class({
     this.parent (parent);
     this.channel = null;
 
-    this.details = new ChannelView.ChannelDetails ();
+    this.details = new ChannelView.ChannelDetails (this);
     this.header.add (this.details);
   },
 
@@ -193,6 +193,13 @@ var ChannelLayout = new Lang.Class({
     //print (JSON.stringify (channel));
     this.query ();
     if (this.channel.title) this.words = this.channel.title;
+  },
+
+  get_channel_data: function () {
+    if (!this.channel) return null;
+    if (!this.channel.local) this.channel.local = {};
+    this.channel.local.last = this.first_item_data.id;
+    return this.channel;
   }
 });
 

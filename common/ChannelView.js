@@ -22,9 +22,10 @@ var ChannelDetails = new Lang.Class({
   Name: "ChannelDetails",
   Extends: Gtk.Box,
 
-  _init: function () {
+  _init: function (view) {
     this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
     this.get_style_context ().add_class ("search-bar");
+    this.view = view;
 
     //let space = new Gtk.Box ();
     //this.pack_start (space, true, true, 0);
@@ -92,12 +93,11 @@ var ChannelDetails = new Lang.Class({
     this.itembar.link.label = "https://youtube.com/channel/" + channel.id;
     channel.title = channel.title || this.itembar.link.label;
     this.itembar.link.title = channel.title;
-
-    //this.itembar.set_bookmark (this.settings.subscribed (channel.id));
+    this.itembar.set_bookmark (this.view.w.settings.subscribed (channel.id));
   },
 
   on_bookmark: function (o) {
-    //this.settings.toggle_bookmark (this.itembar.id, !o.get_style_context().has_class ("selected"));
+    this.view.w.settings.toggle_channel (this.view.get_channel_data (), !o.get_style_context().has_class ("selected"));
     this.itembar.set_bookmark (!o.get_style_context().has_class ("selected"));
   }
 });

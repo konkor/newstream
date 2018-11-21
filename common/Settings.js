@@ -25,6 +25,7 @@ let history_size = 5000;
 let view_history = [];
 let view_history_size = 1000;
 let bookmarks = [];
+let channels = [];
 let window_height = 480;
 let window_width = 800;
 let window_x = 0;
@@ -66,6 +67,7 @@ var Settings = new Lang.Class({
     this.load_history ();
     this.load_view_history ();
     this.load_bookmarks ();
+    this.load_channels ();
     window_height = this.get_int ("window-height");
     window_width = this.get_int ("window-width");
     window_x = this.get_int ("window-x");
@@ -204,7 +206,7 @@ var Settings = new Lang.Class({
 
   save_view_history: function (data) {
     GLib.file_set_contents (app_data_dir + "/view_history.json", JSON.stringify (view_history));
-    if (data) GLib.file_set_contents (app_data_dir + "/data/" + data.id + ".json", JSON.stringify (data));
+    this.add_data (data);
   },
 
   load_view_history: function () {
@@ -219,11 +221,20 @@ var Settings = new Lang.Class({
     }
   },
 
+  add_data: function (data) {
+    if (!data && !data.id) return;
+    try {
+      GLib.file_set_contents (app_data_dir + "/data/" + data.id + ".json", JSON.stringify (data));
+    } catch (e) {
+      print ("Can't store " + app_data_dir + "/data/" + data.id + ".json ...\n", e);
+    }
+  },
+
   remove_data: function (id) {
     try {
-      Gio.File.new_for_path (app_data_dir + "/data/" + s + ".json").delete (null);
+      Gio.File.new_for_path (app_data_dir + "/data/" + id + ".json").delete (null);
     } catch (e) {
-      print ("Can't delete " + app_data_dir + "/data/" + s + ".json ...");
+      print ("Can't delete " + app_data_dir + "/data/" + id + ".json ...\n", e);
     }
   },
 
@@ -259,6 +270,43 @@ var Settings = new Lang.Class({
       print (e);
     }
     this.bookmarks_modified = true;
+  },
+
+  get channels () { return channels; },
+
+  subscribed: function (id) {
+    return id && (channels.indexOf (id) > -1);
+  },
+
+  load_channels: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/channels.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        channels = JSON.parse (Utils.bytesToString (ar));
+      } catch (e) {
+        channels = [];
+      }
+    }
+    this.channels_modified = true;
+  },
+
+  toggle_channel: function (channel, state) {
+    let id = channel.id;
+    if (!id || (this.subscribed (id) && state) || (!this.subscribed (id) && !state)) return;
+    if (state) {
+      channels.unshift (id);
+      this.add_data (channel);
+    } else {
+      channels.splice (channels.indexOf (id), 1);
+      this.remove_data (id);
+    }
+    try {
+      GLib.file_set_contents (app_data_dir + "/channels.json", JSON.stringify (channels));
+    } catch (e) {
+      print (e);
+    }
+    this.channels_modified = true;
   }
 
 });
