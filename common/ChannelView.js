@@ -89,16 +89,12 @@ var ChannelDetails = new Lang.Class({
     channel.description = channel.description || "";
     this.description.info.set_text (channel.description);
 
-    //this.itembar.set_link ("channel/" + channel.id, channel.title);
-    this.itembar.link.label = "https://youtube.com/channel/" + channel.id;
-    channel.title = channel.title || this.itembar.link.label;
-    this.itembar.link.title = channel.title;
-    this.itembar.set_bookmark (this.view.w.settings.subscribed (channel.id));
+    this.itembar.base_url = "https://youtube.com/channel/";
+    this.itembar.set_link (channel.id, channel.title, this.view.w.settings.subscribed (channel.id));
   },
 
   on_bookmark: function (o) {
-    this.view.w.settings.toggle_channel (this.view.get_channel_data (), !o.get_style_context().has_class ("selected"));
-    this.itembar.set_bookmark (!o.get_style_context().has_class ("selected"));
+    this.view.w.settings.toggle_channel (this.view.get_channel_data (), o.get_style_context().has_class ("selected"));
   }
 });
 

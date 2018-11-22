@@ -76,16 +76,8 @@ var Itembar = new Lang.Class({
 
   _init: function () {
     this.parent ({orientation:Gtk.Orientation.HORIZONTAL});
-    //this.get_style_context ().add_class ("sb");
 
-    this.bookmark = new Gtk.Button ({label:"", always_show_image: true, tooltip_text:"Bookmark"});
-    this.bookmark.get_style_context ().add_class ("bookmark");
-    this.bookmark.get_style_context ().add_class ("selected");
-    this.bookmark_on = this.get_bookmark ();
-    this.bookmark_off = GdkPixbuf.Pixbuf.new_from_file (APPDIR + "/data/icons/bookmark_off.svg");
-    this.bookmark.image = new Gtk.Image ();
-    this.bookmark.image.pixbuf = this.bookmark_off;
-    this.bookmark.set_relief (Gtk.ReliefStyle.NONE);
+    this.bookmark = new BookButton ();
     this.pack_start (this.bookmark, true, true, 0);
 
     this.share = new Gtk.MenuButton ({tooltip_text:"Share"});
@@ -93,13 +85,13 @@ var Itembar = new Lang.Class({
     this.share.set_relief (Gtk.ReliefStyle.NONE);
     this.share.set_popup (this.build_menu ());
     this.pack_start (this.share, true, true, 0);
-
   },
 
   build_menu: function () {
     let menu = new Gtk.Menu ();
 
-    this.link = new Gtk.ImageMenuItem ({label:"https://youtu.be/", always_show_image: true, sensitive: false});
+    this.base_url = "https://youtu.be/";
+    this.link = new Gtk.ImageMenuItem ({label:this.base_url, always_show_image: true, sensitive: false});
     this.link.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/social/link.svg");
     menu.add (this.link);
 
@@ -161,34 +153,55 @@ var Itembar = new Lang.Class({
     Utils.launch_uri (uri);
   },
 
-  set_link: function (id, title) {
+  set_link: function (id, title, state) {
     if (!id) return;
     this.id = id;
-    this.link.label = "https://youtu.be/" + id;
+    this.link.label = this.base_url + id;
     title = title || this.link.label;
     this.link.title = title;
-  },
+    state = state || false;
+    this.bookmark.set_bookmark (state);
+  }
+});
 
-  set_bookmark: function (state) {
-    if (state) {
-      this.bookmark.get_style_context ().add_class ("selected");
-      this.bookmark.image.pixbuf = this.bookmark_on;
-      this.bookmark.tooltip_text = "Remove Bookmark";
-      //this.bookmark.set_label ("★");
-    } else {
-      this.bookmark.get_style_context ().remove_class ("selected");
-      this.bookmark.image.pixbuf = this.bookmark_off;
-      this.bookmark.tooltip_text = "Add Bookmark";
-      //this.bookmark.set_label ("☆");
-    }
+var BookButton = new Lang.Class({
+  Name: "BookButton",
+  Extends: Gtk.Button,
+
+  _init: function () {
+    this.parent ({label:"", always_show_image: true, tooltip_text:"Bookmark"});
+    this.get_style_context ().add_class ("bookmark");
+    this.get_style_context ().add_class ("selected");
+    this.bookmark_on = this.get_bookmark ();
+    this.bookmark_off = GdkPixbuf.Pixbuf.new_from_file (APPDIR + "/data/icons/bookmark_off.svg");
+    this.image = new Gtk.Image ();
+    this.image.pixbuf = this.bookmark_off;
+    this.set_relief (Gtk.ReliefStyle.NONE);
+    this.connect ('clicked', Lang.bind (this, (o) => {
+      this.set_bookmark (!o.get_style_context().has_class ("selected"));
+    }));
   },
 
   get_bookmark: function () {
     let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"16\" width=\"18\" version=\"1.1\" viewBox=\"0 0 4.7624999 4.2333333\"><path d=\"m3.53 3.94c-0.21 0.15-0.94-0.42-1.2-0.42-0.25 0-0.99 0.57-1.19 0.42-0.208-0.15 0.11-1.03 0.03-1.27-0.07-0.24-0.846-0.76-0.767-1 0.078-0.25 1.01-0.21 1.22-0.36s0.46-1.05 0.72-1.04c0.25-0.005 0.51 0.89 0.71 1.04 0.21 0.15 1.14 0.12 1.22 0.36s-0.7 0.77-0.78 1.01c-0.07 0.24 0.24 1.12 0.04 1.26z\" fill=\"#bebebe\"/></svg>";
-    let c = this.bookmark.get_style_context().get_color (0);
+    let c = this.get_style_context().get_color (0);
     if (c) svg = svg.replace (/bebebe/g, "%02x%02x%02x".format (c.red*255,c.green*255,c.blue*255));
     let stream = Gio.MemoryInputStream.new_from_bytes (new GLib.Bytes (svg));
     return GdkPixbuf.Pixbuf.new_from_stream (stream, null);
+  },
+
+  set_bookmark: function (state) {
+    if (state) {
+      this.get_style_context ().add_class ("selected");
+      this.image.pixbuf = this.bookmark_on;
+      this.tooltip_text = "Remove Bookmark";
+      //this.set_label ("★");
+    } else {
+      this.get_style_context ().remove_class ("selected");
+      this.image.pixbuf = this.bookmark_off;
+      this.tooltip_text = "Add Bookmark";
+      //this.set_label ("☆");
+    }
   }
 });
 
@@ -227,13 +240,11 @@ var VideoDetails = new Lang.Class({
     this.channel.load (item);
     this.statistics.load (item);
     this.description.load (item);
-    this.itembar.set_link (item.id, item.title);
-    this.itembar.set_bookmark (this.settings.booked (item.id));
+    this.itembar.set_link (item.id, item.title, this.settings.booked (item.id));
   },
 
   on_bookmark: function (o) {
-    this.settings.toggle_bookmark (this.itembar.id, !o.get_style_context().has_class ("selected"));
-    this.itembar.set_bookmark (!o.get_style_context().has_class ("selected"));
+    this.settings.toggle_bookmark (this.itembar.id, o.get_style_context().has_class ("selected"));
   }
 });
 
