@@ -17,6 +17,7 @@ imports.searchPath.unshift(APPDIR);
 const ResultView = imports.common.ResultView;
 const HistoryView = imports.common.HistoryView;
 const BookmarkView = imports.common.BookmarkView;
+const SubscriptionView = imports.common.SubscriptionView;
 const ChannelView = imports.common.ChannelView;
 const Item = imports.common.ItemView;
 
@@ -56,6 +57,27 @@ var BookmarkLayout = new Lang.Class({
     if (this.w.settings.bookmarks_modified) this.query ();
     this.w.settings.bookmarks_modified = false;
     this.w.section.label = "Bookmarks";
+    this.w.home.visible = false;
+    this.w.back.visible = true;
+    this.w.searchbar.visible = false;
+    this.w.topbar.visible = false;
+    this.w.menu_button.visible = true;
+  }
+});
+
+var SubscriptionLayout = new Lang.Class({
+  Name: "SubscriptionLayout",
+  Extends: SubscriptionView.SubscriptionView,
+
+  _init: function (parent) {
+    this.parent (parent);
+    this.connect ("map", Lang.bind (this, this.setup));
+  },
+
+  setup: function (o, e) {
+    if (this.w.settings.channels_modified) this.query ();
+    this.w.settings.channels_modified = false;
+    this.w.section.label = "Subscriptions";
     this.w.home.visible = false;
     this.w.back.visible = true;
     this.w.searchbar.visible = false;

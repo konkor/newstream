@@ -45,6 +45,13 @@ var NewStreamApplication = new Lang.Class ({
         },
         accels: ["b", "<Primary>b"]
       },
+      { name: "subscriptions",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "subscriptions");
+        },
+        accels: ["s", "<Primary>s"]
+      },
       { name: "history",
         activate: () => {
           this.unfullscreen ();
@@ -57,7 +64,7 @@ var NewStreamApplication = new Lang.Class ({
           this.unfullscreen ();
           this.window.on_stack_update (this, "search");
         },
-        accels: ["s", "<Primary>s"],
+        accels: ["<Alt>s"],
         enabled: false
       },
       { name: "search-enabled",
@@ -200,6 +207,7 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("toggle-fullscreen").set_enabled (true);
     this.lookup_action ("toggle-play").set_enabled (true);
     this.lookup_action ("bookmarks").set_enabled (true);
+    this.lookup_action ("subscriptions").set_enabled (true);
     this.lookup_action ("history").set_enabled (true);
     this.lookup_action ("player").set_enabled (this.player_enabled);
     this.lookup_action ("search").set_enabled (this.search_enabled);
@@ -215,6 +223,7 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("toggle-fullscreen").set_enabled (false);
     this.lookup_action ("toggle-play").set_enabled (false);
     this.lookup_action ("bookmarks").set_enabled (false);
+    this.lookup_action ("subscriptions").set_enabled (false);
     this.lookup_action ("history").set_enabled (false);
     this.lookup_action ("player").set_enabled (false);
     this.lookup_action ("channel").set_enabled (false);

@@ -133,10 +133,23 @@ var MainWindow = new Lang.Class ({
     this.bookmarks = new Layouts.BookmarkLayout (this);
     this.stack.add_named (this.bookmarks, "bookmarks");
 
+    this.subscriptions = new Layouts.SubscriptionLayout (this);
+    this.stack.add_named (this.subscriptions, "subscriptions");
+
     this.channelview = new Layouts.ChannelLayout (this);
     this.stack.add_named (this.channelview, "channel");
 
     let mmenu = new Gtk.Menu (), mii;
+
+    mii = new Gtk.MenuItem ({label:"Bookmarks"});
+    this.set_accel (mii, "<Ctrl>B");
+    mii.set_action_name ("app.bookmarks");
+    mmenu.add (mii);
+
+    mii = new Gtk.MenuItem ({label:"Subscriptions"});
+    this.set_accel (mii, "<Ctrl>S");
+    mii.set_action_name ("app.subscriptions");
+    mmenu.add (mii);
 
     this.player_mi = new Gtk.MenuItem ({label:"Player", sensitive:false});
     this.set_accel (this.player_mi, "P");
@@ -149,13 +162,8 @@ var MainWindow = new Lang.Class ({
     mmenu.add (mii);
 
     mii = new Gtk.MenuItem ({label:"Last Search"});
-    this.set_accel (mii, "<Primary>S");
+    this.set_accel (mii, "<Alt>S");
     mii.set_action_name ("app.search");
-    mmenu.add (mii);
-
-    mii = new Gtk.MenuItem ({label:"Bookmarks"});
-    this.set_accel (mii, "<Ctrl>B");
-    mii.set_action_name ("app.bookmarks");
     mmenu.add (mii);
 
     mii = new Gtk.MenuItem ({label:"History"});
