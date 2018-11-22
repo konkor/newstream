@@ -71,15 +71,7 @@ var ResultView = new Lang.Class({
     space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);
 
-    this.results.connect ("child-activated", Lang.bind (this, (o,a) => {
-      var child = a.get_children()[0].details;
-      if (child && child.data) {
-        this.w.itemview.load (child.data);
-        if (this.w.stack.visible_child_name != "item")
-          this.w.back.last = this.w.stack.visible_child_name;
-        this.w.stack.visible_child_name = "item";
-      }
-    }));
+    this.results.connect ("child-activated", Lang.bind (this, this.on_item_activated));
     this.pager.connect ("page-selected", (o, token) => {
       this.on_page_selected (o, token);
     });
@@ -121,6 +113,16 @@ var ResultView = new Lang.Class({
 
   on_page_selected: function (o, token) {
     this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
+  },
+
+  on_item_activated: function (o, item) {
+    var child = item.get_children()[0].details;
+    if (child && child.data) {
+      this.w.itemview.load (child.data);
+      if (this.w.stack.visible_child_name != "item")
+        this.w.back.last = this.w.stack.visible_child_name;
+      this.w.stack.visible_child_name = "item";
+    }
   },
 
   add_items: function (respond) {
