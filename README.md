@@ -18,11 +18,24 @@
 <a href="https://github.com/konkor/newstream/releases/">other releases</a>
 </p>
 
+## Goals
+
+* Build a modern looking responsible application based on layout's views with a custom controls, header bar and UI like mobile applications. It should support history of layouts and navigation via keyboard so.
+* Local data organization via #hashtags to an example to assign custom category, for filtering, for playlists etc.
+* More personal #privacy and #security through the local store of links, lists, subscriptions and without authentication. Sure data collectors/service providers still will be see you external network IP address but for all your local network only not personalized by cookies and other browser info. So user could use proxy to hide IP addresses too.
+* Descent video player with all expected features.
+* Audio-mode for listening podcasts and music.
+* Fine audio processing including volume control, pre-amplifier, 10 bands cubic equalizer, pitch, re-sampling so.
+* Excellent linux system integration like glib notifications, menus, background player, appindicators and/or desktop extensions etc.
+* Nice to have offline-mode to able working without current network connection at all.
+
 ## Features
 
 * Searching (video items only)
 * Searching history
 * Basic video player (fullscreen on double-click, play/pause button and a seeking bar)
+
+<i>See [releases page](https://github.com/konkor/newstream/releases/) and commits for current status of the development</i>
 
 ## Planned Features
 * Modern styled GTK UI with user-friendly mobile-like behavior
