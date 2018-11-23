@@ -17,6 +17,7 @@ const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
 const Utils = imports.common.Utils;
 const ResultView = imports.common.ResultView;
+const ItemView = imports.common.ItemView;
 
 const IPP = 20; //items per page
 
@@ -27,8 +28,9 @@ var SubscriptionView = new Lang.Class({
   _init: function (parent) {
     this.parent (parent);
     this.settings = parent.settings;
-    this.results.max_children_per_line = 1;
-    this.results.homogeneous = false;
+    this.results.max_children_per_line = 5;
+    this.activate_on_single_click = true,
+    this.results.homogeneous = true;
   },
 
   query: function (page) {
@@ -85,6 +87,14 @@ var SubscriptionViewItem = new Lang.Class({
     this.published = new Gtk.Label ({label:d, xalign:0, opacity: 0.7});
     this.published.get_style_context ().add_class ("small");
     box.pack_start (this.published, true, true, 0);
+
+    this.bookmark = new ItemView.BookButton ();
+    this.settings = Gio.Application.get_default ().window.settings;
+    this.bookmark.set_bookmark (this.settings.subscribed (this.channel.id));
+    this.pack_end (this.bookmark, false, false, 0);
+    this.bookmark.connect ('clicked', Lang.bind (this, (o) => {
+      this.settings.toggle_channel (this.channel, o.get_style_context().has_class ("selected"));
+    }));
 
     this.get_thumb ();
     this.show_all ();
