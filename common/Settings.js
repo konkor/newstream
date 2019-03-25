@@ -258,6 +258,7 @@ var Settings = new Lang.Class({
   },
 
   toggle_bookmark: function (id, state) {
+    print ("toggle_bookmark", id, state);
     if (!id || (this.booked (id) && state) || (!this.booked (id) && !state)) return;
     if (state) bookmarks.unshift (id);
     else {

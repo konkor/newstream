@@ -90,7 +90,7 @@ var ChannelDetails = new Lang.Class({
     this.description.info.set_text (channel.description);
 
     this.itembar.base_url = "https://youtube.com/channel/";
-    this.itembar.set_link (channel.id, channel.title, this.view.w.settings.subscribed (channel.id));
+    this.itembar.set_link (channel.id, channel.title, this.view.w.settings.subscribed (channel.id), 1);
   },
 
   on_bookmark: function (o) {

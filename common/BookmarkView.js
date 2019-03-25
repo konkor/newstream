@@ -45,7 +45,12 @@ var BookmarkView = new Lang.Class({
     this.pager.toggle ();
     this.clear_all ();
     marks.forEach (p => {
-      let item = new BookmarkViewItem (this.settings.get_view_history_item (p));
+      let data = this.settings.get_view_history_item (p);
+      if (!data) {
+        this.settings.toggle_bookmark (p, false);
+        return;
+      }
+      let item = new BookmarkViewItem (data);
       item.show_details ();
       this.results.add (item);
     });
