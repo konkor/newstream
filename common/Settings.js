@@ -26,11 +26,6 @@ let view_history = [];
 let view_history_size = 1000;
 let bookmarks = [];
 let channels = [];
-let window_height = 480;
-let window_width = 800;
-let window_x = 0;
-let window_y = 0;
-let window_maximized = false;
 
 var Settings = new Lang.Class({
   Name: "Settings",
@@ -68,11 +63,6 @@ var Settings = new Lang.Class({
     this.load_view_history ();
     this.load_bookmarks ();
     this.load_channels ();
-    window_height = this.get_int ("window-height");
-    window_width = this.get_int ("window-width");
-    window_x = this.get_int ("window-x");
-    window_y = this.get_int ("window-y");
-    window_maximized = this.get_boolean ("window-maximized");
   },
 
   get save () { return save; },
@@ -81,34 +71,33 @@ var Settings = new Lang.Class({
     this.set_boolean ("save-settings", save);
   },
 
-  get window_height () { return window_height; },
-  get window_width () { return window_width; },
-  get window_x () { return window_x; },
-  get window_y () { return window_y; },
-  get window_maximized () { return window_maximized; },
+  get window_height () { return this.get_int ("window-height"); },
+  get window_width () { return this.get_int ("window-width"); },
+  get window_x () { return this.get_int ("window-x"); },
+  get window_y () { return this.get_int ("window-y"); },
+  get window_maximized () { return this.get_boolean ("window-maximized"); },
 
   save_geometry: function (o) {
     let window = o.get_window ();
     if (!window) return;
     let ws = window.get_state();
-    let x = 0, y = 0;
-    window_maximized = false;
+    let x = 0, y = 0, w = 480, h = 720, maximized = false;
 
     if (Gdk.WindowState.MAXIMIZED & ws) {
-      window_maximized = true;
+      maximized = true;
     } else if ((Gdk.WindowState.TILED & ws) == 0) {
-      [x, y, window_width, window_height] = window.get_geometry ();
+      //[x, y, window_width, window_height] = window.get_geometry ();
       [, x, y] = window.get_origin ();
-      if (x > 0 && y > 0) {
-        window_x = x; window_y = y;
-      }
+      //[x, y] = o.get_position ();
+      [w, h] = o.get_size ();
     }
+    print ("save_geometry", x,y,w,h);
 
-    this.set_int ("window-height", window_height);
-    this.set_int ("window-width", window_width);
-    this.set_int ("window-x", window_x);
-    this.set_int ("window-y", window_y);
-    this.set_boolean ("window-maximized", window_maximized);
+    this.set_int ("window-height", h);
+    this.set_int ("window-width", w);
+    this.set_int ("window-x", x);
+    this.set_int ("window-y", y);
+    this.set_boolean ("window-maximized", maximized);
   },
 
   get history () { return history; },
