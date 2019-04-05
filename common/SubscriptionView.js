@@ -60,7 +60,7 @@ var SubscriptionView = new Lang.Class({
     var child = item.get_children()[0];
     if (child && child.channel) {
       let app = Gio.Application.get_default ();
-      app.window.channelview.load (child.channel, child.image.pixbuf);
+      app.window.channelview.load (child.channel, child.pixbuf);
     }
   }
 });
@@ -108,9 +108,10 @@ var SubscriptionViewItem = new Lang.Class({
 
   get_thumb: function () {
     let url = this.channel.thumbnails["default"].url;
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r) => {
       if (r != 200) return;
-      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 32, 32, true, null);
+      this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
+      this.image.pixbuf = this.pixbuf.scale_simple (32, 32, 2);
     }));
   }
 });
