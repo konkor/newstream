@@ -23,8 +23,6 @@
   background-color: @newstream_bg_color;
 }
 .bookmark {
-  font-size: 12pt;
-  font-weight: bold;
   margin: 0;
 }.selected {
   color: @newstream_selection_color;

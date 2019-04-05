@@ -61,10 +61,6 @@ var ChannelDetails = new Lang.Class({
 
     this.description = new ItemView.Description ();
     contents.add (this.description);
-
-    this.itembar.bookmark.connect ('clicked', Lang.bind (this, (o) => {
-      this.on_bookmark (o);
-    }));
   },
 
   load: function (channel, pixbuf) {
@@ -90,11 +86,7 @@ var ChannelDetails = new Lang.Class({
     this.description.info.set_text (channel.description);
 
     this.itembar.base_url = "https://youtube.com/channel/";
-    this.itembar.set_link (channel.id, channel.title, this.view.w.settings.subscribed (channel.id));
-  },
-
-  on_bookmark: function (o) {
-    this.view.w.settings.toggle_channel (this.view.get_channel_data (), o.get_style_context().has_class ("selected"));
+    this.itembar.set_link (channel.id, channel, this.view.w.settings.subscribed (channel.id), 1);
   }
 });
 

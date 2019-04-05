@@ -153,12 +153,17 @@ var Itembar = new Lang.Class({
     Utils.launch_uri (uri);
   },
 
-  set_link: function (id, title, state) {
+  set_link: function (id, title, state, kind) {
     if (!id) return;
     this.id = id;
     this.link.label = this.base_url + id;
-    title = title || this.link.label;
-    this.link.title = title;
+    if (kind == 0) {
+      this.link.title = title || this.link.label;
+      this.bookmark.editor.setup (id, title, 0);
+    } else {
+      this.link.title = title.title || this.link.label;
+      this.bookmark.editor.setup_channel (title);
+    }
     state = state || false;
     this.bookmark.set_bookmark (state);
   }
@@ -166,7 +171,7 @@ var Itembar = new Lang.Class({
 
 var BookButton = new Lang.Class({
   Name: "BookButton",
-  Extends: Gtk.Button,
+  Extends: Gtk.MenuButton,
 
   _init: function () {
     this.parent ({label:"", always_show_image: true, tooltip_text:"Bookmark"});
@@ -177,8 +182,17 @@ var BookButton = new Lang.Class({
     this.image = new Gtk.Image ();
     this.image.pixbuf = this.bookmark_off;
     this.set_relief (Gtk.ReliefStyle.NONE);
-    this.connect ('clicked', Lang.bind (this, (o) => {
-      this.set_bookmark (!o.get_style_context().has_class ("selected"));
+
+    this.editor = new BookEditor (this);
+    this.set_popover (this.editor);
+
+    this.connect ('toggled', Lang.bind (this, (o) => {
+      if (!o.active) return;
+      if (!o.get_style_context().has_class ("selected")) {
+        this.set_bookmark (true);
+        this.editor.set_state (true);
+      }
+      this.editor.show_all ();
     }));
   },
 
@@ -205,6 +219,67 @@ var BookButton = new Lang.Class({
   }
 });
 
+var BookEditor = new Lang.Class({
+  Name: "BookEditor",
+  Extends: Gtk.Popover,
+
+  _init: function (parent) {
+    this.parent ({});
+    this.w = parent;
+    let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL,margin:8, spacing:8});
+    this.add (box);
+
+    this.title = new Gtk.Label ({label:"", wrap: true, lines: 1, ellipsize: 3, xalign:0});
+    box.add (this.title);
+    this.tags = new Gtk.Entry ({tooltip_text:"Enter tags", placeholder_text:"#hashtags"});
+    this.tags.sensitive = false;
+    box.add (this.tags);
+
+    let hbox = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
+    box.add (hbox);
+    this.remove_btn = new Gtk.Button ({label:"Remove", tooltip_text:"Remove Bookmark"});
+    this.remove_btn.get_style_context ().add_class ("destructive-action");
+    hbox.pack_start (this.remove_btn, true, true, 0);
+
+    this.done_btn = new Gtk.Button ({label:"Done", tooltip_text:"Finish Editing"});
+    this.done_btn.get_style_context ().add_class ("suggested-action");
+    this.done_btn.margin_left = 8;
+    hbox.pack_start (this.done_btn, true, true, 0);
+
+    this.remove_btn.connect ("clicked", Lang.bind (this, this.on_removed));
+    this.done_btn.connect ("clicked", Lang.bind (this, this.hide));
+
+    hbox.set_size_request (240, 32);
+  },
+
+  setup: function (id, title, kind) {
+    this.title.set_text (title);
+    this.id = id;
+    this.kind = kind;
+  },
+
+  setup_channel: function (channel) {
+    this.channel = channel;
+    this.title.set_text (this.channel.title);
+    this.id = this.channel.id;
+    this.kind = 1;
+  },
+
+  on_removed: function () {
+    if (!this.id) return;
+    this.set_state (false);
+    this.w.set_bookmark (false);
+    this.hide ();
+  },
+
+  set_state: function (state) {
+    state = state || false;
+    let app = Gio.Application.get_default ();
+    if (this.kind == 0) app.window.settings.toggle_bookmark (this.id, state);
+    else if (this.kind == 1) app.window.settings.toggle_channel (this.channel, state);
+  }
+});
+
 var VideoDetails = new Lang.Class({
   Name: "VideoDetails",
   Extends: Gtk.Box,
@@ -228,10 +303,6 @@ var VideoDetails = new Lang.Class({
 
     this.description = new Description ();
     this.add (this.description);
-
-    this.itembar.bookmark.connect ('clicked', Lang.bind (this, (o) => {
-      this.on_bookmark (o);
-    }));
   },
 
   load: function (item) {
@@ -240,11 +311,7 @@ var VideoDetails = new Lang.Class({
     this.channel.load (item);
     this.statistics.load (item);
     this.description.load (item);
-    this.itembar.set_link (item.id, item.title, this.settings.booked (item.id));
-  },
-
-  on_bookmark: function (o) {
-    this.settings.toggle_bookmark (this.itembar.id, o.get_style_context().has_class ("selected"));
+    this.itembar.set_link (item.id, item.title, this.settings.booked (item.id), 0);
   }
 });
 
