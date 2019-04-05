@@ -196,6 +196,7 @@ var VideoFrame = new Lang.Class({
       if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
     }));
     this.connect ('realize', Lang.bind (this, ()=>{
+      this.get_toplevel ().save_geometry ();
       this.move_internal ();
     }));
   },
