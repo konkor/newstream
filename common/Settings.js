@@ -278,6 +278,7 @@ var Settings = new Lang.Class({
   },
 
   toggle_channel: function (channel, state) {
+    print ("toggle_channel", channel.id, state);
     let id = channel.id;
     if (!id || (this.subscribed (id) && state) || (!this.subscribed (id) && !state)) return;
     if (state) {

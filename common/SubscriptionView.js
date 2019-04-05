@@ -54,6 +54,14 @@ var SubscriptionView = new Lang.Class({
 
   on_page_selected: function (o, token) {
     this.query (parseInt (token));
+  },
+
+  on_item_activated: function (o, item) {
+    var child = item.get_children()[0];
+    if (child && child.channel) {
+      let app = Gio.Application.get_default ();
+      app.window.channelview.load (child.channel, child.image.pixbuf);
+    }
   }
 });
 
@@ -91,10 +99,8 @@ var SubscriptionViewItem = new Lang.Class({
     this.bookmark = new ItemView.BookButton ();
     this.settings = Gio.Application.get_default ().window.settings;
     this.bookmark.set_bookmark (this.settings.subscribed (this.channel.id));
+    this.bookmark.editor.setup_channel (this.channel);
     this.pack_end (this.bookmark, false, false, 0);
-    this.bookmark.connect ('clicked', Lang.bind (this, (o) => {
-      this.settings.toggle_channel (this.channel, o.get_style_context().has_class ("selected"));
-    }));
 
     this.get_thumb ();
     this.show_all ();
