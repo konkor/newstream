@@ -27,7 +27,7 @@ const APPDIR = get_appdir ();
 imports.searchPath.unshift(APPDIR);
 const Application = imports.common.Application;
 
-let app = new Application.NewStreamApplication (ARGV);
+let app = new Application.NewStreamApplication ({});
 app.run (ARGV);
 
 function getCurrentFile () {
