@@ -12,6 +12,7 @@ const GObject = imports.gi.GObject;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Lang = imports.lang;
 
@@ -247,7 +248,7 @@ var BookEditor = new Lang.Class({
     hbox.pack_start (this.done_btn, true, true, 0);
 
     this.remove_btn.connect ("clicked", Lang.bind (this, this.on_removed));
-    this.done_btn.connect ("clicked", Lang.bind (this, this.hide));
+    this.done_btn.connect ("clicked", Lang.bind (this, () => {this.hide();}));
 
     hbox.set_size_request (240, 32);
   },
