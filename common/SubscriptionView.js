@@ -61,6 +61,7 @@ var SubscriptionView = new Lang.Class({
     if (child && child.channel) {
       let app = Gio.Application.get_default ();
       app.window.channelview.load (child.channel, child.pixbuf);
+      this.w.back.last = this.w.stack.visible_child_name;
     }
   }
 });
