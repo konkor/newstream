@@ -362,6 +362,9 @@ var VideoWidget = new Lang.Class ({
     //this.logo_pixbuf = theme.load_icon ("applications-multimedia", 256, 0);
     this.logo_pixbuf = GdkPixbuf.Pixbuf.new_from_file (APPDIR + "/data/icons/newstream.cover.svg");
     this.set_cover ();
+    this.connect ("unmap", () => {
+      this.set_controls_visibility (false, false);
+    });
   },
 
   get_cover_pixbuf: function () {
@@ -435,7 +438,7 @@ var VideoWidget = new Lang.Class ({
   },
 
   set_controls_visibility: function (visible, animate) {
-    animate = animate || true;
+    animate = (typeof animate !== 'undefined') ?  animate : true;
     let transition = animate ? 250 : 0;
     if (this.player.video && this.player.video.fullscreen || !visible) {
       let [,header_controls_height] = this.header_controls.get_preferred_height (this.header_controls);
@@ -449,8 +452,12 @@ var VideoWidget = new Lang.Class ({
     this.controls.set_opacity (opacity);
 
     this.set_show_cursor (visible);
-    //if (visible) this.schedule_hiding_popup ();
     this.control_visible = visible;
+    //BUG: New Gtk? doesn't redraw controls after unmap
+    if (visible) GLib.timeout_add (0, animate+50, () =>  {
+      this.controls.visible = false;
+      this.controls.visible = true;
+    });
   },
 
   schedule_hiding_popup: function () {
