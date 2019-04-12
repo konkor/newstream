@@ -14,8 +14,6 @@ const Lang = imports.lang;
 var Format = imports.format;
 String.prototype.format = Format.format;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
 const fetch = imports.common.Utils.fetch;
 
 const ORDER = {
@@ -214,16 +212,3 @@ var SearchProvider = new Lang.Class({
     return url;
   }
 });
-
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}

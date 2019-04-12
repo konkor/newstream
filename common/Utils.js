@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.

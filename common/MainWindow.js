@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -15,24 +15,25 @@ const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const Lang = imports.lang;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
-
+const Logger = imports.common.Logger;
 const Prefs = imports.common.Settings;
 const Provider = imports.common.SearchProvider;
 const Search = imports.common.Search;
 const Layouts = imports.common.Layouts;
 const Utils = imports.common.Utils;
 
-let theme_gui = APPDIR + "/data/themes/default/gtk.css";
+let APPDIR = "";
+let theme_gui = "/data/themes/default/gtk.css";
 let cssp = null;
 
 var MainWindow = new Lang.Class ({
   Name: "MainWindow",
   Extends: Gtk.ApplicationWindow,
 
-  _init: function (args) {
-    this.parent();
+  _init: function (params) {
+    this.parent (params);
+    APPDIR = this.application.current_dir;
+    theme_gui = APPDIR + theme_gui;
     this.set_icon_name ("io.github.konkor.newstream");
     if (!this.icon) try {
       this.icon = Gtk.Image.new_from_file (APPDIR + "/data/icons/hicolor/scalable/apps/io.github.konkor.newstream.svg").pixbuf;
@@ -339,15 +340,7 @@ function get_css_provider () {
   return cssp;
 }
 
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}
+const DOMAIN = "MainWindow";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

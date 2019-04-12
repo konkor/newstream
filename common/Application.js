@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -15,6 +15,8 @@ const Lang = imports.lang;
 
 const APPDIR = getCurrentFile ()[1];
 imports.searchPath.unshift(APPDIR);
+
+const Logger = imports.common.Logger;
 const Window = imports.common.MainWindow;
 
 let inhibit_id = 0;
@@ -23,7 +25,7 @@ var NewStreamApplication = new Lang.Class ({
   Name: "NewStreamApplication",
   Extends: Gtk.Application,
 
-  _init: function (args) {
+  _init: function (params) {
     this.parent ({
       application_id: "io.github.konkor.newstream",
       flags: Gio.ApplicationFlags.HANDLES_OPEN
@@ -32,10 +34,9 @@ var NewStreamApplication = new Lang.Class ({
     GLib.set_application_name ("New Stream");
   },
 
-  vfunc_startup: function() {
-    this.parent();
-    this.window = new Window.MainWindow (this);
-    this.add_window (this.window);
+  vfunc_startup: function () {
+    this.parent ();
+    this.window = new Window.MainWindow ({ application:this });
 
     let action_entries = [
       { name: "bookmarks",
@@ -232,6 +233,10 @@ var NewStreamApplication = new Lang.Class ({
     this.lookup_action ("seek-backward").set_enabled (false);
     this.lookup_action ("volume-up").set_enabled (false);
     this.lookup_action ("volume-down").set_enabled (false);
+  },
+
+  get current_dir () {
+    return APPDIR;
   }
 });
 

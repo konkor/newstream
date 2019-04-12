@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -8,14 +8,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Lang = imports.lang;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
-const Lang = imports.lang;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
-const Utils = imports.common.Utils;
+const Logger = imports.common.Logger;
+const Utils  = imports.common.Utils;
 const ResultView = imports.common.ResultView;
 
 const IPP = 20; //items per page
@@ -83,22 +82,16 @@ var BookmarkViewItem = new Lang.Class({
 
   get_thumb: function () {
     let url = this.details.get_thumbnail_url ("default");
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+    if (url) Utils.fetch (url, null, null, (d, r) => {
       if (r != 200) return;
-      this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 48, true, null);
-    }));
+      try {
+        this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale (Gio.MemoryInputStream.new_from_bytes (d), 48, 48, true, null);
+      } catch (e) {debug (e.message);}
+    });
   }
 });
 
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}
+const DOMAIN = "BookmarkView";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

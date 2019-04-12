@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -8,23 +8,23 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Lang = imports.lang;
 const GObject = imports.gi.GObject;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
-const Lang = imports.lang;
+const Gtk = imports.gi.Gtk;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
+let APPDIR = "";
 
 var Searchbar = new Lang.Class({
   Name: "Searchbar",
   Extends: Gtk.Box,
 
-  _init: function (sender) {
+  _init: function (parent) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
-    this.settings = sender.settings;
+    this.settings = parent.settings;
+    APPDIR = parent.application.current_dir;
     this.get_style_context ().add_class ("search-bar");
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
@@ -171,16 +171,3 @@ var SearchHistoryItem = new Lang.Class({
     this.visible = this.get_label().length != 0;
   }
 });
-
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}

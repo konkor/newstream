@@ -1,12 +1,15 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+const Lang = imports.lang;
+const System = imports.system;
 
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -19,11 +22,8 @@ const ClutterGst = imports.gi.ClutterGst;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
-const Lang = imports.lang;
-const System = imports.system;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
+const Logger = imports.common.Logger;
 const PlayerEngine = imports.common.PlayerEngine;
 const Utils = imports.common.Utils;
 
@@ -32,6 +32,7 @@ if (!ClutterGst.Content) CG_VERSION = 2;
 
 const OVERLAY_OPACITY = 220;
 
+let APPDIR = "";
 let window_handler = 0;
 
 var Player = new Lang.Class({
@@ -41,6 +42,7 @@ var Player = new Lang.Class({
   _init: function (sender) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.w = sender;
+    APPDIR = this.w.application.current_dir;
 
     GtkClutter.init (null);
     ClutterGst.init(null);
@@ -169,8 +171,9 @@ var Player = new Lang.Class({
     if (!this.item.id) return;
 
     if (this.item.cover_url) Utils.fetch (this.item.cover_url, null, null, Lang.bind (this, (d,r)=>{
-      if (r == 200)
+      if (r == 200) try {
         this.video.contents.set_cover (GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null));
+      } catch (e) {debug (e.message);};
     }));
   }
 });
@@ -680,15 +683,7 @@ var AspectFrame = new Lang.Class ({
   }
 });
 
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}
+const DOMAIN = "Player";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

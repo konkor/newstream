@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -8,13 +8,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Lang = imports.lang;
+const Signals = imports.signals;
+
 const GObject = imports.gi.GObject;
 const GLib = imports.gi.GLib;
 //const Gio = imports.gi.Gio;
 const Gst = imports.gi.Gst;
 const GstVideo = imports.gi.GstVideo;
-const Lang = imports.lang;
-const Signals = imports.signals;
 
 let timer = 0;
 

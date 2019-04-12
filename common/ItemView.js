@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -16,11 +16,12 @@ const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Lang = imports.lang;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
+const Logger = imports.common.Logger;
 const ResultView = imports.common.ResultView;
 const Player = imports.common.Player;
 const Utils = imports.common.Utils;
+
+let APPDIR = "";
 
 var ItemView = new Lang.Class({
   Name: "ItemView",
@@ -34,6 +35,7 @@ var ItemView = new Lang.Class({
   _init: function (owner) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.w = owner;
+    APPDIR = this.w.application.current_dir;
 
     this.scroll = new Gtk.ScrolledWindow ();
     this.scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
@@ -360,8 +362,10 @@ var Channel = new Lang.Class({
     }
     if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, Lang.bind (this, (d,r)=>{
       if (r != 200) return;
-      this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
-      this.logo.pixbuf = this.pixbuf.scale_simple (56, 56, 2);
+      try {
+        this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
+        this.logo.pixbuf = this.pixbuf.scale_simple (56, 56, 2);
+      } catch (e) {debug (e.message);};
     }));
   }
 });
@@ -428,15 +432,7 @@ var Description = new Lang.Class({
   }
 });
 
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}
+const DOMAIN = "ItemView";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

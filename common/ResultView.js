@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018 konkor <konkor.github.io>
+ * Copyright (C) 2018-2019 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -8,17 +8,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Lang = imports.lang;
 const GObject = imports.gi.GObject;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
-const Lang = imports.lang;
 
-const APPDIR = getCurrentFile ()[1];
-imports.searchPath.unshift(APPDIR);
-const Utils = imports.common.Utils;
+const Logger = imports.common.Logger;
+const Utils  = imports.common.Utils;
+
+let APPDIR = "";
 
 var ResultView = new Lang.Class({
   Name: "ResultView",
@@ -33,6 +34,7 @@ var ResultView = new Lang.Class({
     scroll = (typeof scroll !== 'undefined') ?  scroll : true;
     let box = null;
     this.w = parent;
+    APPDIR = this.w.application.current_dir;
     this.provider = parent.provider;
 
     this.header = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
@@ -107,7 +109,10 @@ var ResultView = new Lang.Class({
     if (res != 200) return;
     this.emit ('ready');
     this.clear_all ();
-    this.add_items (JSON.parse (Utils.bytesToString (data).toString()));
+    try {
+      let items = JSON.parse (Utils.bytesToString (data).toString ());
+      this.add_items (items);
+    } catch (e) { debug (e.message);}
     if (this.scroll) this.scroll.vadjustment.value = 0;
   },
 
@@ -453,15 +458,7 @@ var Pager = new Lang.Class({
   }
 });
 
-function getCurrentFile () {
-  let stack = (new Error()).stack;
-  let stackLine = stack.split("\n")[1];
-  if (!stackLine)
-    throw new Error ("Could not find current file");
-  let match = new RegExp ("@(.+):\\d+").exec(stackLine);
-  if (!match)
-    throw new Error ("Could not find current file");
-  let path = match[1];
-  let file = Gio.File.new_for_path (path).get_parent();
-  return [file.get_path(), file.get_parent().get_path(), file.get_basename()];
-}
+const DOMAIN = "ResultView";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}
