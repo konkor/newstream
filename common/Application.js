@@ -170,6 +170,7 @@ var NewStreamApplication = new Lang.Class ({
       if (typeof entry.enabled !== 'undefined' ) action.set_enabled (entry.enabled);
       this.add_action (action);
     });
+    this.search_enabled = false;
   },
 
   vfunc_activate: function () {
