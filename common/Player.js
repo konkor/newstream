@@ -154,6 +154,7 @@ var Player = new Lang.Class({
   set_volume: function (volume) {
     if (!this.engine) return;
     this.engine.volume = volume;
+    this.video.contents.controls.volume.value = this.engine.volume;
   },
 
   set_volume_delta: function (offset) {
@@ -525,13 +526,17 @@ var VideoControl = new Lang.Class ({
     this.time_duration.get_style_context ().add_class ("small");
     this.box.add (this.time_duration);
 
+    this.volume = new Gtk.VolumeButton ({use_underline:true, use_symbolic:true});
+    this.volume.value = this.player.engine.volume;
+    this.box.add (this.volume);
+
     this.box.show_all ();
 
-    this.player.engine.connect ('state-changed', Lang.bind (this, (s,o,n,p)=>{
+    this.player.engine.connect ('state-changed', (s,o,n,p) => {
       //print ("state-changed:", o,n,p,this.play.state);
       this.play.toggle (n == 4);
-    }));
-    this.player.engine.connect ('progress', Lang.bind (this, this.on_progress));
+    });
+    this.player.engine.connect ('progress', this.on_progress.bind (this));
 
     this.seek_scale.connect ('button-press-event', () => {
       this.sender.set_controls_busy (true);
@@ -541,7 +546,8 @@ var VideoControl = new Lang.Class ({
       this.seek_lock = false;
       this.sender.set_controls_busy (false);
     });
-    this.seek_scale.connect ('value-changed', Lang.bind (this, this.on_seek));
+    this.seek_scale.connect ('value-changed', this.on_seek.bind (this));
+    this.volume.connect ('value-changed', this.on_volume.bind (this));
   },
 
   on_play: function (o, state) {
@@ -575,6 +581,10 @@ var VideoControl = new Lang.Class ({
     let pos = o.get_value () / 65535 * this.duration;
     this.set_time (this.time, pos);
     this.player.seek (pos);
+  },
+
+  on_volume: function (o) {
+    this.player.engine.volume = o.value;
   },
 
   update_slider_visibility: function (dur) {
