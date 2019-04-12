@@ -45,9 +45,9 @@ var PlayerEngine = new Lang.Class({
 
     this.bus = this.playbin.get_bus();
     this.bus.add_signal_watch();
-    this.bus.connect ("message", Lang.bind (this, this.on_bus_message));
+    this.bus.connect ("message", this.on_bus_message.bind (this));
 
-    timer = GLib.timeout_add (0, 500, Lang.bind (this, this.on_timer));
+    timer = GLib.timeout_add (0, 500, this.on_timer.bind (this));
   },
 
   get state () {

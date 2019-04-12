@@ -51,10 +51,10 @@ var Player = new Lang.Class({
     this.video = new VideoFrame (this);
     this.pack_start (this.video, true, true, 0);
 
-    this.connect ('unrealize', Lang.bind (this, (o)=>{
+    this.connect ('unrealize', (o) => {
       this.engine.stop ();
-    }));
-    this.engine.connect ('state-changed', Lang.bind (this, (s,o,n,p)=>{
+    });
+    this.engine.connect ('state-changed', (s,o,n,p) => {
       //print ("state-changed:", o,n,p);
       if (this.w.stack.visible_child_name != "item") {
         this.w.phones.visible = n == 4;
@@ -65,7 +65,7 @@ var Player = new Lang.Class({
       }
       if (n != 4) this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
       else if (this.video.fullscreen) this.get_toplevel ().application.lookup_action ("inhibit").activate (null);
-    }));
+    });
   },
 
   load: function (item) {
@@ -74,7 +74,7 @@ var Player = new Lang.Class({
     if (!this.item || (this.item.id != item.id)) {
       this.item = item;
       this.get_cover ();
-      if (this.item.id) Utils.fetch_formats (this.item.id, Lang.bind (this, (d)=>{
+      if (this.item.id) Utils.fetch_formats (this.item.id, (d) => {
         this.formats = d;
         var url = "";
         if (d && d.format) print (d.format, d.vcodec, d.acodec);
@@ -94,7 +94,7 @@ var Player = new Lang.Class({
         //if (d.formats) d.formats.forEach ( p => {
         //print (p.format);
         //print (p.url);
-      }));
+      });
       this.w.application.lookup_action ("player-enabled").activate (null);
       //this.engine.volume = 0.5;
     } else {
@@ -170,11 +170,11 @@ var Player = new Lang.Class({
     this.video.contents.set_cover (null);
     if (!this.item.id) return;
 
-    if (this.item.cover_url) Utils.fetch (this.item.cover_url, null, null, Lang.bind (this, (d,r)=>{
+    if (this.item.cover_url) Utils.fetch (this.item.cover_url, null, null, (d,r) => {
       if (r == 200) try {
         this.video.contents.set_cover (GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null));
       } catch (e) {debug (e.message);};
-    }));
+    });
   }
 });
 
@@ -195,14 +195,14 @@ var VideoFrame = new Lang.Class({
     this.frame.set_size_request (100,480);
     this.frame.show ();
     this.pack_start (this.frame, true, true, 0);
-    this.contents.connect ('button-press-event', Lang.bind (this, (o, e)=>{
+    this.contents.connect ('button-press-event', (o, e) => {
       //print ('button-press-event', e.get_event_type());
       if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
-    }));
-    this.connect ('realize', Lang.bind (this, ()=>{
+    });
+    this.connect ('realize', () => {
       this.get_toplevel ().save_geometry ();
       this.move_internal ();
-    }));
+    });
   },
 
   toggle_fullscreen: function () {
@@ -260,10 +260,10 @@ var FullscreenWindow = new Lang.Class({
     let app = Gio.Application.get_default();
     this.application = app;
 
-    this.connect ('window_state_event', Lang.bind (this, (o, e)=>{
+    this.connect ('window_state_event', (o, e) => {
       var state = this.window.get_state();
       if (state == Gdk.WindowState.FULLSCREEN) this.set_bounds ();
-    }));
+    });
   },
 
   set_bounds: function () {
@@ -287,8 +287,8 @@ var VideoWidget = new Lang.Class ({
     this.parent ();
     this.build ();
 
-    this.connect ("motion_notify_event", Lang.bind (this, this.on_motion_notify));
-    this.player.engine.connect ('state-changed', Lang.bind (this, this.on_player_state));
+    this.connect ("motion_notify_event", this.on_motion_notify.bind (this));
+    this.player.engine.connect ('state-changed', this.on_player_state.bind (this));
 
     this.set_controls_visibility (false);
   },
@@ -506,7 +506,7 @@ var VideoControl = new Lang.Class ({
     this.get_widget ().add (this.box);
 
     this.play = new PlayButton ();
-    this.play.connect ("play", Lang.bind (this, this.on_play));
+    this.play.connect ("play", this.on_play.bind (this));
     this.box.add (this.play);
 
     this.time = new Gtk.Label ({label: "0:00"});

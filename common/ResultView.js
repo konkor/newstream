@@ -73,24 +73,24 @@ var ResultView = new Lang.Class({
     space = new Gtk.Box ();
     box.pack_start (space, true, false, 0);
 
-    this.results.connect ("child-activated", Lang.bind (this, this.on_item_activated));
+    this.results.connect ("child-activated", this.on_item_activated.bind (this));
     this.pager.connect ("page-selected", (o, token) => {
       this.on_page_selected (o, token);
     });
-    this.results.connect ('key_release_event', Lang.bind (this, (o, e)=>{
+    this.results.connect ('key_release_event', (o, e) => {
       let state = o.get_selected_children ().length < 1;
       let app = Gio.Application.get_default();
       app.lookup_action ("seek-forward").set_enabled (state);
       app.lookup_action ("seek-backward").set_enabled (state);
       app.lookup_action ("volume-up").set_enabled (state);
       app.lookup_action ("volume-down").set_enabled (state);
-    }));
-    this.results.connect ('key_press_event', Lang.bind (this, (o, e)=>{
+    });
+    this.results.connect ('key_press_event', (o, e) => {
       this.enable_global_actions ();
-    }));
-    this.results.connect ('leave_notify_event', Lang.bind (this, (o, e)=>{
+    });
+    this.results.connect ('leave_notify_event', (o, e) => {
       this.enable_global_actions ();
-    }));
+    });
   },
 
   enable_global_actions: function () {
@@ -102,7 +102,7 @@ var ResultView = new Lang.Class({
   },
 
   query: function (words) {
-    this.url = this.provider.get (words, Lang.bind (this, this.on_results));
+    this.url = this.provider.get (words, this.on_results.bind (this));
   },
 
   on_results: function (data, res) {
@@ -117,7 +117,7 @@ var ResultView = new Lang.Class({
   },
 
   on_page_selected: function (o, token) {
-    this.provider.get_page (this.url, token, this.etag, Lang.bind (this, this.on_results));
+    this.provider.get_page (this.url, token, this.etag, this.on_results.bind (this));
   },
 
   on_item_activated: function (o, item) {
@@ -140,13 +140,13 @@ var ResultView = new Lang.Class({
     respond.items.forEach (p => {
       let item = new ResultViewItem (p);
       this.results.add (item);
-      if (item.details.id) this.provider.get_info (item.details.id, Lang.bind (this, (d)=>{
+      if (item.details.id) this.provider.get_info (item.details.id, (d) => {
         let data = JSON.parse (Utils.bytesToString (d));
         if (data.pageInfo && data.pageInfo.totalResults > 0) {
           item.details.parse (data.items[0]);
           item.show_details ();
         } else print ("WARNING: failed detailed info for", item.details.id, "\nRecived:\n", Utils.bytesToString (d));
-      }));
+      });
     });
   },
 
@@ -228,24 +228,24 @@ var ResultViewItem = new Lang.Class({
 
   get_thumb: function () {
     let url = this.details.get_thumbnail_url ("default");
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r)=>{
+    if (url) Utils.fetch (url, null, null, (d,r) => {
       if (r != 200) return;
       //print (d.get_size(),d.get_data().length);
       this.image.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
-    }));
+    });
   },
 
   get_channel_info: function () {
     let w = Gio.Application.get_default ().window;
     if (!this.details.data.channel.id) return;
     if (this.details.data.channel.thumbnails) this.get_channel_logo_url ();
-    else if (w) w.provider.get_channel_info (this.details.data.channel.id, Lang.bind (this, (d)=>{
+    else if (w) w.provider.get_channel_info (this.details.data.channel.id, (d) => {
       let data = JSON.parse (Utils.bytesToString (d));
       if (data.pageInfo.totalResults > 0) {
         this.details.parse (data.items[0]);
         this.get_channel_logo_url ();
       }
-    }));
+    });
   },
 
   get_channel_logo_url: function () {
@@ -442,7 +442,7 @@ var Pager = new Lang.Class({
     btn.no_show_all = true;
     this.pack_start (btn, false, false, 8);
 
-    btn.connect ('clicked', Lang.bind (this, this.on_clicked));
+    btn.connect ('clicked', this.on_clicked.bind (this));
 
     return btn;
   },

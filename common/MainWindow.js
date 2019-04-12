@@ -95,10 +95,10 @@ var MainWindow = new Lang.Class ({
     //this.phones.margin = 6;
     this.phones.no_show_all = true;
     this.hb.pack_end (this.phones);
-    this.phones.connect ('clicked', Lang.bind (this, () => {
+    this.phones.connect ('clicked', () => {
      this.back.last = this.stack.visible_child_name;
      this.stack.visible_child_name = "item";
-    }));
+    });
 
     let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.add (box);
@@ -182,26 +182,26 @@ var MainWindow = new Lang.Class ({
 
     this.hotview.query ();
 
-    this.topbar.connect ('stack_update', Lang.bind (this, this.on_stack_update));
-    this.searchview.connect ('ready', Lang.bind (this, ()=>{
+    this.topbar.connect ('stack_update', this.on_stack_update.bind (this));
+    this.searchview.connect ('ready', () => {
       this.stack.visible_child_name = "search";
       this.application.lookup_action ("search-enabled").activate (null);
-    }));
-    this.channelview.connect ('ready', Lang.bind (this, ()=>{
+    });
+    this.channelview.connect ('ready', () => {
       this.stack.visible_child_name = "channel";
       this.application.lookup_action ("channel-enabled").activate (null);
-    }));
-    this.searchbar.search_button.connect ('clicked', Lang.bind (this, this.on_search));
-    this.back.connect ('clicked', Lang.bind (this, this.on_back));
-    this.connect ('delete_event', Lang.bind (this, ()=>{
+    });
+    this.searchbar.search_button.connect ('clicked', this.on_search.bind (this));
+    this.back.connect ('clicked', this.on_back.bind (this));
+    this.connect ('delete_event', () => {
       this.application.quit ();
-    }));
-    this.stack.connect ('notify::visible-child-name', Lang.bind (this, (o,e)=>{
+    });
+    this.stack.connect ('notify::visible-child-name', (o,e) => {
       if (this.stack.visible_child_name != "item" && this.itemview.playing)
         this.phones.visible = true;
       else this.phones.visible = false;
-    }));
-    this.connect ('unmap', Lang.bind (this, this.save_geometry));
+    });
+    this.connect ('unmap', this.save_geometry.bind (this));
   },
 
   set_accel: function (mi, accel) {
@@ -286,7 +286,7 @@ var Topbar = new Lang.Class({
     if (btn.index == 0) btn.active = true;
     this.pack_start (btn, true, true, 0);
     this.buttons.push (btn);
-    btn.connect ('toggled', Lang.bind (this, this.on_toggle));
+    btn.connect ('toggled', this.on_toggle.bind (this));
   },
 
   on_toggle: function (o) {

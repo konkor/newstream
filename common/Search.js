@@ -56,38 +56,38 @@ var Searchbar = new Lang.Class({
     this.history = new SearchHistory (this);
     this.add (this.history);
 
-    this.clear_button.connect ('clicked', Lang.bind (this, ()=>{
+    this.clear_button.connect ('clicked', () => {
       this.entry.text = "";
-    }));
-    this.entry.connect ('key_press_event', Lang.bind (this, (o, e)=>{
+    });
+    this.entry.connect ('key_press_event', (o, e) => {
       var [,key] = e.get_keyval ();
       if (key == Gdk.KEY_Escape) this.entry.text = "";
-    }));
-    this.entry.connect ('activate', Lang.bind (this, ()=>{
+    });
+    this.entry.connect ('activate', () => {
       this.search_button.clicked ();
-    }));
-    this.entry.connect ('notify::text', Lang.bind (this, (o,a)=>{
+    });
+    this.entry.connect ('notify::text', (o, a) => {
       this.history.update ();
-    }));
-    this.entry.connect ('focus-in-event', Lang.bind (this, (o, e)=>{
+    });
+    this.entry.connect ('focus-in-event', (o, e) => {
       let app = Gio.Application.get_default();
       app.disable_global_actions ();
       this.history.visible = true;
-    }));
-    this.entry.connect ('focus-out-event', Lang.bind (this, (o, e)=>{
+    });
+    this.entry.connect ('focus-out-event', (o, e) => {
       //this.history.visible = false;
       let app = Gio.Application.get_default();
       app.enable_global_actions ();
-      GLib.timeout_add (0, 200, Lang.bind (this, ()=>{
+      GLib.timeout_add (0, 200, () => {
         this.history.visible = false;
         return false;
-      }));
-    }));
-    this.history.connect ('selected', Lang.bind (this, (o, t)=>{
+      });
+    });
+    this.history.connect ('selected', (o, t) => {
       //print ("selected", t);
       this.entry.text = t;
       this.search_button.clicked ();
-    }));
+    });
   }
 });
 
@@ -113,12 +113,12 @@ var SearchHistory = new Lang.Class({
     this.items.push (new SearchHistoryItem ());
     this.items.forEach (p => {
       this.add (p);
-      p.connect ("clicked", Lang.bind (this, (o)=>{
+      p.connect ("clicked", (o) => {
         this.emit ("selected", o.get_label ());
-      }));
+      });
     });
 
-    this.connect ("map", Lang.bind (this, this.update));
+    this.connect ("map", this.update.bind (this));
   },
 
   update: function (o, e) {

@@ -157,7 +157,7 @@ var NewStreamApplication = new Lang.Class ({
         accels: ["Down"]
       }
     ];
-    action_entries.forEach (Lang.bind (this, (entry) => {
+    action_entries.forEach (entry => {
       let props = {};
       ['name', 'state', 'parameter_type'].forEach ((prop) => {
         if (entry[prop]) props[prop] = entry[prop];
@@ -169,7 +169,7 @@ var NewStreamApplication = new Lang.Class ({
       if (entry.accels) this.set_accels_for_action ('app.' + entry.name, entry.accels);
       if (typeof entry.enabled !== 'undefined' ) action.set_enabled (entry.enabled);
       this.add_action (action);
-    }));
+    });
   },
 
   vfunc_activate: function () {

@@ -110,13 +110,13 @@ var SubscriptionViewItem = new Lang.Class({
 
   get_thumb: function () {
     let url = this.channel.thumbnails["default"].url;
-    if (url) Utils.fetch (url, null, null, Lang.bind (this, (d,r) => {
+    if (url) Utils.fetch (url, null, null, (d, r) => {
       if (r != 200) return;
       try {
         this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
         this.image.pixbuf = this.pixbuf.scale_simple (32, 32, 2);
       } catch (e) {debug (e.message);};
-    }));
+    });
   }
 });
 

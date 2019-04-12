@@ -61,7 +61,7 @@ var ItemView = new Lang.Class({
     if (!this.player.item || (this.player.item.id != item.id))
       this.details.load (item);
     this.player.load (item);
-    this.results.url = this.w.provider.get_relaited (this.player.item.id,Lang.bind (this.results, this.results.on_results));
+    this.results.url = this.w.provider.get_relaited (this.player.item.id, this.results.on_results.bind (this.results));
   },
 
   get playing () {
@@ -121,11 +121,11 @@ var Itembar = new Lang.Class({
   add_clipboard: function () {
     let btn = new Gtk.ImageMenuItem ({label:"Copy to clipboard", always_show_image: true});
     btn.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/edit-copy-symbolic.svg");
-    btn.connect ('activate', Lang.bind (this, (o) => {
+    btn.connect ('activate', () => {
       let clipboard = Gtk.Clipboard.get_default (Gdk.Display.get_default ());
       if (!clipboard) return;
       clipboard.set_text (this.link.label, -1);
-    }));
+    });
     return btn;
   },
 
@@ -137,7 +137,7 @@ var Itembar = new Lang.Class({
     let btn = new Gtk.ImageMenuItem ({label:label, always_show_image: true});
     btn.image = icon;
     btn.name = name;
-    btn.connect ("activate", Lang.bind (this, this.on_activate));
+    btn.connect ("activate", this.on_activate.bind (this));
 
     return btn;
   },
@@ -189,14 +189,14 @@ var BookButton = new Lang.Class({
     this.editor = new BookEditor (this);
     this.set_popover (this.editor);
 
-    this.connect ('toggled', Lang.bind (this, (o) => {
+    this.connect ('toggled', (o) => {
       if (!o.active) return;
       if (!o.get_style_context().has_class ("selected")) {
         this.set_bookmark (true);
         this.editor.set_state (true);
       }
       this.editor.show_all ();
-    }));
+    });
   },
 
   get_bookmark: function () {
@@ -249,8 +249,8 @@ var BookEditor = new Lang.Class({
     this.done_btn.margin_left = 8;
     hbox.pack_start (this.done_btn, true, true, 0);
 
-    this.remove_btn.connect ("clicked", Lang.bind (this, this.on_removed));
-    this.done_btn.connect ("clicked", Lang.bind (this, () => {this.hide();}));
+    this.remove_btn.connect ("clicked", this.on_removed.bind (this));
+    this.done_btn.connect ("clicked", () => {this.hide();});
 
     hbox.set_size_request (240, 32);
   },
@@ -360,13 +360,13 @@ var Channel = new Lang.Class({
       var d = new Date (data.published);
       this.published.set_text ("Published: " + d.toLocaleDateString());
     }
-    if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, Lang.bind (this, (d,r)=>{
+    if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, (d,r) => {
       if (r != 200) return;
       try {
         this.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null);
         this.logo.pixbuf = this.pixbuf.scale_simple (56, 56, 2);
       } catch (e) {debug (e.message);};
-    }));
+    });
   }
 });
 

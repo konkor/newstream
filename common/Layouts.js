@@ -26,7 +26,7 @@ var HistoryLayout = new Lang.Class({
   _init: function (parent) {
     this.parent (parent);
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   setup: function (o, e) {
@@ -48,7 +48,7 @@ var BookmarkLayout = new Lang.Class({
   _init: function (parent) {
     this.parent (parent);
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   setup: function (o, e) {
@@ -69,7 +69,7 @@ var SubscriptionLayout = new Lang.Class({
 
   _init: function (parent) {
     this.parent (parent);
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   setup: function (o, e) {
@@ -92,7 +92,7 @@ var ItemLayout = new Lang.Class({
     this.parent (parent);
     this.w = parent;
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   query: function (item) {
@@ -117,11 +117,11 @@ var HotView = new Lang.Class({
     this.parent (parent);
     this.w = parent;
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   query: function (words) {
-    this.url = this.provider.get_hot (Lang.bind (this, this.on_results));
+    this.url = this.provider.get_hot (this.on_results.bind (this));
   },
 
   setup: function (o, e) {
@@ -143,7 +143,7 @@ var NewView = new Lang.Class({
   },
 
   query: function (words) {
-    this.url = this.provider.get_day (Lang.bind (this, this.on_results));
+    this.url = this.provider.get_day (this.on_results.bind (this));
   }
 });
 
@@ -156,7 +156,7 @@ var HitView = new Lang.Class({
   },
 
   query: function (words) {
-    this.url = this.provider.get_hit (Lang.bind (this, this.on_results));
+    this.url = this.provider.get_hit (this.on_results.bind (this));
   }
 });
 
@@ -169,13 +169,13 @@ var SearchView = new Lang.Class({
     this.w = parent;
     this.words = "New Stream";
 
-    this.connect ("map", Lang.bind (this, this.setup));
+    this.connect ("map", this.setup.bind (this));
   },
 
   query: function (words) {
     if (!words) return;
     this.words = words;
-    this.url = this.provider.get (words, Lang.bind (this, this.on_results));
+    this.url = this.provider.get (words, this.on_results.bind (this));
   },
 
   setup: function (o, e) {
@@ -202,7 +202,7 @@ var ChannelLayout = new Lang.Class({
 
   query: function (words) {
     if (this.channel)
-      this.url = this.provider.get_channel (this.channel.id, Lang.bind (this, this.on_results));
+      this.url = this.provider.get_channel (this.channel.id, this.on_results.bind (this));
   },
 
   load: function (channel, pixbuf) {

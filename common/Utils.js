@@ -87,12 +87,12 @@ var SpawnPipe = new Lang.Class({
       GLib.io_add_watch (errchannel,100,GLib.IOCondition.IN | GLib.IOCondition.HUP, (channel, condition) => {
         return this.process_line (channel, condition, "stderr");
       });
-      let watch = GLib.child_watch_add (100, pid, Lang.bind (this, (pid, status, o) => {
+      let watch = GLib.child_watch_add (100, pid, (pid, status, o) => {
         //print ("watch handler " + pid + ":" + status + ":" + o);
         GLib.source_remove (watch);
         GLib.spawn_close_pid (pid);
         if (callback) callback (this.stdout, this.error);
-      }));
+      });
     } catch (e) {
       error (e);
     }
@@ -227,7 +227,7 @@ function check_install_ydl () {
 
 function install_ydl (callback) {
   fetch ("https://yt-dl.org/downloads/latest/youtube-dl",
-    "New Stream (GNU/Linux)", null, Lang.bind (this, (data, s) => {
+    "New Stream (GNU/Linux)", null, (data, s) => {
       if ((s == 200) && data) {
         let file = Gio.File.new_for_path (get_app_data_dir () + "/bin/youtube-dl");
         file.replace_contents_bytes_async (
@@ -239,13 +239,13 @@ function install_ydl (callback) {
         );
       }
       return false;
-  }));
+  });
   return true;
 }
 
 function check_update_ydl (callback) {
   fetch ("https://rg3.github.io/youtube-dl/update/LATEST_VERSION",
-    null, null, Lang.bind (this, (text, s) => {
+    null, null, (text, s) => {
       if ((s == 200) && text) {
         latest_version = bytesToString (text).toString().split("\n")[0];
       }
@@ -254,7 +254,7 @@ function check_update_ydl (callback) {
         if (callback) callback ();
       }
       return false;
-  }));
+  });
 }
 
 function bytesToString (array) {
