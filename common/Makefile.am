@@ -7,6 +7,7 @@ common_DATA = \
     HistoryView.js \
     ItemView.js \
     Layouts.js \
+    Logger.js \
     MainWindow.js \
     PlayerEngine.js \
     Player.js \

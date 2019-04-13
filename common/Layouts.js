@@ -190,6 +190,7 @@ var SearchView = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
+    this.w.fullscreen.visible = false;
   }
 });
 
