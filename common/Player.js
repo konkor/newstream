@@ -532,11 +532,11 @@ var VideoControl = new Lang.Class ({
     this.box.pack_start (this.seek_scale, true, true, 0);
     //this.box.add (this.seek_scale);
 
-    this.time_duration = new Gtk.Label ({label: "-",margin_right:24});
+    this.time_duration = new Gtk.Label ({label: "-", margin_right:6});
     this.time_duration.get_style_context ().add_class ("small");
     this.box.add (this.time_duration);
 
-    this.volume = new Gtk.VolumeButton ({use_underline:true, use_symbolic:true});
+    this.volume = new Gtk.VolumeButton ({use_underline:true, use_symbolic:true, margin_right:2});
     this.volume.value = this.player.engine.volume;
     this.box.add (this.volume);
 
