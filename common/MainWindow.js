@@ -102,6 +102,7 @@ var MainWindow = new Lang.Class ({
 
     this.fullscreen = Gtk.Button.new_from_icon_name ("view-fullscreen-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
     this.fullscreen.get_style_context ().add_class ("hb-button");
+    this.fullscreen.set_relief (Gtk.ReliefStyle.NONE);
     this.fullscreen.no_show_all = true;
     this.hb.pack_end (this.fullscreen);
     this.fullscreen.connect ('clicked', () => {
