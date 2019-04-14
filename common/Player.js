@@ -536,6 +536,14 @@ var VideoControl = new Lang.Class ({
     this.time_duration.get_style_context ().add_class ("small");
     this.box.add (this.time_duration);
 
+    this.repeat = new Gtk.ToggleButton ();
+    this.repeat.image = Gtk.Image.new_from_icon_name ("media-playlist-repeat-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+    this.repeat.set_relief (Gtk.ReliefStyle.NONE);
+    this.repeat.tooltip_text = "Repeat";
+    this.repeat.active = this.player.engine.repeat;
+    this.box.add (this.repeat);
+    this.repeat.connect ("toggled", (o) => {this.player.engine.repeat = o.active;});
+
     this.volume = new Gtk.VolumeButton ({use_underline:true, use_symbolic:true, margin_right:2});
     this.volume.value = this.player.engine.volume;
     this.box.add (this.volume);

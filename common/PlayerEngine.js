@@ -42,6 +42,7 @@ var PlayerEngine = new Lang.Class({
     //this.playbin.set_property("video-sink", this.videosink);
 
     this.current_volume = 0;
+    this.repeat = false;
 
     this.bus = this.playbin.get_bus();
     this.bus.add_signal_watch();
@@ -146,8 +147,10 @@ var PlayerEngine = new Lang.Class({
       if (!overlay || !this.handler) return false;
       overlay.set_window_handle (this.handler);
     } else if (msg.type == Gst.MessageType.EOS) {
-      this.playbin.set_state(Gst.State.READY);
       this.emit ('state-changed', this.current_state, Gst.State.READY, 0);
+      if (this.repeat) {
+        this.seek (0, false);
+      } else this.playbin.set_state (Gst.State.READY);
     } else if (msg.type == Gst.MessageType.STATE_CHANGED) {
       let [oldstate, newstate, pending] = msg.parse_state_changed ();
       if (this.current_state == newstate) return true;
