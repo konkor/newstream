@@ -81,7 +81,7 @@ var ChannelDetails = new Lang.Class({
 
     //this.description.load (item);
     channel.description = channel.description || "";
-    this.description.info.set_text (channel.description);
+    this.description.load (channel);
 
     this.itembar.base_url = "https://youtube.com/channel/";
     this.itembar.set_link (channel.id, channel, this.view.w.settings.subscribed (channel.id), 1);

@@ -435,13 +435,13 @@ var Description = new Lang.Class({
   get_marked: function (text) {
     let words = GLib.markup_escape_text (text, -1).split (" "), marked = "";
     words.forEach (w => {
-      if (w.indexOf ("http") == 0) {
+      if (w.indexOf ("http") > -1) {
         var ww = w.split ("\n");
         w = "";
         ww.forEach (s => {
           if (s.indexOf ("http") == 0)
             s = "<a href=\"" + s + "\">" + s + "</a>";
-          if (w) w += "\n"
+          if (w) w += "\n";
           w += s;
         });
       }
