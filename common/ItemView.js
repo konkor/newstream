@@ -417,7 +417,7 @@ var Description = new Lang.Class({
     });
 
     this.info = new Gtk.Label ({
-      xalign:0.0, yalign:1.0, wrap: true, margin:8
+      xalign:0.0, yalign:1.0, wrap: true, selectable:true, use_markup: true, margin:8
     });
     this.info.margin_left = 18;
     this.info.get_style_context ().add_class ("small");
@@ -428,7 +428,26 @@ var Description = new Lang.Class({
 
   load: function (data) {
     if (!data || !data.description) return;
-    this.info.set_text (data.description);
+    this.info.set_text ("");
+    this.info.set_markup (this.get_marked (data.description));
+  },
+
+  get_marked: function (text) {
+    let words = GLib.markup_escape_text (text, -1).split (" "), marked = "";
+    words.forEach (w => {
+      if (w.indexOf ("http") == 0) {
+        var ww = w.split ("\n");
+        w = "";
+        ww.forEach (s => {
+          if (s.indexOf ("http") == 0)
+            s = "<a href=\"" + s + "\">" + s + "</a>";
+          if (w) w += "\n"
+          w += s;
+        });
+      }
+      marked += w + " ";
+    });
+    return marked;
   }
 });
 
