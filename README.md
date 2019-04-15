@@ -14,7 +14,7 @@
 ![screencast](https://i.imgur.com/NZdkhYd.png)
 
 <p align="center">
-<a href="https://github.com/konkor/newstream/releases/download/v0.1.4/newstream_0.1.4-1_all.deb"><img src="https://i.imgur.com/Oe4O8bm.png" alt="Latest deb package" title="Ubuntu/Debian/Mint/Elementary..."></a></br>
+<a href="https://github.com/konkor/newstream/releases/download/v0.1.5/newstream_0.1.5-1_all.deb"><img src="https://i.imgur.com/Oe4O8bm.png" alt="Latest deb package" title="Ubuntu/Debian/Mint/Elementary..."></a></br>
 <a href="https://github.com/konkor/newstream/releases/">other releases</a>
 </p>
 
