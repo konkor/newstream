@@ -32,11 +32,40 @@ var NewStreamApplication = new Lang.Class ({
     });
     GLib.set_prgname ("New Stream");
     GLib.set_application_name ("New Stream");
+
+    this.add_main_option (
+      'debug', 0, GLib.OptionFlags.NONE, GLib.OptionArg.NONE,
+      "Enable debugging messages", null
+    );
+    this.add_main_option (
+      'verbose', 0, GLib.OptionFlags.NONE, GLib.OptionArg.NONE,
+      "Enable verbose output", null
+    );
+    this.connect ('handle-local-options', this.on_local_options.bind (this));
+  },
+
+  on_local_options: function (app, options) {
+    try {
+      this.register (null);
+    } catch (e) {
+      Logger.error ("Failed to register: %s".format (e.message));
+      return 1;
+    }
+
+    if (options.contains ("verbose")) {
+      DEBUG_LVL = 1;
+      Logger.init (1);
+    }
+    if (options.contains ("debug")) {
+      DEBUG_LVL = 2;
+      Logger.init (2);
+    }
+
+    return -1;
   },
 
   vfunc_startup: function () {
     this.parent ();
-    this.window = new Window.MainWindow ({ application:this });
 
     let action_entries = [
       { name: "bookmarks",
@@ -174,8 +203,12 @@ var NewStreamApplication = new Lang.Class ({
   },
 
   vfunc_activate: function () {
-    this.window.show_all ();
-    this.window.present ();
+    if (!this.active_window) {
+      this.window = new Window.MainWindow ({ application:this });
+      this.window.show_all ();
+    } else {
+      this.window.present ();
+    }
   },
 
   uninhibit_cb: function () {

@@ -24,6 +24,7 @@ let view_history = [];
 let view_history_size = 1000;
 let bookmarks = [];
 let channels = [];
+let tags = [];
 
 var Settings = new Lang.Class({
   Name: "Settings",
@@ -58,6 +59,7 @@ var Settings = new Lang.Class({
     history_size = this.get_int ("history-size");
     view_history_size = this.get_int ("view-history-size");
     this.load_history ();
+    this.load_tags ();
     this.load_view_history ();
     this.load_bookmarks ();
     this.load_channels ();
@@ -133,6 +135,18 @@ var Settings = new Lang.Class({
         history = JSON.parse (Utils.bytesToString (ar));
       } catch (e) {
         history = [];
+      }
+    }
+  },
+
+  load_tags: function () {
+    let f = Gio.file_new_for_path (app_data_dir + "/tags.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        tags = JSON.parse (Utils.bytesToString (ar));
+      } catch (e) {
+        tags = [];
       }
     }
   },
