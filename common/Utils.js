@@ -8,11 +8,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
-const Soup = imports.gi.Soup;
+const Lang      = imports.lang;
 const ByteArray = imports.byteArray;
-const Lang = imports.lang;
+const GLib      = imports.gi.GLib;
+const Gio       = imports.gi.Gio;
+const Soup      = imports.gi.Soup;
+
+const Logger = imports.common.Logger;
 
 const USER_AGENT = 'GNOME Shell - YouTubeSearchProvider - extension';
 
@@ -59,9 +61,15 @@ function fetch_formats (id, callback) {
   if (!ydl) return;
   let pipe = new SpawnPipe ([ydl, "--all-formats", "--dump-single-json", "https://www.youtube.com/watch?v=" + id], "/",
     (info, error) => {
-    if (!error) data = JSON.parse (info);
-    else print ("FORMATS ERROR:", error);
-    callback (data);
+    if (error) Logger.error ("FETCH_FORMATS", error);
+    try {
+      data = JSON.parse (info);
+    } catch (e) {
+      Logger.error ("FETCH_FORMATS", e);
+      callback ({});
+    } finally {
+      callback (data);
+    }
   });
 }
 

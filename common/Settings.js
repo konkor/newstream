@@ -13,7 +13,7 @@ const Gdk = imports.gi.Gdk;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
-const Utils = imports.common.Utils;
+const Utils  = imports.common.Utils;
 const Logger = imports.common.Logger;
 
 let app_data_dir = get_app_data_dir ();
