@@ -14,6 +14,7 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 const Utils = imports.common.Utils;
+const Logger = imports.common.Logger;
 
 let app_data_dir = get_app_data_dir ();
 
@@ -137,6 +138,12 @@ var Settings = new Lang.Class({
         history = [];
       }
     }
+  },
+
+  get tags () { return tags; },
+
+  tagged: function (tag) {
+    return tag && (tags.indexOf (tag) > -1);
   },
 
   load_tags: function () {

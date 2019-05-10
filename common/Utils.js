@@ -203,10 +203,7 @@ function time_stamp (time) {
 let current_version = "";
 let latest_version = "";
 function check_install_ydl () {
-  let path = GLib.build_filenamev ([get_app_data_dir (),"bin"]);
-  if (!GLib.file_test (path, GLib.FileTest.EXISTS))
-    GLib.mkdir_with_parents (path, 484);
-  path = GLib.build_filenamev ([path,"youtube-dl"]);
+  let path = GLib.build_filenamev ([get_user_bin_dir (),"youtube-dl"]);
   let file = Gio.File.new_for_path (path);
   if (!file.query_exists (null))
     return false;
@@ -229,7 +226,7 @@ function install_ydl (callback) {
   fetch ("https://yt-dl.org/downloads/latest/youtube-dl",
     "New Stream (GNU/Linux)", null, (data, s) => {
       if ((s == 200) && data) {
-        let file = Gio.File.new_for_path (get_app_data_dir () + "/bin/youtube-dl");
+        let file = Gio.File.new_for_path (get_user_bin_dir () + "/youtube-dl");
         file.replace_contents_bytes_async (
           data, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null, (o, res) => {
             file.replace_contents_finish (res);
@@ -247,7 +244,9 @@ function check_update_ydl (callback) {
   fetch ("https://rg3.github.io/youtube-dl/update/LATEST_VERSION",
     null, null, (text, s) => {
       if ((s == 200) && text) {
-        latest_version = bytesToString (text).toString().split("\n")[0];
+        text = bytesToString (text).toString ();
+        if ((text.length > 6) && (text.length < 20) && (text.split("\n").length < 2))
+          latest_version = text.split("\n")[0];
       }
       if (latest_version != current_version) {
         install_ydl ();
@@ -259,6 +258,13 @@ function check_update_ydl (callback) {
 
 function bytesToString (array) {
     return array instanceof Uint8Array ? ByteArray.toString (array) : array;
+}
+
+function get_user_bin_dir () {
+  let path = GLib.build_filenamev ([GLib.get_home_dir (), ".local/bin"]);
+  if (!GLib.file_test (path, GLib.FileTest.EXISTS))
+    GLib.mkdir_with_parents (path, 484);
+  return path;
 }
 
 function get_app_data_dir () {
