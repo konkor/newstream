@@ -63,7 +63,7 @@ function fetch_formats (id, callback) {
     (info, error) => {
     if (error) Logger.error ("FETCH_FORMATS", error);
     try {
-      data = JSON.parse (info);
+      if (info) data = JSON.parse (info);
     } catch (e) {
       Logger.error ("FETCH_FORMATS", e);
       callback ({});
