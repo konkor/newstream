@@ -98,7 +98,9 @@ var Itembar = new Lang.Class({
     this.link.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/social/link.svg");
     menu.add (this.link);
 
-    if (Gtk.Clipboard.get_default) menu.add (this.add_clipboard ());
+    this.xclip = GLib.find_program_in_path ("xclip");
+    if (Gtk.Clipboard.get_default || this.xclip)
+      menu.add (this.add_clipboard ());
 
     this.app = Gio.AppInfo.get_default_for_uri_scheme ("https");
     if (!this.app) return menu;
@@ -122,9 +124,14 @@ var Itembar = new Lang.Class({
     let btn = new Gtk.ImageMenuItem ({label:"Copy to clipboard", always_show_image: true});
     btn.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/edit-copy-symbolic.svg");
     btn.connect ('activate', () => {
-      let clipboard = Gtk.Clipboard.get_default (Gdk.Display.get_default ());
-      if (!clipboard) return;
-      clipboard.set_text (this.link.label, -1);
+      if (Gtk.Clipboard.get_default) {
+        let clipboard = Gtk.Clipboard.get_default (Gdk.Display.get_default ());
+        if (!clipboard) return;
+        clipboard.set_text (this.link.label, -1);
+      } else if (this.xclip) {
+        let cmd = "sh -c \'" + GLib.find_program_in_path ("echo") + " " + this.link.label + " | " + this.xclip + " -selection clipboard\'";
+        GLib.spawn_command_line_async (cmd);
+      }
     });
     return btn;
   },

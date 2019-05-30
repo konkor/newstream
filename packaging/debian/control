@@ -24,6 +24,6 @@ Depends: ${shlibs:Depends},
          gstreamer1.0-plugins-good,
          gstreamer1.0-plugins-bad,
          gstreamer1.0-plugins-ugly
-Recommends: fonts-roboto
+Recommends: fonts-roboto, xclip
 Description: Youtube Player
  Linux Youtube Stream Player.
