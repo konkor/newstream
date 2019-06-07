@@ -194,7 +194,7 @@ var NewStreamApplication = new Lang.Class ({
           if (player) player.set_preset (preset.deep_unpack ());
           o.set_state (preset);
         },
-        state: new GLib.Variant ("i", 0),
+        state: new GLib.Variant ("i", -1),
         parameter_type: new GLib.VariantType ("i")
       }
     ];

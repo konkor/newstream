@@ -10,6 +10,11 @@
       <attribute name="label" translatable="yes">_Quality</attribute>
       <section>
         <item>
+          <attribute name="label" translatable="yes" context="Quality preset">Auto</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">-1</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes" context="Quality preset">Custom</attribute>
           <attribute name="action">app.quality-preset</attribute>
           <attribute name="target" type="i">0</attribute>
@@ -63,8 +68,14 @@
     </submenu>
   </section>
   <section>
-    <section id="video-placeholder"/>
-    <section id="audio-placeholder"/>
+    <submenu>
+      <attribute name="label" translatable="yes">Video Stream</attribute>
+      <section id="video-placeholder"/>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Audio Stream</attribute>
+      <section id="audio-placeholder"/>
+    </submenu>
   </section>
 </menu>
 

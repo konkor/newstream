@@ -353,6 +353,22 @@ var PlayerMenu = new Lang.Class ({
     let builder = new Gtk.Builder ();
     builder.add_from_file (APPDIR + "/data/stream.ui");
     this.set_menu_model (builder.get_object ("playermenu"));
+    this.video = builder.get_object ("video-placeholder");
+    this.add_video_selector ();
+    this.audio = builder.get_object ("audio-placeholder");
+    this.add_audio_selector ();
+    print (this.popover.get_children());
+  },
+
+  add_video_selector: function () {
+    let mi = new Gio.MenuItem ();
+    mi.set_label ("Auto");
+    //, detailed_action:"app.video-stream"
+    this.video.append_item (mi);
+  },
+
+  add_audio_selector: function () {
+
   }
 });
 
