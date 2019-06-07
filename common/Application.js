@@ -184,6 +184,18 @@ var NewStreamApplication = new Lang.Class ({
           if (player) player.set_volume_delta (-0.05);
         },
         accels: ["Down"]
+      },
+      { name: "quality-preset",
+        activate: (action, parameter) => {
+          action.change_state (parameter);
+        },
+        change_state: (o, preset) => {
+          var player = this.window.itemview.player;
+          if (player) player.set_preset (preset.deep_unpack ());
+          o.set_state (preset);
+        },
+        state: new GLib.Variant ("i", 0),
+        parameter_type: new GLib.VariantType ("i")
       }
     ];
     action_entries.forEach (entry => {

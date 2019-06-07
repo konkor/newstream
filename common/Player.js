@@ -175,6 +175,18 @@ var Player = new Lang.Class({
         this.video.contents.set_cover (GdkPixbuf.Pixbuf.new_from_stream (Gio.MemoryInputStream.new_from_bytes (d), null));
       } catch (e) {debug (e.message);};
     });
+  },
+
+  set_preset: function (preset_type) {
+    debug ("Set quality preset: " + preset_type);
+  },
+
+  set_audio_format: function (format) {
+    debug ("set_audio_format: " + format);
+  },
+
+  set_video_format: function (format) {
+    debug ("set_video_format: " + format);
   }
 });
 

@@ -39,6 +39,7 @@ var HistoryLayout = new Lang.Class({
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
+    this.w.player_menu.visible = false;
   }
 });
 
@@ -62,6 +63,7 @@ var BookmarkLayout = new Lang.Class({
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
+    this.w.player_menu.visible = false;
   }
 });
 
@@ -84,6 +86,7 @@ var SubscriptionLayout = new Lang.Class({
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
+    this.w.player_menu.visible = false;
   }
 });
 
@@ -110,6 +113,7 @@ var ItemLayout = new Lang.Class({
     this.w.topbar.visible = false;
     this.w.menu_button.visible = false;
     this.w.fullscreen.visible = true;
+    this.w.player_menu.visible = true;
   }
 });
 
@@ -136,6 +140,7 @@ var HotView = new Lang.Class({
     this.w.topbar.visible = true;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
+    this.w.player_menu.visible = false;
   }
 });
 
@@ -191,6 +196,7 @@ var SearchView = new Lang.Class({
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
+    this.w.player_menu.visible = false;
   }
 });
 

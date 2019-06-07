@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<!--*- mode: xml -*--><!DOCTYPE glade-interface
+  SYSTEM 'http://glade.gnome.org/glade-2.0.dtd'>
+<interface>
+<requires lib="gtk+" version="3.11"/>
+
+<menu id="playermenu">
+  <section>
+    <submenu>
+      <attribute name="label" translatable="yes">_Quality</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes" context="Quality preset">Custom</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">0</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">144p - Preview</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">1</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">240p - Mobile</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">2</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">360p - Video CD</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">3</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">480p - DVD</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">4</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">720p - HD Ready</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">5</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">1080p - Full HD</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">6</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">1440p - 2K Video</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">7</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">2160p - 4K Video</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">8</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="no" context="Quality preset">4320p - 8K Video</attribute>
+          <attribute name="action">app.quality-preset</attribute>
+          <attribute name="target" type="i">9</attribute>
+        </item>
+      </section>
+    </submenu>
+  </section>
+  <section>
+    <section id="video-placeholder"/>
+    <section id="audio-placeholder"/>
+  </section>
+</menu>
+
+</interface>

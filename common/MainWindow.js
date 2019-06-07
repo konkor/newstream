@@ -85,7 +85,6 @@ var MainWindow = new Lang.Class ({
     this.menu_button.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/open-menu-symbolic.svg");
     this.menu_button.get_style_context ().add_class ("hb-button");
     this.menu_button.set_relief (Gtk.ReliefStyle.NONE);
-    //this.menu_button.menu_model = mmenu;
     //this.menu_button.margin = 6;
     this.hb.pack_end (this.menu_button);
 
@@ -99,6 +98,9 @@ var MainWindow = new Lang.Class ({
      this.back.last = this.stack.visible_child_name;
      this.stack.visible_child_name = "item";
     });
+
+    this.player_menu = new PlayerMenu ();
+    this.hb.pack_end (this.player_menu);
 
     this.fullscreen = Gtk.Button.new_from_icon_name ("view-fullscreen-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
     this.fullscreen.get_style_context ().add_class ("hb-button");
@@ -334,6 +336,23 @@ var BackButton = new Lang.Class({
     //if (value == "item") return;
     if (!this.history.length || this.history[this.history.length-1] != value)
       this.history.push (value);
+  }
+});
+
+var PlayerMenu = new Lang.Class ({
+  Name: "PlayerMenu",
+  Extends: Gtk.MenuButton,
+
+  _init: function () {
+    this.parent ({tooltip_text:"Player Menu"});
+    this.image = Gtk.Image.new_from_file (APPDIR + "/data/icons/open-menu-symbolic.svg");
+    this.get_style_context ().add_class ("hb-button");
+    this.set_relief (Gtk.ReliefStyle.NONE);
+    this.use_popover = true;
+
+    let builder = new Gtk.Builder ();
+    builder.add_from_file (APPDIR + "/data/stream.ui");
+    this.set_menu_model (builder.get_object ("playermenu"));
   }
 });
 
