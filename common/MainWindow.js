@@ -340,6 +340,7 @@ var BackButton = new Lang.Class({
   }
 });
 
+let qs = [144,240,360,480,720,1080,1440,2160,4320];
 var PlayerMenu = new Lang.Class ({
   Name: "PlayerMenu",
   Extends: Gtk.MenuButton,
@@ -372,8 +373,97 @@ var PlayerMenu = new Lang.Class ({
     this.audio.visible = false;
   },
 
+  load_formats: function (formats) {
+    let item, i = 0, maxq = -1;
+    this.video.remove_all ();
+    item = new Menu.SideItem ("Auto");
+    this.video.add_item (item);
+    item.connect ('clicked', this.on_video_auto.bind (this));
+    item = new Menu.SideItem ("None Video");
+    this.video.add_item (item);
+    item.connect ('clicked', this.on_video_none.bind (this));
+
+    this.audio.remove_all ();
+    item = new Menu.SideItem ("Auto");
+    this.audio.add_item (item);
+    item.connect ('clicked', this.on_audio_auto.bind (this));
+    item = new Menu.SideItem ("None Sound");
+    this.audio.add_item (item);
+    item.connect ('clicked', this.on_audio_none.bind (this));
+
+    if (!formats) return;
+    formats.forEach (p => {
+      if (p.vcodec != "none") this.add_video_format (p);
+      if (p.acodec != "none") this.add_audio_format (p);
+      if (p.vcodec == "none") return;
+      if (p.height > maxq) maxq = p.height;
+    });
+    this.profiles.section.get_children ().forEach (p => {
+      if (i > 1) p.visible = maxq >= qs[i-2];
+      i++;
+    });
+  },
+
+  add_video_format: function (format) {
+    let item = new Menu.SideItem (this.get_format_string (format));
+    if (format.filesize) item.info.info.set_text (GLib.format_size (format.filesize));
+    item.format = format;
+    this.video.add_item (item);
+    item.connect ('clicked', this.on_video_format.bind (this));
+  },
+
+  on_video_format: function (o) {
+    //TODO
+    this.video.info.label.set_text (o.info.label.label);
+  },
+
+  on_video_auto: function () {
+    //TODO
+    this.video.info.label.set_text ("Auto");
+  },
+
+  on_video_none: function () {
+    //TODO
+    this.video.info.label.set_text ("None");
+  },
+
+  add_audio_format: function (format) {
+    let item = new Menu.SideItem (this.get_format_string (format));
+    if (format.filesize) item.info.info.set_text (GLib.format_size (format.filesize));
+    item.format = format;
+    this.audio.add_item (item);
+    item.connect ('clicked', this.on_audio_format.bind (this));
+  },
+
+  on_audio_format: function (o) {
+    //TODO
+    this.audio.info.label.set_text (o.info.label.label);
+  },
+
+  on_audio_auto: function () {
+    //TODO
+    this.audio.info.label.set_text ("Auto");
+  },
+
+  on_audio_none: function () {
+    //TODO
+    this.audio.info.label.set_text ("None");
+  },
+
+  get_format_string: function (f) {
+    let s = "";
+    if (f.vcodec != "none") {
+      s = "%sp %s %s".format (f.height, f.ext, f.vcodec);
+    }
+    if (f.acodec != "none") {
+      if (s) s += " / ";
+      s += "%d kbit %s".format (f.abr, f.acodec);
+    }
+    return s.trim ();
+  },
+
   add_profiles: function () {
-    let item, qs = [144,240,360,480,720,1080,1440,2160,4320], i = 0;
+    let item, i = 0;
     this.profiles = new Menu.SideSubmenu ("Auto", "", "Quality Preset");
     this.profiles.info.add (Gtk.Image.new_from_icon_name ("emblem-system-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
     this.menu.add_submenu (this.profiles);

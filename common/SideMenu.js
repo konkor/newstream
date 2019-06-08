@@ -101,6 +101,10 @@ var SideSubmenu = new Lang.Class({
   add_item: function (item) {
     this.section.add (item);
     item.connect ("clicked", () => {this.expanded = false;});
+  },
+
+  remove_all: function () {
+    this.section.get_children().forEach (p => {p.destroy ()});
   }
 });
 

@@ -77,8 +77,9 @@ var Player = new Lang.Class({
       if (this.item.id) Utils.fetch_formats (this.item.id, (d) => {
         this.formats = d;
         var url = "";
-        if (d && d.format) print (d.format, d.vcodec, d.acodec);
+        if (d && d.format) info (d.format, d.vcodec, d.acodec);
         if (d && d.formats) d.formats.forEach (p => {
+          info (JSON.stringify (p));
           if (d.format_id == p.format_id) {
             url = p.url;
             if (p.fps) this.fps = p.fps;
@@ -90,6 +91,7 @@ var Player = new Lang.Class({
           this.engine.open (url);
           this.show_all ();
         }
+        this.w.player_menu.load_formats (d.formats);
         //print (d.format_id, d.id, d.ext);
         //if (d.formats) d.formats.forEach ( p => {
         //print (p.format);
