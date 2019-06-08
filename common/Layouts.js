@@ -140,7 +140,7 @@ var HotView = new Lang.Class({
     this.w.topbar.visible = true;
     this.w.menu_button.visible = true;
     this.w.fullscreen.visible = false;
-    this.w.player_menu.visible = false;
+    this.w.player_menu.visible = true;
   }
 });
 

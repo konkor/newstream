@@ -20,6 +20,7 @@ const Prefs = imports.common.Settings;
 const Provider = imports.common.SearchProvider;
 const Search = imports.common.Search;
 const Layouts = imports.common.Layouts;
+const Menu = imports.common.SideMenu;
 const Utils = imports.common.Utils;
 
 let APPDIR = "";
@@ -350,25 +351,65 @@ var PlayerMenu = new Lang.Class ({
     this.set_relief (Gtk.ReliefStyle.NONE);
     this.use_popover = true;
 
-    let builder = new Gtk.Builder ();
-    builder.add_from_file (APPDIR + "/data/stream.ui");
-    this.set_menu_model (builder.get_object ("playermenu"));
-    this.video = builder.get_object ("video-placeholder");
-    this.add_video_selector ();
-    this.audio = builder.get_object ("audio-placeholder");
-    this.add_audio_selector ();
-    print (this.popover.get_children());
+    let popover = new Gtk.Popover ();
+    this.popover = popover;
+
+    this.menu = new Menu.SideMenu ();
+    this.menu.set_size_request (224, 32);
+    popover.add (this.menu);
+    this.add_profiles ();
+
+    this.video = new Menu.SideSubmenu ("Auto", "", "Video Stream");
+    this.video.info.add (Gtk.Image.new_from_icon_name ("camera-video-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+    this.menu.add_submenu (this.video);
+
+    this.audio = new Menu.SideSubmenu ("Auto", "", "Audio Stream");
+    this.audio.info.add (Gtk.Image.new_from_icon_name ("audio-speakers-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+    this.menu.add_submenu (this.audio);
+
+    this.menu.show_all ();
+    this.video.visible = false;
+    this.audio.visible = false;
   },
 
-  add_video_selector: function () {
-    let mi = new Gio.MenuItem ();
-    mi.set_label ("Auto");
-    //, detailed_action:"app.video-stream"
-    this.video.append_item (mi);
+  add_profiles: function () {
+    let item, qs = [144,240,360,480,720,1080,1440,2160,4320], i = 0;
+    this.profiles = new Menu.SideSubmenu ("Auto", "", "Quality Preset");
+    this.profiles.info.add (Gtk.Image.new_from_icon_name ("emblem-system-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+    this.menu.add_submenu (this.profiles);
+
+    item = new Menu.SideItem ("Auto");
+    this.profiles.add_item (item);
+    item.connect ('clicked', (o) => {
+      this.profiles.info.label.set_text (o.info.label.label);
+      this.profiles.button.tooltip_text = "Quality Preset";
+      this.on_custom_profile ();
+    });
+    item = new Menu.SideItem ("Custom");
+    this.profiles.add_item (item);
+    item.connect ('clicked', this.on_custom_profile.bind (this));
+    ["Lowest","Mobile","Video CD","DVD Video","HD Ready","Full HD","2K Video","4K Video","8K Video"].forEach (s => {
+      item = new Menu.SideItem (s,"",qs[i++] + "p");
+      item.id = i - 1;
+      this.profiles.add_item (item);
+      item.connect ('clicked', this.on_profile.bind (this));
+    });
   },
 
-  add_audio_selector: function () {
+  on_profile: function (o) {
+    //TODO: on profile selected
+    this.on_custom_profile ();
+    this.profiles.info.label.set_text (o.info.label.label);
+    this.profiles.button.tooltip_text = o.info.info.label;
+  },
 
+  on_custom_profile: function (o) {
+    this.video.visible = this.audio.visible = !!o;
+    if (this.video.visible) {
+      this.profiles.info.label.set_text ("Custom");
+      this.profiles.button.tooltip_text = "Quality Preset";
+    }
+    this.menu.on_submenu_activate ();
   }
 });
 

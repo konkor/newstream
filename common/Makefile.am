@@ -15,6 +15,7 @@ common_DATA = \
     Search.js \
     SearchProvider.js \
     Settings.js \
+    SideMenu.js \
     SubscriptionView.js \
     Utils.js \
     $(NULL)
