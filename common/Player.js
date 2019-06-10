@@ -74,12 +74,13 @@ var Player = new Lang.Class({
     if (!this.item || (this.item.id != item.id)) {
       this.item = item;
       this.get_cover ();
+      this.engine.open ();
       if (this.item.id) Utils.fetch_formats (this.item.id, (d) => {
         this.formats = d;
         var url = "";
         if (d && d.format) info (d.format, d.vcodec, d.acodec);
         if (d && d.formats) d.formats.forEach (p => {
-          info (JSON.stringify (p));
+          //info (JSON.stringify (p));
           if (d.format_id == p.format_id) {
             url = p.url;
             if (p.fps) this.fps = p.fps;
@@ -106,6 +107,28 @@ var Player = new Lang.Class({
       this.engine.play ();
     }
     System.gc ();
+  },
+
+  set_audio: function (url) {
+    if (this.engine) {
+      let pos = this.video.contents.controls.current_position;
+      debug ("position: " + pos);
+      this.engine.stop ();
+      this.engine.set_audio (url);
+      this.engine.pause ();
+      GLib.timeout_add (0, 500, () => {this.seek (pos, true)});
+      //TODO this.seek_on_ready = pos;
+    }
+  },
+
+  set_video: function (url) {
+    if (this.engine) {
+      //let pos = this.engine.position;
+      this.engine.stop ();
+      this.engine.set_video (url);
+      //if (pos > 0) this.seek (pos);
+      //this.engine.play ();
+    }
   },
 
   play: function () {
@@ -420,7 +443,12 @@ var VideoWidget = new Lang.Class ({
 
   on_player_state: function (engine, o,n,p) {
     //print (o,n,p,!((n == 4) || (n == 3)));
-    this.set_cover_visiblity (!((n == 4) || (n == 3)));
+    /*if (this.player.seek_on_ready && (n == 3)) {
+      debug ("seek_on_ready");
+      engine.seek (this.player.seek_on_ready, true);
+      this.player.seek_on_ready = 0;
+    }*/
+    this.set_cover_visiblity (!((n == 4) || (n == 3)) || !engine.video_stream);
   },
 
   set_controls_busy: function (val) {

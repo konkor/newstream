@@ -17,6 +17,8 @@ const GLib = imports.gi.GLib;
 const Gst = imports.gi.Gst;
 const GstVideo = imports.gi.GstVideo;
 
+const Logger = imports.common.Logger;
+
 let timer = 0;
 
 var PlayerEngine = new Lang.Class({
@@ -34,21 +36,36 @@ var PlayerEngine = new Lang.Class({
   _init: function () {
     Gst.init(null); //["GST_GL_PLATFORM=\"egl\""]
     this.current_state = 0;
+    this.video_stream = false;
+    this.audio_stream = false;
 
-    this.playbin = Gst.ElementFactory.make("playbin", null);
-    this.audiosink = Gst.ElementFactory.make("pulsesink", "audiosink");
-    this.playbin.set_property("audio-sink", this.audiosink);
-    //this.videosink = Gst.ElementFactory.make("glimagesink", "videosink");
-    //this.playbin.set_property("video-sink", this.videosink);
+    this.pipeline = new Gst.Pipeline ({name:"xstream"});
+
+    //Main Video(audio, subtitles) stream
+    this.playbin = Gst.ElementFactory.make("playbin", "mainbin");
+    this.audiosink = Gst.ElementFactory.make ("pulsesink", "audiosink");
+
+    //Audio stream
+    this.audiobin = Gst.ElementFactory.make ("playbin", "audiobin");
+    //this.audiobin.connect ("pad_added", this.on_audio_pad.bind (this));
+    this.audiosink2 = Gst.ElementFactory.make ("pulsesink", "audiosink2");
+
+    //Fake outputs
+    this.fakeaudio = Gst.ElementFactory.make ("fakesink", "fakeaudio");
+    this.fakevideo = Gst.ElementFactory.make ("fakesink", "fakevideo");
+
+    //this.pipeline.add (this.playbin);
+    this.audiobin.set_property ("video-sink", this.fakevideo);
+    this.audiobin.set_property ("audio-sink", this.audiosink2);
 
     this.current_volume = 0;
     this.repeat = false;
 
-    this.bus = this.playbin.get_bus();
-    this.bus.add_signal_watch();
+    this.bus = this.pipeline.get_bus ();
+    this.bus.add_signal_watch ();
     this.bus.connect ("message", this.on_bus_message.bind (this));
 
-    timer = GLib.timeout_add (0, 500, this.on_timer.bind (this));
+    timer = GLib.timeout_add (0, 1000, this.on_timer.bind (this));
   },
 
   get state () {
@@ -56,8 +73,8 @@ var PlayerEngine = new Lang.Class({
   },
 
   get position () {
-    let pos, res;
-    [res, pos] = this.playbin.query_position (Gst.Format.TIME);
+    let pos, res, pipe = this.video_stream ? this.playbin : this.audiobin;
+    [res, pos] = pipe.query_position (Gst.Format.TIME);
     if (!res) pos = -1;
     else pos /= Gst.MSECOND;
     return pos;
@@ -65,54 +82,98 @@ var PlayerEngine = new Lang.Class({
 
   get duration () {
     let dur, res;
-    [res, dur] = this.playbin.query_duration (Gst.Format.TIME);
+    [res, dur] = this.pipeline.query_duration (Gst.Format.TIME);
     if (!res) dur = -1;
     else dur /= Gst.MSECOND;
     return dur;
   },
 
   get volume () {
-    if (!this.current_volume && this.playbin)
-      this.current_volume = this.playbin.get_volume (1);
+    if (!this.current_volume && this.pipeline)
+      this.current_volume = this.audio_stream ? this.audiobin.get_volume (1) : this.playbin.get_volume (1);
     return this.current_volume;
   },
 
   set volume (val) {
-    if (!this.playbin) return;
+    if (!this.pipeline) return;
     val = val || 0;
     if (val > 1) val = 1.0;
+    this.audiobin.set_volume (1, val);
     this.playbin.set_volume (1, val);
     this.current_volume = val;
   },
 
-  open: function (uri) {
-    this.playbin.set_state (Gst.State.NULL);
-    this.playbin.set_property ("uri", uri);
-    this.playbin.set_state (Gst.State.PLAYING);
+  open: function (video_url, audio_url) {
+    //video_url = "http://192.168.1.2:8088/0/test.mp4";audio_url = "http://192.168.1.2:8088/0/test.mp4";
+    this.pipeline.set_state (Gst.State.NULL);
+    this.set_audio (audio_url);
+    this.set_video (video_url);
+    this.pipeline.set_state (Gst.State.PLAYING);
+  },
+
+  set_audio: function (url) {
+    if (url == this.audio_url) return;
+    this.audio_url = url || null;
+    if (url) {
+      this.audiobin.set_property ("uri", url);
+      if (!this.pipeline.get_by_name ("audiobin")) this.pipeline.add (this.audiobin);
+      this.playbin.set_property ("audio-sink", this.fakeaudio);
+      this.audio_stream = true;
+    } else {
+      if (this.audio_stream) this.pipeline.remove (this.audiobin);
+      this.playbin.set_property ("audio-sink", this.audiosink);
+      this.audio_stream = false;
+    }
+    this.audiobin.sync_state_with_parent ();
+  },
+
+  set_video: function (url) {
+    if (url) {
+      if (!this.pipeline.get_by_name ("mainbin")) this.pipeline.add (this.playbin);
+      this.playbin.set_property ("uri", url);
+      this.video_stream = true;
+    } else {
+      if (this.video_stream) this.pipeline.remove (this.playbin);
+      this.video_stream = false;
+    }
+    this.playbin.sync_state_with_parent ();
+  },
+
+  preload: function () {
+    this.pipeline.set_state (Gst.State.READY);
   },
 
   play: function () {
-    this.playbin.set_state (Gst.State.PLAYING);
+    this.pipeline.set_state (Gst.State.PLAYING);
   },
 
   pause: function () {
-    this.playbin.set_state (Gst.State.PAUSED);
+    this.pipeline.set_state (Gst.State.PAUSED);
   },
 
   stop: function () {
-    this.playbin.set_state (Gst.State.NULL);
+    this.pipeline.set_state (Gst.State.NULL);
   },
 
   seek: function (pos, accurate) {
-    if (!this.playbin || this.seek_lock) return false;
+    if (!this.pipeline || this.seek_lock) return false;
     this.seek_lock = true;
-    let flag = Gst.SeekFlags.FLUSH;
+    let flag = Gst.SeekFlags.FLUSH, res;
     if (accurate) flag |= Gst.SeekFlags.ACCURATE;
-    let res = this.playbin.seek (1.0,
+    this.pipeline.set_state (Gst.State.PAUSED);
+    if (this.video_stream)  res = this.playbin.seek (1.0,
       Gst.Format.TIME, flag,
       Gst.SeekType.SET, pos * Gst.MSECOND,
       Gst.SeekType.NONE, 0
     );
+    if (this.audio_stream) res = this.audiobin.seek (1.0,
+      Gst.Format.TIME, flag,
+      Gst.SeekType.SET, pos * Gst.MSECOND,
+      Gst.SeekType.NONE, 0
+    );
+    this.pipeline.set_state (Gst.State.PLAYING);
+    if (this.video_stream) this.playbin.sync_state_with_parent ();
+    if (this.audio_stream) this.audiobin.sync_state_with_parent ();
     this.seek_lock = false;
     return res;
   },
@@ -138,6 +199,30 @@ var PlayerEngine = new Lang.Class({
     return this.videosink;
   },
 
+  on_audio_pad: function (src, new_pad) {
+    //let sink_pad = this.audiobin.get_static_pad ("sink");
+    //print ("Received new pad \'%s\' from \'%s\'".format (new_pad.name, src.name));
+    print ("Received new pad");
+
+    /*if (sink_pad.is_linked ()) {
+      debug (" Already linked audiobin. Ignoring.");
+      return;
+    }
+    var new_pad_caps = new_pad.query_caps (null);
+    var new_pad_struct = new_pad_caps.get_structure (0);
+    var new_pad_type = new_pad_struct.get_name ();
+    if (new_pad_type.indexOf ("audio/x-raw") == -1) {
+      debug (new_pad_struct.get_name () + " It's not raw audio. Ignoring.");
+      return;
+    }
+    ret = new_pad.link (sink_pad);
+    if (ret != Gst.PadLinkReturn.OK) {
+      error ("Type is '%s' but link failed.".format (new_pad_type));
+    } else {
+      debug ("Link succeeded (type \'%s\').".format (new_pad_type));
+    }*/
+  },
+
   on_bus_message: function (bus,msg,a,b,c) {
     //TODO Process messages
     //print (msg.type);
@@ -150,14 +235,14 @@ var PlayerEngine = new Lang.Class({
       this.emit ('state-changed', this.current_state, Gst.State.READY, 0);
       if (this.repeat) {
         this.seek (0, false);
-      } else this.playbin.set_state (Gst.State.READY);
+      } else this.pipeline.set_state (Gst.State.READY);
     } else if (msg.type == Gst.MessageType.STATE_CHANGED) {
       let [oldstate, newstate, pending] = msg.parse_state_changed ();
       if (this.current_state == newstate) return true;
       this.current_state = newstate;
       this.emit ('state-changed', oldstate, newstate, pending);
     }
-  return true;
+    return true;
   },
 
   on_timer: function () {
@@ -171,3 +256,8 @@ var PlayerEngine = new Lang.Class({
 });
 
 Signals.addSignalMethods(PlayerEngine.prototype);
+
+const DOMAIN = "PlayerEngine";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

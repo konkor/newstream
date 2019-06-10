@@ -138,6 +138,7 @@ var MainWindow = new Lang.Class ({
     this.stack.add_named (this.searchview, "search");
 
     this.itemview = new Layouts.ItemLayout (this);
+    this.player_menu.player = this.itemview.player;
     this.stack.add_named (this.itemview, "item");
 
     this.history = new Layouts.HistoryLayout (this);
@@ -375,6 +376,10 @@ var PlayerMenu = new Lang.Class ({
 
   load_formats: function (formats) {
     let item, i = 0, maxq = -1;
+    this.audio_auto = true;
+    this.audio_format = null;
+    this.video_auto = true;
+    this.video_format = null;
     this.video.remove_all ();
     item = new Menu.SideItem ("Auto");
     this.video.add_item (item);
@@ -391,6 +396,7 @@ var PlayerMenu = new Lang.Class ({
     this.audio.add_item (item);
     item.connect ('clicked', this.on_audio_none.bind (this));
 
+    this.formats = formats;
     if (!formats) return;
     formats.forEach (p => {
       if (p.vcodec != "none") this.add_video_format (p);
@@ -413,8 +419,15 @@ var PlayerMenu = new Lang.Class ({
   },
 
   on_video_format: function (o) {
-    //TODO
     this.video.info.label.set_text (o.info.label.label);
+    debug (o.format.url);
+    if (this.player && o.format.url) {
+      this.player.set_video (o.format.url);
+      if ((o.format.acodec == "none") && (this.audio_auto)) {
+        this.player.set_audio (this.choose_auto_audio (o.format));
+      }
+    }
+    this.video_auto = false;
   },
 
   on_video_auto: function () {
@@ -423,8 +436,10 @@ var PlayerMenu = new Lang.Class ({
   },
 
   on_video_none: function () {
-    //TODO
     this.video.info.label.set_text ("None");
+    this.player.set_video ();
+    this.player.set_audio (this.choose_auto_audio ());
+    this.video_auto = false;
   },
 
   add_audio_format: function (format) {
@@ -438,6 +453,8 @@ var PlayerMenu = new Lang.Class ({
   on_audio_format: function (o) {
     //TODO
     this.audio.info.label.set_text (o.info.label.label);
+    debug (o.format.url);
+    if (this.player && o.format.url) this.player.set_audio (o.format.url);
   },
 
   on_audio_auto: function () {
@@ -448,6 +465,24 @@ var PlayerMenu = new Lang.Class ({
   on_audio_none: function () {
     //TODO
     this.audio.info.label.set_text ("None");
+  },
+
+  choose_auto_audio: function (video_format) {
+    let best = null;
+    if (!this.audio_auto)
+      if (this.audio_format) return this.audio_format.url;
+      else return null;
+    if (this.formats) this.formats.forEach (f => {
+      if (f.acodec != "none") {
+        if (!best) best = f;
+        else if (f.vcodec == "none") {
+          if ((best.abr <= f.abr) || (video_format && (f.ext == video_format.ext))) best = f;
+        }
+      }
+    });
+    debug ("choose_auto_audio: %s".format (JSON.stringify (best)));
+    if (best) return best.url;
+    return null;
   },
 
   get_format_string: function (f) {
