@@ -374,7 +374,7 @@ var PlayerMenu = new Lang.Class ({
     this.audio.visible = false;
   },
 
-  load_formats: function (formats) {
+  load_formats: function (formats, auto_format) {
     let item, i = 0, maxq = -1;
     this.audio_auto = true;
     this.audio_format = null;
@@ -397,6 +397,7 @@ var PlayerMenu = new Lang.Class ({
     item.connect ('clicked', this.on_audio_none.bind (this));
 
     this.formats = formats;
+    this.auto_format = auto_format || null;
     if (!formats) return;
     formats.forEach (p => {
       if (p.vcodec != "none") this.add_video_format (p);
@@ -408,6 +409,7 @@ var PlayerMenu = new Lang.Class ({
       if (i > 1) p.visible = maxq >= qs[i-2];
       i++;
     });
+    this.on_auto ();
   },
 
   add_video_format: function (format) {
@@ -423,16 +425,23 @@ var PlayerMenu = new Lang.Class ({
     debug (o.format.url);
     if (this.player && o.format.url) {
       this.player.set_video (o.format.url);
-      if ((o.format.acodec == "none") && (this.audio_auto)) {
+      if (o.format.acodec == "none")
         this.player.set_audio (this.choose_auto_audio (o.format));
-      }
+      this.video_auto = false;
+      this.video_format = o.format;
     }
-    this.video_auto = false;
   },
 
   on_video_auto: function () {
-    //TODO
+    this.formats.forEach (p => {
+      if (this.auto_format == p.format_id) this.video_format = p;
+    });
+    if (!this.video_format || !this.video_format.url) return;
+    this.player.open (this.video_format.url);
+    this.video_auto = this.audio_auto = true;
+    this.audio_format = null;
     this.video.info.label.set_text ("Auto");
+    this.audio.info.label.set_text ("Auto");
   },
 
   on_video_none: function () {
@@ -440,6 +449,7 @@ var PlayerMenu = new Lang.Class ({
     this.player.set_video ();
     this.player.set_audio (this.choose_auto_audio ());
     this.video_auto = false;
+    this.video_format = null;
   },
 
   add_audio_format: function (format) {
@@ -451,20 +461,25 @@ var PlayerMenu = new Lang.Class ({
   },
 
   on_audio_format: function (o) {
-    //TODO
     this.audio.info.label.set_text (o.info.label.label);
     debug (o.format.url);
     if (this.player && o.format.url) this.player.set_audio (o.format.url);
+    this.audio_auto = false;
+    this.audio_format = o.format;
   },
 
   on_audio_auto: function () {
     //TODO
     this.audio.info.label.set_text ("Auto");
+    this.audio_auto = true;
   },
 
   on_audio_none: function () {
-    //TODO
+    this.player.set_audio ();
     this.audio.info.label.set_text ("None");
+    this.audio_auto = false;
+    this.audio_format = null;
+    if (!this.video_format) this.player.stop ();
   },
 
   choose_auto_audio: function (video_format) {
@@ -481,7 +496,12 @@ var PlayerMenu = new Lang.Class ({
       }
     });
     debug ("choose_auto_audio: %s".format (JSON.stringify (best)));
-    if (best) return best.url;
+    if (best) {
+      this.audio_format = best;
+      this.audio_auto = false;
+      this.audio.info.label.set_text (this.get_format_string (best));
+      return best.url;
+    }
     return null;
   },
 
@@ -505,11 +525,7 @@ var PlayerMenu = new Lang.Class ({
 
     item = new Menu.SideItem ("Auto");
     this.profiles.add_item (item);
-    item.connect ('clicked', (o) => {
-      this.profiles.info.label.set_text (o.info.label.label);
-      this.profiles.button.tooltip_text = "Quality Preset";
-      this.on_custom_profile ();
-    });
+    item.connect ('clicked', this.on_auto.bind (this));
     item = new Menu.SideItem ("Custom");
     this.profiles.add_item (item);
     item.connect ('clicked', this.on_custom_profile.bind (this));
@@ -519,6 +535,17 @@ var PlayerMenu = new Lang.Class ({
       this.profiles.add_item (item);
       item.connect ('clicked', this.on_profile.bind (this));
     });
+  },
+
+  on_auto: function (o) {
+    this.profiles.info.label.set_text ("Auto");
+    this.profiles.button.tooltip_text = "Quality Preset";
+    this.on_custom_profile ();
+    if (o) this.on_video_auto ();
+    else {
+      this.video.info.label.set_text ("Auto");
+      this.audio.info.label.set_text ("Auto");
+    }
   },
 
   on_profile: function (o) {

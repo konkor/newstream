@@ -92,7 +92,7 @@ var Player = new Lang.Class({
           this.engine.open (url);
           this.show_all ();
         }
-        this.w.player_menu.load_formats (d.formats);
+        this.w.player_menu.load_formats (d.formats, d.format_id);
         //print (d.format_id, d.id, d.ext);
         //if (d.formats) d.formats.forEach ( p => {
         //print (p.format);
@@ -131,8 +131,16 @@ var Player = new Lang.Class({
     }
   },
 
+  open: function (url) {
+    if (this.engine && url) this.engine.open (url);
+  },
+
   play: function () {
     if (this.engine) this.engine.play ();
+  },
+
+  stop: function () {
+    if (this.engine) this.engine.stop ();
   },
 
   pause: function () {
@@ -593,7 +601,7 @@ var VideoControl = new Lang.Class ({
     this.box.show_all ();
 
     this.player.engine.connect ('state-changed', (s,o,n,p) => {
-      //print ("state-changed:", o,n,p,this.play.state);
+      print ("state-changed:", o,n,p,this.play.state);
       this.play.toggle (n == 4);
     });
     this.player.engine.connect ('progress', this.on_progress.bind (this));
