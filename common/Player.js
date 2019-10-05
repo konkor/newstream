@@ -229,17 +229,24 @@ var VideoFrame = new Lang.Class({
 
   _init: function (sender) {
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
+    this.mainwindow = sender.w;
 
-    this.contents = new VideoWidget (sender);
-    this.video_window = new FullscreenWindow (sender);
-    this.video_window.realize ();
-    this.video_window.add (this.contents);
+    //this.contents = new VideoWidget (sender);
+    //this.video_window = new FullscreenWindow (sender);
+    //this.video_window.realize ();
+    //this.video_window.add (this.contents);
 
     this.frame = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.frame.override_background_color (Gtk.StateFlags.NORMAL, new Gdk.RGBA({alpha:1}));
     this.frame.set_size_request (100,480);
     this.frame.show ();
     this.pack_start (this.frame, true, true, 0);
+
+    this.contents = new VideoWidget (sender);
+    print (sender);
+    print (this.mainwindow);
+
+    this.frame.add (this.contents);
     this.contents.connect ('button-press-event', (o, e) => {
       //print ('button-press-event', e.get_event_type());
       if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
@@ -252,7 +259,7 @@ var VideoFrame = new Lang.Class({
 
   toggle_fullscreen: function () {
     this.contents.set_controls_visibility (false, false);
-    this.get_toplevel ().present ();
+    this.mainwindow.present ();
 
     if (this.fullscreen) {
       this.move_internal ();
@@ -262,29 +269,44 @@ var VideoFrame = new Lang.Class({
   },
 
   move_fullscreen: function () {
-    this.get_toplevel ().save_geometry ();
-    if (this.contents.parent != this.video_window) {
+    this.mainwindow.save_geometry ();
+    /*if (this.contents.parent != this.video_window) {
       this.contents.reparent (this.video_window);
       this.contents.show_all ();
       this.fullscreen = true;
       this.get_toplevel ().hide ();
       this.video_window.show ();
       this.video_window.fullscreen ();
+    }*/
+    if (!this.fullscreen) {
+      this.mainwindow.fullscreen ();
+      this.mainwindow.itemview.details.visible = false;
+      this.mainwindow.itemview.results.visible = false;
+      let [w, h] = this.mainwindow.get_size ();
+      this.frame.set_size_request (w, h);
+      this.fullscreen = true;
     }
-    this.get_toplevel ().application.lookup_action ("inhibit").activate (null);
+    this.mainwindow.application.lookup_action ("inhibit").activate (null);
   },
 
   move_internal: function () {
-    this.get_toplevel ().restore_position ();
-    this.video_window.unfullscreen ();
+    this.mainwindow.restore_position ();
+    /*this.video_window.unfullscreen ();
     this.video_window.hide ();
     if (this.contents.parent != this.frame) {
       this.get_toplevel ().present ();
       this.contents.reparent (this.frame);
       this.contents.show_all ();
       this.fullscreen = false;
+    }*/
+    if (this.fullscreen) {
+      this.mainwindow.unfullscreen ();
+      this.mainwindow.itemview.details.visible = true;
+      this.mainwindow.itemview.results.visible = true;
+      this.frame.set_size_request (100,480);
+      this.fullscreen = false;
     }
-    this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
+    this.mainwindow.application.lookup_action ("uninhibit").activate (null);
   }
 });
 

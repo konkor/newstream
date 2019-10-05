@@ -103,12 +103,12 @@ var MainWindow = new Lang.Class ({
     this.player_menu = new PlayerMenu ();
     this.hb.pack_end (this.player_menu);
 
-    this.fullscreen = Gtk.Button.new_from_icon_name ("view-fullscreen-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
-    this.fullscreen.get_style_context ().add_class ("hb-button");
-    this.fullscreen.set_relief (Gtk.ReliefStyle.NONE);
-    this.fullscreen.no_show_all = true;
-    this.hb.pack_end (this.fullscreen);
-    this.fullscreen.connect ('clicked', () => {
+    this.fullscreen_button = Gtk.Button.new_from_icon_name ("view-fullscreen-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+    this.fullscreen_button.get_style_context ().add_class ("hb-button");
+    this.fullscreen_button.set_relief (Gtk.ReliefStyle.NONE);
+    this.fullscreen_button.no_show_all = true;
+    this.hb.pack_end (this.fullscreen_button);
+    this.fullscreen_button.connect ('clicked', () => {
       this.application.lookup_action ("toggle-fullscreen").activate (null);
     });
 
