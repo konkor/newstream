@@ -55,7 +55,8 @@ var PlayerEngine = new Lang.Class({
     this.fakevideo = Gst.ElementFactory.make ("fakesink", "fakevideo");
 
     //this.pipeline.add (this.playbin);
-    this.audiobin.set_property ("video-sink", this.fakevideo);
+    //this.audiobin.set_property ("video-sink", this.fakevideo);
+    this.audiobin.set_property ("flags", 2);
     this.audiobin.set_property ("audio-sink", this.audiosink2);
 
     this.current_volume = 0;
