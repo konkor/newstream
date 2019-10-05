@@ -1,3 +1,9 @@
+newstream (0.1.6-1) UNRELEASED; urgency=low
+
+  * Update fixes and improvements
+
+ -- konkor <kapa76@gmail.com>  Sat, 5 Oct 2019 16:00:00 +0200
+
 newstream (0.1.5-1) UNRELEASED; urgency=low
 
   * Add Volume Button
