@@ -231,11 +231,6 @@ var VideoFrame = new Lang.Class({
     this.parent ({orientation:Gtk.Orientation.VERTICAL});
     this.mainwindow = sender.w;
 
-    //this.contents = new VideoWidget (sender);
-    //this.video_window = new FullscreenWindow (sender);
-    //this.video_window.realize ();
-    //this.video_window.add (this.contents);
-
     this.frame = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.frame.override_background_color (Gtk.StateFlags.NORMAL, new Gdk.RGBA({alpha:1}));
     this.frame.set_size_request (100,480);
@@ -243,13 +238,21 @@ var VideoFrame = new Lang.Class({
     this.pack_start (this.frame, true, true, 0);
 
     this.contents = new VideoWidget (sender);
-    print (sender);
-    print (this.mainwindow);
-
     this.frame.add (this.contents);
+
     this.contents.connect ('button-press-event', (o, e) => {
       //print ('button-press-event', e.get_event_type());
+      if (this.toggle_play_id) {
+        GLib.source_remove (this.toggle_play_id);
+        this.toggle_play_id = 0;
+      }
       if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
+      else if (e.get_event_type() == Gdk.EventType.BUTTON_PRESS) {
+        this.toggle_play_id = GLib.timeout_add (0, 250, () => {
+          this.toggle_play_id = 0;
+          this.contents.player.toggle_play ();
+        });
+      }
     });
     this.connect ('realize', () => {
       this.get_toplevel ().save_geometry ();
@@ -270,14 +273,6 @@ var VideoFrame = new Lang.Class({
 
   move_fullscreen: function () {
     this.mainwindow.save_geometry ();
-    /*if (this.contents.parent != this.video_window) {
-      this.contents.reparent (this.video_window);
-      this.contents.show_all ();
-      this.fullscreen = true;
-      this.get_toplevel ().hide ();
-      this.video_window.show ();
-      this.video_window.fullscreen ();
-    }*/
     if (!this.fullscreen) {
       this.mainwindow.fullscreen ();
       this.mainwindow.itemview.details.visible = false;
@@ -291,14 +286,6 @@ var VideoFrame = new Lang.Class({
 
   move_internal: function () {
     this.mainwindow.restore_position ();
-    /*this.video_window.unfullscreen ();
-    this.video_window.hide ();
-    if (this.contents.parent != this.frame) {
-      this.get_toplevel ().present ();
-      this.contents.reparent (this.frame);
-      this.contents.show_all ();
-      this.fullscreen = false;
-    }*/
     if (this.fullscreen) {
       this.mainwindow.unfullscreen ();
       this.mainwindow.itemview.details.visible = true;
@@ -307,38 +294,6 @@ var VideoFrame = new Lang.Class({
       this.fullscreen = false;
     }
     this.mainwindow.application.lookup_action ("uninhibit").activate (null);
-  }
-});
-
-var FullscreenWindow = new Lang.Class({
-  Name: "FullscreenWindow",
-  Extends: Gtk.Window,
-
-  _init: function (sender) {
-    this.parent ({type: Gtk.WindowType.TOPLEVEL});
-    this.mainwindow = sender.w;
-    if (this.mainwindow.icon) this.icon = this.mainwindow.icon;
-    this.can_focus = true;
-    this.decorated = false;
-    this.deletable = false;
-    this.transient_for = null;
-
-    //this.control = null;
-    let app = Gio.Application.get_default();
-    this.application = app;
-
-    this.connect ('window_state_event', (o, e) => {
-      var state = this.window.get_state();
-      if (state == Gdk.WindowState.FULLSCREEN) this.set_bounds ();
-    });
-  },
-
-  set_bounds: function () {
-    var monitor = 0;
-    if (this.mainwindow.window) monitor = this.screen.get_monitor_at_window (this.mainwindow.window);
-    var bounds = this.screen.get_monitor_geometry (0);
-    this.move (bounds.x, bounds.y);
-    this.resize (bounds.width, bounds.height);
   }
 });
 
