@@ -248,7 +248,7 @@ var VideoFrame = new Lang.Class({
       }
       if (e.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS) this.toggle_fullscreen ();
       else if (e.get_event_type() == Gdk.EventType.BUTTON_PRESS) {
-        this.toggle_play_id = GLib.timeout_add (0, 250, () => {
+        this.toggle_play_id = GLib.timeout_add (0, 750, () => {
           this.toggle_play_id = 0;
           this.contents.player.toggle_play ();
         });
@@ -345,6 +345,7 @@ var VideoWidget = new Lang.Class ({
       });
       this.player.engine.set_videosink (videosink);
     }
+
     this.stage.add_child (this.frame);
     this.stage.set_child_above_sibling (this.cover_frame, this.frame);
 

@@ -141,6 +141,7 @@ var ResultView = new Lang.Class({
       let item = new ResultViewItem (p);
       this.results.add (item);
       if (item.details.id) this.provider.get_info (item.details.id, (d) => {
+        debug (d);
         let data = JSON.parse (Utils.bytesToString (d));
         if (data.pageInfo && data.pageInfo.totalResults > 0) {
           item.details.parse (data.items[0]);
@@ -240,8 +241,9 @@ var ResultViewItem = new Lang.Class({
     if (!this.details.data.channel.id) return;
     if (this.details.data.channel.thumbnails) this.get_channel_logo_url ();
     else if (w) w.provider.get_channel_info (this.details.data.channel.id, (d) => {
+      debug ("ResultViewItem.get_channel_info:\n" + Utils.bytesToString (d));
       let data = JSON.parse (Utils.bytesToString (d));
-      if (data.pageInfo.totalResults > 0) {
+      if (data.pageInfo.resultsPerPage > 0) {
         this.details.parse (data.items[0]);
         this.get_channel_logo_url ();
       }

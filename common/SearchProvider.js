@@ -9,12 +9,15 @@
  */
 
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 
 var Format = imports.format;
 String.prototype.format = Format.format;
 
 const fetch = imports.common.Utils.fetch;
+
+const cache_dir = GLib.build_filenamev ([GLib.get_user_data_dir(),"newstream","cache"]);
 
 const ORDER = {
   0: "date",
@@ -68,7 +71,7 @@ const VIDEOTYPE = {
 }
 
 const BASE_URL = 'https://www.googleapis.com/youtube/v3/';
-const KEY = 'AIzaSyASv1z2gERCOR7OmJnWUtXImlQO0hI9m7o';
+const KEY = 'AIzaSyDEsAMmHbBAQXIdklCC6sPyoV4PtdS9D0Q';
 
 var SearchProvider = new Lang.Class({
   Name: "SearchProvider",
@@ -156,11 +159,20 @@ var SearchProvider = new Lang.Class({
 
   get_info: function (id, callback) {
     if (!id) return;
+    let d = get_cache (id);
+    if (d) {
+      //print ("get item info for video ", id);
+      callback (d);
+      return;
+    }
     let url = '%svideos?part=snippet,contentDetails,statistics&id=%s&key=%s'.format (
       BASE_URL, id, KEY
     );
     //print (url);
-    fetch (url, null, null, callback);
+    fetch (url, null, null, (d) => {
+      set_cache (id, d);
+      callback (d);
+    });
   },
 
   get_channel: function (id, callback) {
@@ -174,10 +186,19 @@ var SearchProvider = new Lang.Class({
 
   get_channel_info: function (id, callback) {
     if (!id) return;
+    let d = get_cache (id);
+    if (d) {
+      //print ("get cache contents for channel ", id);
+      callback (d);
+      return;
+    }
     let url = '%schannels?part=snippet,statistics&id=%s&key=%s'.format (
       BASE_URL, id, KEY
     );
-    fetch (url, null, null, callback);
+    fetch (url, null, null, (d) => {
+      set_cache (id, d);
+      callback (d);
+    });
   },
 
   get_hot: function (callback) {
@@ -206,9 +227,28 @@ var SearchProvider = new Lang.Class({
 
   get_relaited: function (id, callback) {
     let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&relatedToVideoId=%s&key=%s'.format (
-      BASE_URL, 12, id, KEY
+      BASE_URL, 4, id, KEY
     );
     fetch (url, null, null, callback);
     return url;
   }
 });
+
+function set_cache (id, data) {
+  if (!id || !data || !data.length) return;
+  try {
+    GLib.file_set_contents (cache_dir + "/" + id, data);
+  } catch (e) {
+    print (e);
+  }
+}
+
+function get_cache (id) {
+  if (!id) return null;
+  let f = Gio.file_new_for_path (cache_dir + "/" + id);
+    if (f.query_exists(null)) {
+      let [res, ar, tags] = f.load_contents (null);
+      if (res) return ar;
+    }
+  return null;
+}

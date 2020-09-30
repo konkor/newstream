@@ -228,7 +228,7 @@ var PlayerEngine = new Lang.Class({
     //TODO Process messages
     //print (msg.type);
     if (GstVideo.is_video_overlay_prepare_window_handle_message (msg)) {
-      //print ("Seet overlay...", msg.type, this.handler);
+      print ("Seet overlay...", msg.type, this.handler);
       var overlay = msg.src;
       if (!overlay || !this.handler) return false;
       overlay.set_window_handle (this.handler);

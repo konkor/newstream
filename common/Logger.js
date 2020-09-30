@@ -17,7 +17,7 @@ const domain_name = ["EE","II","DD"];
 const domain_source = "application";
 
 var LEVEL = { ERROR: 0, INFO: 1, DEBUG: 2 };
-var debug_lvl = LEVEL.DEBUG;
+var debug_lvl = LEVEL.ERROR;
 let mono = false;
 
 function init (level, nocolor) {

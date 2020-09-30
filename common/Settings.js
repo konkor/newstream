@@ -321,6 +321,8 @@ function get_app_data_dir () {
     GLib.mkdir_with_parents (path, 484);
   if (!GLib.file_test (path + "/data", GLib.FileTest.EXISTS))
     GLib.mkdir_with_parents (path + "/data", 484);
+  if (!GLib.file_test (path + "/cache", GLib.FileTest.EXISTS))
+    GLib.mkdir_with_parents (path + "/cache", 484);
   return path;
 }
 

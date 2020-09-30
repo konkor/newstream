@@ -18,7 +18,7 @@ const Utils = imports.common.Utils;
 const ResultView = imports.common.ResultView;
 const ItemView = imports.common.ItemView;
 
-let IPP = 20; //items per page
+let IPP = 60; //items per page
 let APPDIR = "";
 
 var SubscriptionView = new Lang.Class({

@@ -33,6 +33,8 @@ var NewStreamApplication = new Lang.Class ({
     GLib.set_prgname ("New Stream");
     GLib.set_application_name ("New Stream");
 
+    this.player_enabled = false;
+
     this.add_main_option (
       'debug', 0, GLib.OptionFlags.NONE, GLib.OptionArg.NONE,
       "Enable debugging messages", null

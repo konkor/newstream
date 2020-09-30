@@ -367,6 +367,7 @@ var Channel = new Lang.Class({
       var d = new Date (data.published);
       this.published.set_text ("Published: " + d.toLocaleDateString());
     }
+    debug ("data.channel_thumb_url:\n" + JSON.stringify(data));
     if (data.channel_thumb_url) Utils.fetch (data.channel_thumb_url, null, null, (d,r) => {
       if (r != 200) return;
       try {
@@ -406,9 +407,11 @@ var Statistics = new Lang.Class({
   },
 
   load: function (data) {
-    if (!data) return;
-    this.views.set_text (Utils.format_size_long (data.views) + " views");
-    this.likes.set_text (Utils.format_size (data.likes) + " / " + Utils.format_size (data.dislikes));
+    if (!data || !data.id) return;
+    if (data.views) {
+      this.views.set_text (Utils.format_size_long (data.views) + " views");
+      this.likes.set_text (Utils.format_size (data.likes) + " / " + Utils.format_size (data.dislikes));
+    }
     this.url = "https://youtu.be/" + data.id;
   }
 });
