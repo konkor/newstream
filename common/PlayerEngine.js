@@ -42,22 +42,35 @@ var PlayerEngine = new Lang.Class({
     this.pipeline = new Gst.Pipeline ({name:"xstream"});
 
     //Main Video(audio, subtitles) stream
-    this.playbin = Gst.ElementFactory.make("playbin", "mainbin");
+    //this.playbin = Gst.ElementFactory.make("playbin", "mainbin");
     this.audiosink = Gst.ElementFactory.make ("pulsesink", "audiosink");
+    if (!this.audiosink)
+      this.audiosink = Gst.ElementFactory.make ("alsasink", "audiosink");
 
     //Audio stream
-    this.audiobin = Gst.ElementFactory.make ("playbin", "audiobin");
-    //this.audiobin.connect ("pad_added", this.on_audio_pad.bind (this));
-    this.audiosink2 = Gst.ElementFactory.make ("pulsesink", "audiosink2");
+    //this.audiobin = Gst.ElementFactory.make ("playbin", "audiobin");
+    //this.audiosink2 = Gst.ElementFactory.make ("pulsesink", "audiosink2");
+    //this.audiobin = Gst.parse_launch ("uridecodebin name=\"audiouri\" ! audioconvert ! audio/x-raw ! pulsesink");
+    this.audiobin = Gst.parse_launch ("uridecodebin name=\"audiouri\" ! audioconvert");
+    print ("audiobin.name", this.audiobin.name);
+    this.audiodec = this.audiobin.get_by_name ("audiouri");
+    this.audiobin.add (this.audiosink);
+
+    //this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
+    this.videobin = Gst.parse_launch ("uridecodebin name=\"videouri\" ! autovideoconvert ! cluttersink  name=\"videosink\"");
+    print ("videobin.name", this.videobin.name);
+    this.videodec = this.videobin.get_by_name ("videouri");
+    this.videosink = this.videobin.get_by_name ("videosink");
+    //this.videobin.add (this.videosink);
 
     //Fake outputs
     this.fakeaudio = Gst.ElementFactory.make ("fakesink", "fakeaudio");
     this.fakevideo = Gst.ElementFactory.make ("fakesink", "fakevideo");
 
-    //this.pipeline.add (this.playbin);
-    //this.audiobin.set_property ("video-sink", this.fakevideo);
-    this.audiobin.set_property ("flags", 2);
-    this.audiobin.set_property ("audio-sink", this.audiosink2);
+    ////this.pipeline.add (this.playbin);
+    ////this.audiobin.set_property ("video-sink", this.fakevideo);
+    //this.audiobin.set_property ("flags", 2);
+    //this.audiobin.set_property ("audio-sink", this.audiosink2);
 
     this.current_volume = 0;
     this.repeat = false;
@@ -74,7 +87,7 @@ var PlayerEngine = new Lang.Class({
   },
 
   get position () {
-    let pos, res, pipe = this.video_stream ? this.playbin : this.audiobin;
+    let pos, res, pipe = this.video_stream ? this.videobin : this.audiobin;
     [res, pos] = pipe.query_position (Gst.Format.TIME);
     if (!res) pos = -1;
     else pos /= Gst.MSECOND;
@@ -90,8 +103,7 @@ var PlayerEngine = new Lang.Class({
   },
 
   get volume () {
-    if (!this.current_volume && this.pipeline)
-      this.current_volume = this.audio_stream ? this.audiobin.get_volume (1) : this.playbin.get_volume (1);
+    //if (!this.current_volume && this.pipeline) this.current_volume = this.audiobin.get_volume (1);
     return this.current_volume;
   },
 
@@ -100,44 +112,47 @@ var PlayerEngine = new Lang.Class({
     val = val || 0;
     if (val > 1) val = 1.0;
     this.audiobin.set_volume (1, val);
-    this.playbin.set_volume (1, val);
+    //this.playbin.set_volume (1, val);
     this.current_volume = val;
   },
 
   open: function (video_url, audio_url) {
     //video_url = "http://192.168.1.2:8088/0/test.mp4";audio_url = "http://192.168.1.2:8088/0/test.mp4";
     this.pipeline.set_state (Gst.State.NULL);
-    this.set_audio (audio_url);
+    print ("open video/audio streams:\n" + video_url + "\n\n" + audio_url);
+    //this.set_audio (video_url);
     this.set_video (video_url);
     this.pipeline.set_state (Gst.State.PLAYING);
   },
 
   set_audio: function (url) {
+    print ("set audio streams:\n" + url);
     if (url == this.audio_url) return;
     this.audio_url = url || null;
     if (url) {
-      this.audiobin.set_property ("uri", url);
-      if (!this.pipeline.get_by_name ("audiobin")) this.pipeline.add (this.audiobin);
-      this.playbin.set_property ("audio-sink", this.fakeaudio);
+      this.audiodec.set_property ("uri", url);
+      if (!this.audio_stream) this.pipeline.add (this.audiobin);
+      //this.playbin.set_property ("audio-sink", this.fakeaudio);
       this.audio_stream = true;
     } else {
       if (this.audio_stream) this.pipeline.remove (this.audiobin);
-      this.playbin.set_property ("audio-sink", this.audiosink);
+      //this.playbin.set_property ("audio-sink", this.audiosink);
       this.audio_stream = false;
     }
     this.audiobin.sync_state_with_parent ();
   },
 
   set_video: function (url) {
+    print ("set video streams:\n" + url);
     if (url) {
-      if (!this.pipeline.get_by_name ("mainbin")) this.pipeline.add (this.playbin);
-      this.playbin.set_property ("uri", url);
+      if (!this.video_stream) this.pipeline.add (this.videobin);
+      this.videodec.set_property ("uri", url);
       this.video_stream = true;
     } else {
-      if (this.video_stream) this.pipeline.remove (this.playbin);
+      if (this.video_stream) this.pipeline.remove (this.videobin);
       this.video_stream = false;
     }
-    this.playbin.sync_state_with_parent ();
+    this.videobin.sync_state_with_parent ();
   },
 
   preload: function () {
@@ -157,7 +172,8 @@ var PlayerEngine = new Lang.Class({
   },
 
   seek: function (pos, accurate) {
-    if (!this.pipeline || this.seek_lock) return false;
+    return false;
+    /*if (!this.pipeline || this.seek_lock) return false;
     this.seek_lock = true;
     let flag = Gst.SeekFlags.FLUSH, res;
     if (accurate) flag |= Gst.SeekFlags.ACCURATE;
@@ -176,7 +192,7 @@ var PlayerEngine = new Lang.Class({
     if (this.video_stream) this.playbin.sync_state_with_parent ();
     if (this.audio_stream) this.audiobin.sync_state_with_parent ();
     this.seek_lock = false;
-    return res;
+    return res;*/
   },
 
   set_window: function (xid) {
@@ -187,15 +203,18 @@ var PlayerEngine = new Lang.Class({
   },
 
   set_videosink: function (sink) {
+    //this.videosink = sink;
+    //this.playbin.set_property("video-sink", this.videosink);
+    if (this.videosink) this.videobin.remove (this.videosink);
     this.videosink = sink;
-    this.playbin.set_property("video-sink", this.videosink);
+    this.videobin.add (this.videosink);
   },
 
   get_videosink: function (name) {
     name = name || "cluttersink";
     if (!this.videosink) {
       this.videosink = Gst.ElementFactory.make (name, "videosink");
-      this.playbin.set_property ("video-sink", this.videosink);
+      this.videobin.add (this.videosink);
     }
     return this.videosink;
   },
@@ -226,7 +245,7 @@ var PlayerEngine = new Lang.Class({
 
   on_bus_message: function (bus,msg,a,b,c) {
     //TODO Process messages
-    //print (msg.type);
+    print (msg.type);
     if (GstVideo.is_video_overlay_prepare_window_handle_message (msg)) {
       print ("Seet overlay...", msg.type, this.handler);
       var overlay = msg.src;
@@ -242,7 +261,12 @@ var PlayerEngine = new Lang.Class({
       if (this.current_state == newstate) return true;
       this.current_state = newstate;
       this.emit ('state-changed', oldstate, newstate, pending);
-    }
+    } else if (msg.type == Gst.MessageType.BUFFERING) {
+      print ("BUFFERING", msg.parse_buffering ());
+    } else if (msg.type == Gst.MessageType.ERROR) {
+      let [err, d] = msg.parse_error ();
+      print ("GST ERROR:", msg.src, err.message);
+    } //else print (msg.parse_info ());
     return true;
   },
 

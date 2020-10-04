@@ -461,11 +461,13 @@ var PlayerMenu = new Lang.Class ({
   },
 
   on_audio_format: function (o) {
+    this.player.stop ();
     this.audio.info.label.set_text (o.info.label.label);
     debug (o.format.url);
     if (this.player && o.format.url) this.player.set_audio (o.format.url);
     this.audio_auto = false;
     this.audio_format = o.format;
+    this.player.play ();
   },
 
   on_audio_auto: function () {
