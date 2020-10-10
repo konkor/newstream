@@ -42,7 +42,7 @@ var MainWindow = new Lang.Class ({
       error (e.message);
     }
     this.settings = new Prefs.Settings ();
-    this.provider = new Provider.SearchProvider ();
+    this.provider = new Provider.SearchProvider (this.settings);
     let ydl_install = Utils.check_install_ydl ();
     if (!ydl_install) Utils.install_ydl ();
     else Utils.check_update_ydl ();
@@ -112,6 +112,9 @@ var MainWindow = new Lang.Class ({
       this.application.lookup_action ("toggle-fullscreen").activate (null);
     });
 
+    this.spinner = new Gtk.Spinner ();
+    this.hb.pack_end (this.spinner);
+
     let box = new Gtk.Box ({orientation:Gtk.Orientation.VERTICAL});
     this.add (box);
 
@@ -153,6 +156,9 @@ var MainWindow = new Lang.Class ({
     this.channelview = new Layouts.ChannelLayout (this);
     this.stack.add_named (this.channelview, "channel");
 
+    this.preferences = new Layouts.PreferencesLayout (this);
+    this.stack.add_named (this.preferences, "preferences");
+
     let mmenu = new Gtk.Menu (), mii;
 
     mii = new Gtk.MenuItem ({label:"Bookmarks"});
@@ -186,6 +192,12 @@ var MainWindow = new Lang.Class ({
     mmenu.add (mii);
 
     mmenu.add (new Gtk.SeparatorMenuItem ());
+    mii = new Gtk.MenuItem ({label:"Preferences"});
+    this.set_accel (mii, "<Alt>P");
+    mii.set_action_name ("app.preferences");
+    mmenu.add (mii);
+
+    mmenu.add (new Gtk.SeparatorMenuItem ());
     mii = new Gtk.MenuItem ({label:"About"});
     mmenu.add (mii);
     mii.connect ("activate", () => {this.about ()});
@@ -193,7 +205,7 @@ var MainWindow = new Lang.Class ({
     mmenu.show_all ();
     this.menu_button.set_popup (mmenu);
 
-    this.hotview.query ();
+    //this.hotview.query ();
 
     this.topbar.connect ('stack_update', this.on_stack_update.bind (this));
     this.searchview.connect ('ready', () => {
@@ -215,6 +227,12 @@ var MainWindow = new Lang.Class ({
       else this.phones.visible = false;
     });
     this.connect ('unmap', this.save_geometry.bind (this));
+
+    if (!this.settings.api_key) {
+      this.back.last = "0";
+      this.stack.visible_child_name = "preferences";
+      this.preferences.show_all ();
+    }
   },
 
   set_accel: function (mi, accel) {
@@ -226,6 +244,7 @@ var MainWindow = new Lang.Class ({
 
   save_geometry: function () {
     this.settings.save_geometry (this);
+    this.settings.quit ();
   },
 
   restore_position: function () {
@@ -461,13 +480,11 @@ var PlayerMenu = new Lang.Class ({
   },
 
   on_audio_format: function (o) {
-    this.player.stop ();
     this.audio.info.label.set_text (o.info.label.label);
     debug (o.format.url);
     if (this.player && o.format.url) this.player.set_audio (o.format.url);
     this.audio_auto = false;
     this.audio_format = o.format;
-    this.player.play ();
   },
 
   on_audio_auto: function () {

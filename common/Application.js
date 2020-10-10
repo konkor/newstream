@@ -55,11 +55,9 @@ var NewStreamApplication = new Lang.Class ({
     }
 
     if (options.contains ("verbose")) {
-      DEBUG_LVL = 1;
       Logger.init (1);
     }
     if (options.contains ("debug")) {
-      DEBUG_LVL = 2;
       Logger.init (2);
     }
 
@@ -90,6 +88,13 @@ var NewStreamApplication = new Lang.Class ({
           this.window.on_stack_update (this, "history");
         },
         accels: ["h", "<Primary>h"]
+      },
+      { name: "preferences",
+        activate: () => {
+          this.unfullscreen ();
+          this.window.on_stack_update (this, "preferences");
+        },
+        accels: ["<Alt>p"]
       },
       { name: "search",
         activate: () => {

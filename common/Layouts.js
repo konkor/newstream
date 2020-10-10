@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018-2019 konkor <konkor.github.io>
+ * Copyright (C) 2018 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -12,6 +12,7 @@ const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const Lang = imports.lang;
 
+const Preferences = imports.common.Preferences;
 const ResultView = imports.common.ResultView;
 const HistoryView = imports.common.HistoryView;
 const BookmarkView = imports.common.BookmarkView;
@@ -38,8 +39,9 @@ var HistoryLayout = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
-    this.w.fullscreen.visible = false;
+    this.w.fullscreen_button.visible = false;
     this.w.player_menu.visible = false;
+    this.w.spinner.visible = true;
   }
 });
 
@@ -62,7 +64,7 @@ var BookmarkLayout = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
-    this.w.fullscreen.visible = false;
+    this.w.fullscreen_button.visible = false;
     this.w.player_menu.visible = false;
   }
 });
@@ -85,7 +87,30 @@ var SubscriptionLayout = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
-    this.w.fullscreen.visible = false;
+    this.w.fullscreen_button.visible = false;
+    this.w.player_menu.visible = false;
+  }
+});
+
+var PreferencesLayout = new Lang.Class({
+  Name: "PreferencesLayout",
+  Extends: Preferences.Preferences,
+
+  _init: function (parent) {
+    this.parent (parent.settings);
+    this.w = parent;
+    this.connect ("map", this.setup.bind (this));
+  },
+
+  setup: function (o, e) {
+    this.update ();
+    this.w.section.label = "Preferences";
+    this.w.home.visible = false;
+    this.w.back.visible = true;
+    this.w.searchbar.visible = false;
+    this.w.topbar.visible = false;
+    this.w.menu_button.visible = true;
+    this.w.fullscreen_button.visible = false;
     this.w.player_menu.visible = false;
   }
 });
@@ -112,7 +137,7 @@ var ItemLayout = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = false;
-    this.w.fullscreen.visible = true;
+    this.w.fullscreen_button.visible = true;
     this.w.player_menu.visible = true;
   }
 });
@@ -139,7 +164,7 @@ var HotView = new Lang.Class({
     this.w.searchbar.visible = true;
     this.w.topbar.visible = true;
     this.w.menu_button.visible = true;
-    this.w.fullscreen.visible = false;
+    this.w.fullscreen_button.visible = false;
     this.w.player_menu.visible = false;
   }
 });
@@ -195,7 +220,7 @@ var SearchView = new Lang.Class({
     this.w.searchbar.visible = false;
     this.w.topbar.visible = false;
     this.w.menu_button.visible = true;
-    this.w.fullscreen.visible = false;
+    this.w.fullscreen_button.visible = false;
     this.w.player_menu.visible = false;
   }
 });

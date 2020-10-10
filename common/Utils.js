@@ -31,6 +31,7 @@ function fetch (url, agent, headers, callback) {
   session.queue_message (request, (source, message) => {
     if (callback) {
       //callback (message.response_body.data.toString()?message.response_body.data:"", message.status_code);
+      if (message.status_code != 200) error ("ERROR: Fetching data: status code: " + message.status_code + "\n" + message.response_body_data.get_data ());
       callback (message.response_body_data.get_data (), message.status_code);
     }
   });
@@ -289,3 +290,8 @@ function get_info_string (cmd) {
     if (info_out) return info_out;
     return "";
 }
+
+const DOMAIN = "Utils";
+function error (msg) {Logger.error (DOMAIN, msg)}
+function debug (msg) {Logger.debug (DOMAIN, msg)}
+function info (msg) {Logger.info (DOMAIN, msg)}

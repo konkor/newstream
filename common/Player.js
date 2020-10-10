@@ -66,6 +66,10 @@ var Player = new Lang.Class({
       if (n != 4) this.get_toplevel ().application.lookup_action ("uninhibit").activate (null);
       else if (this.video.fullscreen) this.get_toplevel ().application.lookup_action ("inhibit").activate (null);
     });
+    this.engine.connect ('buffering', (o, p) => {
+      if (p == 100) this.w.spinner.stop ();
+      else this.w.spinner.start ();
+    });
   },
 
   load: function (item) {
@@ -75,21 +79,46 @@ var Player = new Lang.Class({
       this.item = item;
       this.get_cover ();
       this.engine.open ();
+      /*
+      {"asr":null,"tbr":99.735,"container":"webm","format":"278 - 256x144 (144p)",
+      "url":"https://r2---sn-3tp8nu5g-3c2y.googlevideo.com/...","vcodec":"vp9",
+      "format_note":"144p","player_url":null,"downloader_options":{
+        "http_chunk_size":10485760
+      },"width":256,"ext":"webm","filesize":35396973,"fps":30,"protocol":"https",
+      "format_id":"278","height":144,"http_headers":{
+        "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept-Encoding":"gzip, deflate",
+        "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9;q=0.8",
+        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.136 Safari/537.36"
+      },"acodec":"none"}*/
+
       if (this.item.id) Utils.fetch_formats (this.item.id, (d) => {
         this.formats = d;
-        var url = "";
-        if (d && d.format) info (d.format, d.vcodec, d.acodec);
+        this.fps = 30;
+        let audio = null, video = null;
+        if (d && d.format) debug ("%s %s %s".format (d.format, d.vcodec, d.acodec));
         if (d && d.formats) d.formats.forEach (p => {
-          //info (JSON.stringify (p));
-          if (d.format_id == p.format_id) {
-            url = p.url;
-            if (p.fps) this.fps = p.fps;
-            else this.fps = 30;
+          //debug (JSON.stringify (p));
+          if (p.protocol == "http_dash_segments") return;
+          if ((p.vcodec != "none") && (p.height <= this.w.settings.video_quality)) {
+            if (!video) video = p;
+            else {
+              if (video.height < p.height) video = p;
+              else if (p.vcodec.indexOf (this.w.settings.video_format) == 0) video = p;
+            }
+          } else {
+            if (!audio) audio = p;
+            else {
+              if (p.abr > audio.abr) audio = p;
+            }
           }
         });
-        if (url) {
+        if (video && video.fps) this.fps = video.fps;
+        if (audio || video) {
+          if (!audio && video.acodec != "none") audio = video;
           this.w.settings.add_view_history (this.item);
-          this.engine.open (url);
+          this.engine.open (video, audio);
           this.show_all ();
         }
         this.w.player_menu.load_formats (d.formats, d.format_id);
@@ -579,7 +608,7 @@ var VideoControl = new Lang.Class ({
     this.box.show_all ();
 
     this.player.engine.connect ('state-changed', (s,o,n,p) => {
-      print ("state-changed:", o,n,p,this.play.state);
+      debug ("state-changed (old,new,pending): " + o + n + p);
       this.play.toggle (n == 4);
     });
     this.player.engine.connect ('progress', this.on_progress.bind (this));

@@ -1,6 +1,6 @@
 /*
  * This is a part of NewStream package
- * Copyright (C) 2018-2019 konkor <konkor.github.io>
+ * Copyright (C) 2018 konkor <konkor.github.io>
  *
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,6 +26,14 @@ let view_history_size = 1000;
 let bookmarks = [];
 let channels = [];
 let tags = [];
+
+let config_id = 0;
+let config = {
+  api_key: "",
+  video_quality: 720,
+  video_format: "webm",
+  show_revalent: true
+}
 
 var Settings = new Lang.Class({
   Name: "Settings",
@@ -55,6 +63,13 @@ var Settings = new Lang.Class({
     this.view_history_modified = true;
   },
 
+  quit: function () {
+    if (config_id) {
+      this.unschedule_config ();
+      this.save_config ();
+    }
+  },
+
   load: function () {
     save = this.get_boolean ("save-settings");
     history_size = this.get_int ("history-size");
@@ -64,6 +79,7 @@ var Settings = new Lang.Class({
     this.load_view_history ();
     this.load_bookmarks ();
     this.load_channels ();
+    this.load_config ();
   },
 
   get save () { return save; },
@@ -89,12 +105,70 @@ var Settings = new Lang.Class({
     } else if ((Gdk.WindowState.TILED & ws) == 0) {
       [x, y] = window.get_position ();
       [w, h] = o.get_size ();
+      w = window.get_width()-65;
+      print (w);
       this.set_int ("window-x", x);
       this.set_int ("window-y", y);
       this.set_int ("window-width", w);
       this.set_int ("window-height", h);
     }
     this.set_boolean ("window-maximized", maximized);
+  },
+
+  load_config: function () {
+    let o, f = Gio.file_new_for_path (app_data_dir + "/config.json");
+    if (f.query_exists(null)) {
+      var [res, ar, tags] = f.load_contents (null);
+      if (res) try {
+        o = JSON.parse (Utils.bytesToString (ar));
+        for (let property in config) {
+          if (o[property]) config[property] = o[property];
+        }
+      } catch (e) {}
+    }
+  },
+
+  save_config: function () {
+    GLib.file_set_contents (app_data_dir + "/config.json", JSON.stringify (config));
+    this.unschedule_config ();
+  },
+
+  schedule_config: function () {
+    this.unschedule_config ();
+    config_id = GLib.timeout_add_seconds (100, 20, this.save_config.bind (this));
+  },
+
+  unschedule_config: function () {
+    if (config_id) GLib.source_remove (config_id);
+    config_id = 0;
+  },
+
+  get api_key () { return config.api_key; },
+  set api_key (val) {
+    if (config.api_key == val) return;
+    config.api_key = val;
+    this.schedule_config ();
+  },
+
+  get video_quality () { return config.video_quality; },
+  set video_quality (val) {
+    if (config.video_quality == val) return;
+    config.video_quality = val;
+    this.schedule_config ();
+  },
+
+  get video_format () { return config.video_format; },
+  set video_format (val) {
+    if (config.video_format == val) return;
+    config.video_format = val;
+    this.schedule_config ();
+  },
+
+  get show_revalent () { return config.show_revalent; },
+  set show_revalent (val) {
+    if (config.show_revalent == val) return;
+    config.show_revalent = val;
+    this.schedule_config ();
   },
 
   get history () { return history; },

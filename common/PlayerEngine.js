@@ -31,15 +31,27 @@ var PlayerEngine = new Lang.Class({
     'progress': {
     flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
     param_types: [GObject.TYPE_INT, GObject.TYPE_INT]},
+    'buffering': {
+    flags: GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.DETAILED,
+    param_types: [GObject.TYPE_INT]},
   },
 
   _init: function () {
     Gst.init(null); //["GST_GL_PLATFORM=\"egl\""]
-    this.current_state = 0;
+    this.audio_state = 0;
+    this.video_state = 0;
+    this.audio_buffer = 0;
+    this.video_buffer = 0;
     this.video_stream = false;
     this.audio_stream = false;
+    this.play_on_ready = false;
 
-    //this.pipeline = new Gst.Pipeline ({name:"xstream"});
+    //Fake outputs
+    this.fakeaudio = Gst.ElementFactory.make ("fakesink", "fakeaudio");
+    this.fakevideo = Gst.ElementFactory.make ("fakesink", "fakevideo");
+
+    this.videobin = new Gst.Pipeline ({name:"xstream_video"});
+    this.audiobin = new Gst.Pipeline ({name:"xstream_audio"});
 
     //Main Video(audio, subtitles) stream
     //this.playbin = Gst.ElementFactory.make("playbin", "mainbin");
@@ -47,31 +59,23 @@ var PlayerEngine = new Lang.Class({
     if (!this.audiosink)
       this.audiosink = Gst.ElementFactory.make ("alsasink", "audiosink");
 
-    /*//Audio stream
+    //Audio stream
     //this.audiobin = Gst.ElementFactory.make ("playbin", "audiobin");
     //this.audiosink2 = Gst.ElementFactory.make ("pulsesink", "audiosink2");
     //this.audiobin = Gst.parse_launch ("uridecodebin name=\"audiouri\" ! audioconvert ! audio/x-raw ! pulsesink");
-    this.audiobin = Gst.parse_launch ("uridecodebin name=\"audiouri\" ! audioconvert ! pulsesink");
-    print ("audiobin.name", this.audiobin.name);
-    this.audiodec = this.audiobin.get_by_name ("audiouri");
-    //this.audiobin.add (this.audiosink);
+    this.audiodec = Gst.ElementFactory.make ("playbin", "audiobin");
+    this.audiodec.set_property ("flags", 2);
+    this.audiodec.set_property ("video-sink", this.fakevideo);
+    this.audiodec.set_property ("audio-sink", this.audiosink);
+    this.audiobin.add (this.audiodec);
 
-    //this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
-    this.videobin = Gst.parse_launch ("uridecodebin name=\"videouri\" ! autovideoconvert ! cluttersink  name=\"videosink\"");
-    print ("videobin.name", this.videobin.name);
-    this.videodec = this.videobin.get_by_name ("videouri");
-    this.videosink = this.videobin.get_by_name ("videosink");
-    //this.videobin.add (this.videosink);
-    */
+    this.videosink = Gst.ElementFactory.make ("cluttersink", "videosink");
+    this.videodec = Gst.ElementFactory.make ("playbin", "videobin");
+    this.videodec.set_property ("video-sink", this.videosink);
+    this.videodec.set_property ("audio-sink", this.fakeaudio);
+    this.videodec.set_property ("flags", 1);
+    this.videobin.add (this.videodec);
 
-    this.pipeline = Gst.parse_launch ("uridecodebin name=\"videouri\" ! autovideoconvert ! cluttersink  name=\"videosink\" uridecodebin name=\"audiouri\" ! audioconvert ! pulsesink");
-    this.audiodec = this.pipeline.get_by_name ("audiouri");
-    this.videodec = this.pipeline.get_by_name ("videouri");
-    this.videosink = this.pipeline.get_by_name ("videosink");
-
-    //Fake outputs
-    this.fakeaudio = Gst.ElementFactory.make ("fakesink", "fakeaudio");
-    this.fakevideo = Gst.ElementFactory.make ("fakesink", "fakevideo");
 
     ////this.pipeline.add (this.playbin);
     ////this.audiobin.set_property ("video-sink", this.fakevideo);
@@ -81,59 +85,79 @@ var PlayerEngine = new Lang.Class({
     this.current_volume = 0;
     this.repeat = false;
 
-    this.bus = this.pipeline.get_bus ();
+    this.bus = this.audiobin.get_bus ();
     this.bus.add_signal_watch ();
-    this.bus.connect ("message", this.on_bus_message.bind (this));
+    this.bus.connect ("message", this.on_bus_message_audio.bind (this));
+
+    this.bus1 = this.videobin.get_bus ();
+    this.bus1.add_signal_watch ();
+    this.bus1.connect ("message", this.on_bus_message_video.bind (this));
 
     timer = GLib.timeout_add (0, 1000, this.on_timer.bind (this));
   },
 
   get state () {
-    return this.current_state;
+    if (!this.audio_stream) return this.video_state;
+    if (!this.video_stream) return this.audio_state;
+    if (this.audio_state <= this.video_state) return this.audio_state;
+    return this.video_state;
   },
 
   get position () {
-    let pos, res, pipe = this.video_stream ? this.videobin : this.audiobin;
-    [res, pos] = this.pipeline.query_position (Gst.Format.TIME);
+    let pos, pos2, res, pipe = this.video_stream ? this.videobin : this.audiobin;
+    [res, pos] = pipe.query_position (Gst.Format.TIME);
     if (!res) pos = -1;
-    else pos /= Gst.MSECOND;
+    else {
+      if (this.video_stream && this.audio_stream) {
+        [res, pos2] = this.audiobin.query_position (Gst.Format.TIME);
+        //this.seek (pos, true);
+        //print ("audio:", pos2, "video:", pos, "delta:", pos2 - pos);
+      }
+      pos /= Gst.MSECOND;
+    }
+
     return pos;
   },
 
   get duration () {
-    let dur, res;
-    [res, dur] = this.pipeline.query_duration (Gst.Format.TIME);
+    let dur, res, pipe = this.video_stream ? this.videobin : this.audiobin;
+    [res, dur] = pipe.query_duration (Gst.Format.TIME);
     if (!res) dur = -1;
     else dur /= Gst.MSECOND;
     return dur;
   },
 
   get volume () {
-    //if (!this.current_volume && this.pipeline) this.current_volume = this.audiobin.get_volume (1);
+    if (!this.current_volume && this.audiodec) this.current_volume = this.audiodec.get_volume (1);
     return this.current_volume;
   },
 
   set volume (val) {
-    if (!this.pipeline) return;
+    if (!this.audiobin) return;
     val = val || 0;
     if (val > 1) val = 1.0;
-    this.audiobin.set_volume (1, val);
+    this.audiodec.set_volume (1, val);
     //this.playbin.set_volume (1, val);
     this.current_volume = val;
   },
 
-  open: function (video_url, audio_url) {
+  open: function (video_format, audio_format) {
     //video_url = "http://192.168.1.2:8088/0/test.mp4";audio_url = "http://192.168.1.2:8088/0/test.mp4";
-    this.pipeline.set_state (Gst.State.NULL);
-    print ("open video/audio streams:\n" + video_url + "\n\n" + audio_url);
-    this.set_audio (audio_url || video_url);
-    this.set_video (video_url);
-    this.pipeline.set_state (Gst.State.PLAYING);
+    this.stop ();
+    info ("open video/audio streams:\n" + JSON.stringify(video_format) + "\n\n" + JSON.stringify(audio_format));
+    if (!video_format && !audio_format) return;
+    if (video_format) this.set_video (video_format.fragment_base_url || video_format.url, true);
+    else this.set_video (null, true);
+    if (audio_format) this.set_audio (audio_format.fragment_base_url || audio_format.url, true);
+    else this.set_audio (null, true);
+    //this.play ();
+    this.seek (0, false);
   },
 
-  set_audio: function (url) {
-    print ("set audio streams:\n" + url);
+  set_audio: function (url, noplay) {
+    debug ("set audio streams:\n" + url);
     if (url == this.audio_url) return;
+    this.stop ();
     this.audio_url = url || null;
     if (url) {
       this.audiodec.set_property ("uri", url);
@@ -145,11 +169,15 @@ var PlayerEngine = new Lang.Class({
       //this.playbin.set_property ("audio-sink", this.audiosink);
       this.audio_stream = false;
     }
-    this.pipeline.sync_state_with_parent ();
+    //this.audiobin.sync_state_with_parent ();
+    //this.play (true);
+    this.preload ();
+    if (!noplay) this.seek (0, false);
   },
 
-  set_video: function (url) {
-    print ("set video streams:\n" + url);
+  set_video: function (url, noplay) {
+    debug ("set video streams:\n" + url);
+    this.stop ();
     if (url) {
       //if (!this.video_stream) this.pipeline.add (this.videobin);
       this.videodec.set_property ("uri", url);
@@ -158,33 +186,46 @@ var PlayerEngine = new Lang.Class({
       //if (this.video_stream) this.pipeline.remove (this.videobin);
       this.video_stream = false;
     }
-    this.pipeline.sync_state_with_parent ();
+    //this.videobin.sync_state_with_parent ();
+    //this.play (true);
+    this.preload ();
+    if (!noplay) this.seek (0, false);
   },
 
   preload: function () {
-    this.pipeline.set_state (Gst.State.READY);
+    if (this.audio_stream) this.audiobin.set_state (Gst.State.READY);
+    if (this.video_stream) this.videobin.set_state (Gst.State.READY);
   },
 
-  play: function () {
-    this.pipeline.set_state (Gst.State.PLAYING);
+  play: function (on_ready) {
+    if (on_ready && this.audio_stream && this.video_stream) {
+      this.play_on_ready = true;
+      this.pause ();
+      return;
+    }
+    if (this.video_stream) this.videobin.set_state (Gst.State.PLAYING);
+    if (this.audio_stream) this.audiobin.set_state (Gst.State.PLAYING);
+    this.play_on_ready = false;
   },
 
   pause: function () {
-    this.pipeline.set_state (Gst.State.PAUSED);
+    if (this.audio_stream) this.audiobin.set_state (Gst.State.PAUSED);
+    if (this.video_stream) this.videobin.set_state (Gst.State.PAUSED);
   },
 
   stop: function () {
-    this.pipeline.set_state (Gst.State.NULL);
+    this.seek (0, true);
+    if (this.audio_stream) this.audiobin.set_state (Gst.State.NULL);
+    if (this.video_stream) this.videobin.set_state (Gst.State.NULL);
   },
 
   seek: function (pos, accurate) {
-    return false;
-    /*if (!this.pipeline || this.seek_lock) return false;
+    if (!this.audiobin || this.seek_lock) return false;
     this.seek_lock = true;
     let flag = Gst.SeekFlags.FLUSH, res;
     if (accurate) flag |= Gst.SeekFlags.ACCURATE;
-    this.pipeline.set_state (Gst.State.PAUSED);
-    if (this.video_stream)  res = this.playbin.seek (1.0,
+    this.pause ();
+    if (this.video_stream)  res = this.videobin.seek (1.0,
       Gst.Format.TIME, flag,
       Gst.SeekType.SET, pos * Gst.MSECOND,
       Gst.SeekType.NONE, 0
@@ -194,11 +235,11 @@ var PlayerEngine = new Lang.Class({
       Gst.SeekType.SET, pos * Gst.MSECOND,
       Gst.SeekType.NONE, 0
     );
-    this.pipeline.set_state (Gst.State.PLAYING);
-    if (this.video_stream) this.playbin.sync_state_with_parent ();
-    if (this.audio_stream) this.audiobin.sync_state_with_parent ();
+    this.play (true);
+    if (this.video_stream) this.videodec.sync_state_with_parent ();
+    if (this.audio_stream) this.audiodec.sync_state_with_parent ();
     this.seek_lock = false;
-    return res;*/
+    return res;
   },
 
   set_window: function (xid) {
@@ -225,53 +266,65 @@ var PlayerEngine = new Lang.Class({
     return this.videosink;
   },
 
-  on_audio_pad: function (src, new_pad) {
-    //let sink_pad = this.audiobin.get_static_pad ("sink");
-    //print ("Received new pad \'%s\' from \'%s\'".format (new_pad.name, src.name));
-    print ("Received new pad");
-
-    /*if (sink_pad.is_linked ()) {
-      debug (" Already linked audiobin. Ignoring.");
-      return;
-    }
-    var new_pad_caps = new_pad.query_caps (null);
-    var new_pad_struct = new_pad_caps.get_structure (0);
-    var new_pad_type = new_pad_struct.get_name ();
-    if (new_pad_type.indexOf ("audio/x-raw") == -1) {
-      debug (new_pad_struct.get_name () + " It's not raw audio. Ignoring.");
-      return;
-    }
-    ret = new_pad.link (sink_pad);
-    if (ret != Gst.PadLinkReturn.OK) {
-      error ("Type is '%s' but link failed.".format (new_pad_type));
-    } else {
-      debug ("Link succeeded (type \'%s\').".format (new_pad_type));
-    }*/
-  },
-
-  on_bus_message: function (bus,msg,a,b,c) {
-    //TODO Process messages
+  on_bus_message_video: function (bus, msg) {
     if (GstVideo.is_video_overlay_prepare_window_handle_message (msg)) {
-      print ("Seet overlay...", msg.type, this.handler);
+      debug ("Seet overlay... " + this.handler);
       var overlay = msg.src;
       if (!overlay || !this.handler) return false;
       overlay.set_window_handle (this.handler);
     } else if (msg.type == Gst.MessageType.EOS) {
-      this.emit ('state-changed', this.current_state, Gst.State.READY, 0);
+      this.emit ('state-changed', this.state, Gst.State.READY, 0);
       if (this.repeat) {
         this.seek (0, false);
-      } else this.pipeline.set_state (Gst.State.READY);
+      } else this.videobin.set_state (Gst.State.READY);
     } else if (msg.type == Gst.MessageType.STATE_CHANGED) {
       let [oldstate, newstate, pending] = msg.parse_state_changed ();
-      if (this.current_state == newstate) return true;
-      this.current_state = newstate;
+      if (this.video_state == newstate) return true;
+      this.video_state = newstate;
+      debug ("video state: " + newstate);
       this.emit ('state-changed', oldstate, newstate, pending);
     } else if (msg.type == Gst.MessageType.BUFFERING) {
-      print ("BUFFERING", msg.parse_buffering ());
+      this.video_buffer = msg.parse_buffering ();
+      this.emit ("buffering", this.video_buffer);
+      if (this.video_buffer % 10 == 0) debug ("BUFFERING VIDEO: " + this.video_buffer);
+      if (this.play_on_ready && this.video_buffer == this.audio_buffer && this.video_buffer == 100) {
+        this.play ();
+      }
+    } else if (msg.type == Gst.MessageType.TAG) {
+      //TODO: video tags
     } else if (msg.type == Gst.MessageType.ERROR) {
       let [err, d] = msg.parse_error ();
-      print ("GST ERROR:", msg.src, err.message);
-    } else print (msg.type);
+      error ("GST VIDEO ERROR: " + msg.src + "\n" + err.message);
+    } else debug ("GST message: " + msg.type);
+    return true;
+  },
+
+  on_bus_message_audio: function (bus, msg) {
+    //TODO Process messages
+    if (msg.type == Gst.MessageType.EOS) {
+      this.emit ('state-changed', this.state, Gst.State.READY, 0);
+      if (this.repeat) {
+        this.seek (0, false);
+      } else this.audiobin.set_state (Gst.State.READY);
+    } else if (msg.type == Gst.MessageType.STATE_CHANGED) {
+      let [oldstate, newstate, pending] = msg.parse_state_changed ();
+      if (this.audio_state == newstate) return true;
+      this.audio_state = newstate;
+      debug ("audio state: " + newstate);
+      this.emit ('state-changed', oldstate, newstate, pending);
+    } else if (msg.type == Gst.MessageType.BUFFERING) {
+      this.audio_buffer = msg.parse_buffering ();
+      this.emit ("buffering", this.audio_buffer);
+      if (this.audio_buffer % 10 == 0) debug ("BUFFERING AUDIO: " + this.audio_buffer);
+      if (this.play_on_ready && this.video_buffer == this.audio_buffer && this.video_buffer == 100) {
+        this.play ();
+      }
+    } else if (msg.type == Gst.MessageType.TAG) {
+      //TODO: audio tags
+    } else if (msg.type == Gst.MessageType.ERROR) {
+      let [err, d] = msg.parse_error ();
+      error ("GST AUDIO ERROR: " + msg.src + "\n" + err.message);
+    } else debug ("GST message: " + msg.type);
     return true;
   },
 

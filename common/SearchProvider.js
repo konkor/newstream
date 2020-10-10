@@ -11,12 +11,12 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Lang = imports.lang;
+const Format = imports.format;
 
-var Format = imports.format;
 String.prototype.format = Format.format;
 
 const fetch = imports.common.Utils.fetch;
-
+const bytesToString = imports.common.Utils.bytesToString;
 const cache_dir = GLib.build_filenamev ([GLib.get_user_data_dir(),"newstream","cache"]);
 
 const ORDER = {
@@ -76,7 +76,8 @@ const KEY = 'AIzaSyDEsAMmHbBAQXIdklCC6sPyoV4PtdS9D0Q';
 var SearchProvider = new Lang.Class({
   Name: "SearchProvider",
 
-  _init: function () {
+  _init: function (settings) {
+    this.settings = settings;
     this._order = ORDER[0];
     this._time = TIME[4];
     this._safesearch = SAFESEARCH[0];
@@ -88,6 +89,8 @@ var SearchProvider = new Lang.Class({
     this._videotype = VIDEOTYPE[0];
     this._max_results = 24;
   },
+
+  get key () { return this.settings.api_key || KEY; },
 
   calculate_time: function (thetime) {
     let search_time_string = "";
@@ -139,14 +142,18 @@ var SearchProvider = new Lang.Class({
       this._videoduration,
       this._videolicense,
       this._videotype,
-      this.calculate_time (this._time), KEY
+      this.calculate_time (this._time), this.key
     );
     return url;
   },
 
   get: function (query, callback) {
     let url = this._build_query_url (query);
-    fetch (url, null, null, callback);
+    print (url);
+    fetch (url, null, null, (d,r) => {
+      //if (r != 200) print ("Search respond:", r, "\n", d);
+      callback (d, r);
+    });
     return url;
   },
 
@@ -159,26 +166,32 @@ var SearchProvider = new Lang.Class({
 
   get_info: function (id, callback) {
     if (!id) return;
-    let d = get_cache (id);
+    let data, d = get_cache (id);
     if (d) {
-      //print ("get item info for video ", id);
-      callback (d);
+      data = JSON.parse (bytesToString (d));
+      callback (data);
       return;
     }
     let url = '%svideos?part=snippet,contentDetails,statistics&id=%s&key=%s'.format (
-      BASE_URL, id, KEY
+      BASE_URL, id, this.key
     );
     //print (url);
     fetch (url, null, null, (d) => {
-      set_cache (id, d);
-      callback (d);
+      let data;
+      try {
+        data = JSON.parse (bytesToString (d));
+        if (!data.error) set_cache (id, d);
+        callback (data);
+      } catch (e) {
+        print (e.msg + "\nRecived data: " + d);
+      }
     });
   },
 
   get_channel: function (id, callback) {
     if (!id) return "";
     let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video&channelId=%s&key=%s'.format (
-      BASE_URL, this._max_results, id, KEY
+      BASE_URL, this._max_results, id, this.key
     );
     fetch (url, null, null, callback);
     return url;
@@ -186,24 +199,25 @@ var SearchProvider = new Lang.Class({
 
   get_channel_info: function (id, callback) {
     if (!id) return;
-    let d = get_cache (id);
+    let data, d = get_cache (id);
     if (d) {
-      //print ("get cache contents for channel ", id);
-      callback (d);
+      data = JSON.parse (bytesToString (d));
+      callback (data);
       return;
     }
     let url = '%schannels?part=snippet,statistics&id=%s&key=%s'.format (
-      BASE_URL, id, KEY
+      BASE_URL, id, this.key
     );
     fetch (url, null, null, (d) => {
-      set_cache (id, d);
-      callback (d);
+      let data = JSON.parse (bytesToString (d));
+      if (!data.error) set_cache (id, d);
+      callback (data);
     });
   },
 
   get_hot: function (callback) {
     let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video%s&key=%s'.format (
-      BASE_URL, this._max_results, this.calculate_time ("last_7_days"), KEY
+      BASE_URL, this._max_results, this.calculate_time ("last_7_days"), this.key
     );
     fetch (url, null, null, callback);
     return url;
@@ -211,7 +225,7 @@ var SearchProvider = new Lang.Class({
 
   get_day: function (callback) {
     let url = '%ssearch?part=snippet&order=date&maxResults=%s&type=video%s&key=%s'.format (
-      BASE_URL, this._max_results, this.calculate_time ("last_24_hours"), KEY
+      BASE_URL, this._max_results, this.calculate_time ("last_24_hours"), this.key
     );
     fetch (url, null, null, callback);
     return url;
@@ -219,7 +233,7 @@ var SearchProvider = new Lang.Class({
 
   get_hit: function (callback) {
     let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&key=%s'.format (
-      BASE_URL, this._max_results, KEY
+      BASE_URL, this._max_results, this.key
     );
     fetch (url, null, null, callback);
     return url;
@@ -227,7 +241,7 @@ var SearchProvider = new Lang.Class({
 
   get_relaited: function (id, callback) {
     let url = '%ssearch?part=snippet&order=viewCount&maxResults=%s&type=video&relatedToVideoId=%s&key=%s'.format (
-      BASE_URL, 4, id, KEY
+      BASE_URL, 4, id, this.key
     );
     fetch (url, null, null, callback);
     return url;

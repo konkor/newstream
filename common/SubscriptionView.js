@@ -104,7 +104,21 @@ var SubscriptionViewItem = new Lang.Class({
     this.bookmark.editor.setup_channel (this.channel);
     this.pack_end (this.bookmark, false, false, 0);
 
-    this.get_thumb ();
+    let app = Gio.Application.get_default ();
+    if (this.channel.thumbnails) this.get_thumb ();
+    else if (app.window) app.window.provider.get_channel_info (this.channel.id, (d) => {
+      if (!d || (d.kind != "youtube#channel")) return;
+      if (d.snippet.title) this.channel.title = d.snippet.title;
+      if (d.snippet.publishedAt) this.channel.published = d.snippet.publishedAt;
+      if (d.snippet.description) this.channel.description = d.snippet.description;
+      if (d.snippet.thumbnails) this.channel.thumbnails = d.snippet.thumbnails;
+      if (!d.statistics) return;
+      if (d.statistics.viewCount) this.channel.views = d.statistics.viewCount;
+      if (d.statistics.subscriberCount) this.channel.subscribers = d.statistics.subscriberCount;
+      if (d.statistics.videoCount) this.channel.videos = d.statistics.videoCount;
+      app.window.settings.add_data (this.channel);
+      this.get_thumb ();
+    });
     this.show_all ();
   },
 

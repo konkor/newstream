@@ -22,12 +22,14 @@
 
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
+const System = imports.system;
 
 const APPDIR = get_appdir ();
 imports.searchPath.unshift(APPDIR);
 const Application = imports.common.Application;
 
 let app = new Application.NewStreamApplication ({});
+ARGV.unshift (System.programInvocationName);
 app.run (ARGV);
 
 function getCurrentFile () {
